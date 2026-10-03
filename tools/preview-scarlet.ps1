@@ -6,7 +6,7 @@
 #
 #   pwsh tools/preview-scarlet.ps1                               # everything, defaults
 #   pwsh tools/preview-scarlet.ps1 -Only act1 -Step 4            # one scene family, denser frames
-#   pwsh tools/preview-scarlet.ps1 -Only signature -Look proposal # the signature moves as production draws them
+#   pwsh tools/preview-scarlet.ps1 -Only sig -Look proposal      # the signature phrases as production draws them
 #
 # TModLoaderPath / LuminancePackage are discovered when omitted: parameter, then
 # $env:TML_PATH / $env:LUMINANCE_PACKAGE, Convergence.local.props, then the usual Steam,
@@ -26,8 +26,9 @@ param(
     [string]$Players = 'center,edge',
     [ValidateSet('off', 'on', 'both')][string]$Reduced = 'off',
     [ValidateSet('black', 'dim', 'none')][string]$Mask = 'dim',
-    [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike and residue)
+    [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike and residue, crossflow seals)
     [ValidateSet('on', 'off')][string]$Yield = 'on', # ScarletResidueYield.Enabled: a signature residue under the forecast, drying early on safe ground
+    [ValidateSet('over', 'under')][string]$Seals = 'over', # proposal: crossflow seals over the live stream (production since 0.3.83) or under it (before)
     [switch]$NoSequences,
     [switch]$NoMatrix,
     [switch]$NoSmoke,
@@ -80,12 +81,12 @@ $files = @(
     'tools/fixtures/ScarletPreview.cs', 'tools/fixtures/ScarletPreviewAssets.cs',
     'tools/fixtures/ScarletPreviewPlanner.cs', 'tools/fixtures/ScarletPreviewSheet.cs', 'tools/fixtures/ScarletPreviewContract.cs',
     'Common/Raids/Arena/RaidFieldGeometry.cs')
-$authority = 'CrimsonTechnique', 'CrimsonTrackingBeam', 'CrimsonChoirRakes', 'CrimsonClusters', 'CrimsonSpatialCuts',
+$authority = 'CrimsonTechnique', 'CrimsonTrackingBeam', 'CrimsonChoirRakes', 'CrimsonClusters', 'CrimsonSpatialCuts', 'CrimsonSignatureMoves',
     'CrimsonChoreography', 'CrimsonEnsemble', 'CrimsonInvocation', 'CrimsonRhythm', 'CrimsonPhaseRules',
     'CrimsonCovenantRules', 'CrimsonChorusRules', 'CrimsonChorusImpactPositions', 'CrimsonState',
     'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter', 'CrimsonSignatureMoves',
     # The reward rule files are pure; the reward scenes (tools/fixtures/ScarletRewardsPreview*.cs) may use any of them.
-    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/CanticleRules',
+    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/SableCrescentFlight', 'Rewards/CanticleRules',
     'Rewards/BatonRules', 'Rewards/CenserRules', 'Rewards/QuillRules'
 $files += $authority | ForEach-Object { "Content/Encounters/CrimsonFoundry/$_.cs" }
 $files += Get-ChildItem -LiteralPath (Join-Path $root 'tools/fixtures') -Filter 'ScarletRewardsPreview*.cs' | ForEach-Object { "tools/fixtures/$($_.Name)" }
@@ -99,7 +100,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $options = @('--step', $Step, '--phrase-start', $PhraseStart, '--bg', $Backgrounds, '--zoom', $Zooms,
     '--seq-bg', $SequenceBackground, '--seq-zoom', $SequenceZoom, '--size', $Size, '--players', $Players,
-    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--yield', $Yield)
+    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--yield', $Yield, '--seals', $Seals)
 if ($Only) { $options += @('--only', $Only) }
 if ($NoSequences) { $options += '--no-sequences' }
 if ($NoMatrix) { $options += '--no-matrix' }

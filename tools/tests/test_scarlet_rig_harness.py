@@ -177,9 +177,18 @@ class HarnessContractTests(unittest.TestCase):
         self.assertIn("if ($WriteBaseline) { $options += @('--write-baseline', 'on') }", script)
         self.assertIn('internal static class RigBaseline', gates)
         self.assertIn('rev-parse HEAD', gates)
-        for text, gate in ((gates, '"g8"'), (gates, '"g11"'), (conductor, '"s4"')):
+        for text, gate in ((gates, '"g8"'), (conductor, '"s4"')):
             self.assertIn(f'RigBaseline.Refuse(root, dir, {gate}, out manifest)', text)
             self.assertIn(f'RigBaseline.Write(root, dir, {gate},', text)
+        # G11 and the Vespera half of G8v compare against references that live in the harness, so they hold under any phrase
+        # timing: main's ScarletInkStroke (verbatim, renamed) and the pre-S4 boss-path drawing (TodayVespera).
+        reference = read(FIXTURES / 'ScarletInkReference.cs')
+        self.assertIn('internal sealed class ScarletInkStrokeReference', reference)
+        self.assertIn('new ScarletInkStrokeReference().Draw(view, r.Assets, p);', gates)
+        self.assertIn('production.AsSpan().SequenceEqual(reference)', gates)
+        self.assertIn("'tools/fixtures/ScarletInkReference.cs'", script)
+        self.assertIn('private Color[] TodayVespera(', conductor)
+        self.assertIn('compare ? Hash(TodayVespera(s, tick, reduced)) : null', conductor)
         # Nothing is written just because a baseline is missing.
         self.assertNotIn('Directory.EnumerateFiles(dir, "*.rgba.gz").Any()', gates)
         self.assertNotIn('bool compare = File.Exists(file);', conductor)
@@ -221,8 +230,12 @@ class HarnessContractTests(unittest.TestCase):
                                                    'TrackingBeams(s, view, age)', 'Players(s, view)', 'Mask(view)')]
         self.assertEqual(sorted(order), order)
         beams = scene[scene.index('private void TrackingBeams('):scene.index('private void Standins(')]
-        order = [beams.index(token) for token in ('CrossflowSeals(', 'residues.Add(', 'CrimsonEnergy.Draw(batch)', 'foreach (var strike in strikes)')]
+        order = [beams.index(token) for token in ('CrossflowSeals(', 'residues.Add(', 'CrimsonEnergy.Draw(batch)', 'foreach (var strike in strikes)',
+                                                  'foreach (var p in sealsOver)')]
         self.assertEqual(sorted(order), order)
+        # protocol80: a live crossflow's seals are drawn after the ink, over the stream; they charge under the forecast veil.
+        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);', beams)
+        self.assertIn('else sealsOver.Add(p);', beams)
 
 
 if __name__ == '__main__':

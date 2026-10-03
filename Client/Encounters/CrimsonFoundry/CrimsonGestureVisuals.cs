@@ -50,10 +50,14 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 // A curtain note a full crowd leaves nothing to burn on has no cue, shake or embers.
                 if (p.Technique == CrimsonTechnique.CinderCurtain && CrimsonSignatureMoves.CurtainBurning(p) == 0) return;
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
-                // The seal crossflow (and Final's cluster orb in its place) swells for its two
-                // beats and releases; every other note, signature moves included, is a foretell
-                // on its warning and an impact on its strike. No pitch offset: the set is tuned.
+                // The seal crossflow (and Final's cluster orb in its place) swells for its two beats and
+                // releases on a bar head. An ordinary note sounds only its strike: a foretell on every
+                // warning made the phrase tick like a metronome. A signature move is announced by a
+                // foretell on its first step and on its final one, the step that lands on the downbeat.
+                // No pitch offset: the set is tuned.
                 bool crossflow = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley;
+                bool announced = crossflow || p.IsSignature && (p.Pulse == 0 || p.Pulse == CrimsonChoreography.SignatureClimax);
+                if (!impact && !announced) return;
                 var cue = crossflow ? impact ? ScarletCue.CrossflowRelease : ScarletCue.CrossflowCharge
                     : impact ? ScarletCue.Impact : ScarletCue.Foretell;
                 if (voiced.Add((p.Phrase, tick, cue))) voices.Play(cue);
@@ -151,17 +155,18 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 && g.Plan.Born <= age && g.Plan.Fire > age && g.Plan.Fire < plan.Fire) return true;
         return false;
     }
-    // Field beams and the Act signature moves: the forecast (CrimsonEnergy portal veil, dust and mouth) and the
-    // crossflow seals are drawn unchanged; the live strike and its residue (ScarletInkStroke.Owns) use the
-    // ScarletInk "black blood river" material and are drawn after them, so a live stroke always lies over any
-    // forecast. A signature move's residue (ScarletResidueYield, the owner's switch) is drawn before the
+    // Field beams and the Act signature moves: the forecast (CrimsonEnergy portal veil, thread, dust and mouth) is drawn
+    // unchanged, over the crossflow seals while they charge; the live strike and its residue (ScarletInkStroke.Owns)
+    // use the ScarletInk "black blood river" material and are drawn after it, so a live stroke always lies over any
+    // forecast. A live crossflow's seals are drawn last, over the stream, whose round ends stop at their centres and
+    // sink into them. A signature move's residue (ScarletResidueYield, the owner's switch) is drawn before the
     // forecasts instead, under them, and dries early wherever the move's next note leaves the ground safe.
     private static readonly ScarletInkStroke ink = new();
-    private static readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new();
+    private static readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), sealsOver = new();
     private static void DrawTrackingBeams(CrimsonBoss boss, SpriteBatch batch, float age)
     {
         CrimsonEnergy.Begin();
-        strikes.Clear(); residues.Clear(); signatures.Clear();
+        strikes.Clear(); residues.Clear(); signatures.Clear(); sealsOver.Clear();
         Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
@@ -172,7 +177,11 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             // inside the projectile lease (LastEnd + 28).
             int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p) : 0;
             if ((!p.Aimed && !p.IsRift && !p.IsSignature) || !g.ForecastReady || age < p.Born || age >= p.End + tail) continue;
-            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch,p,age);
+            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End)
+            {
+                if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);
+                else sealsOver.Add(p);
+            }
             if (ScarletInkStroke.Underlies(p, age)) { residues.Add(p); continue; }
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
@@ -197,10 +206,13 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             foreach (var residue in residues) ink.Draw(below, ScarletVfxHost.Assets, residue, CollectionsMarshal.AsSpan(signatures));
         }
         CrimsonEnergy.Draw(batch);
-        if (strikes.Count == 0) return;
-        using var scope = new ScarletGraphicsScope(batch);
-        var view = ScarletVfxHost.View(age);
-        foreach (var strike in strikes) ink.Draw(view, ScarletVfxHost.Assets, strike, CollectionsMarshal.AsSpan(signatures));
+        if (strikes.Count > 0)
+        {
+            using var scope = new ScarletGraphicsScope(batch);
+            var view = ScarletVfxHost.View(age);
+            foreach (var strike in strikes) ink.Draw(view, ScarletVfxHost.Assets, strike, CollectionsMarshal.AsSpan(signatures));
+        }
+        foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);
     }
     private static void DrawSources(CrimsonBoss boss, SpriteBatch batch, float age)
     {

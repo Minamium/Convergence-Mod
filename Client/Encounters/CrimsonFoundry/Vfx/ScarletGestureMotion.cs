@@ -37,8 +37,7 @@ internal static class ScarletGestureMotion
     // Fire; the pour jolts the body down on a short spring. The crossflow (Broad) is not a swing.
     internal static ScarletApparitionMotion Crown(float age, ReadOnlySpan<ScarletNote> notes)
     {
-        float phi = 0, drop = 0, flare = 0, kick = 0;
-        bool swinging = false; int last = -1;
+        float swing = 0, follow = 0, drop = 0, flare = 0, kick = 0;
         for (int i = 0; i < notes.Length; i++)
         {
             var c = notes[i];
@@ -49,23 +48,25 @@ internal static class ScarletGestureMotion
                 // A lead note takes the censer over at the previous strike's peak. The approved swing crosses from the
                 // far side (the curtain alternates); a basic beam announced on the same side again dips toward the
                 // centre and returns instead, so the handover never jumps.
-                phi = c.Lead && SameSide(notes, c) ? amplitude * MathF.Cos(MathF.PI * p) * MathF.Cos(MathF.PI * p)
+                swing = c.Lead && SameSide(notes, c) ? amplitude * MathF.Cos(MathF.PI * p) * MathF.Cos(MathF.PI * p)
                     : amplitude * -MathF.Cos(MathF.PI * p) * (c.Lead ? 1 : ScarletEnvelope.Ease(p * 2.2f));
-                swinging = true;
             }
-            else if (age >= c.Fire && age < c.Close && (last < 0 || c.Fire > notes[last].Fire)) last = i;
+            else if (age >= c.Fire && age < c.Close && !HandedOver(notes, c))
+            {
+                // The censer keeps swinging out after a strike, a decaying oscillation that ends with the note's window. A
+                // note whose strike is the next one's warning hands the censer on at its peak instead. Phrases since
+                // protocol80 leave a beat or less between a strike and the next warning, so the swing out is still alive
+                // when the next one begins and simply carries on beneath it: nothing steps at a Born or a Fire.
+                float t = age - c.Fire, beat = Math.Max(1, c.Fire - c.Born);
+                follow += c.Side * CrownAmplitude * c.Register * MathF.Exp(-t / 16) * MathF.Cos(MathF.PI * t / beat)
+                    * (1 - ScarletEnvelope.Ease((t - c.Span + 12) / 12));
+            }
             var e = ScarletEnvelope.Phase(age, c.Born, c.Fire, c.Span);
             flare = Math.Max(flare, e.Wind * c.Register);
             kick = Math.Max(kick, e.Follow * c.Register);
             if (e.T >= 0 && e.T < CrownDropTicks) drop += CrownDrop * c.Register * MathF.Exp(-e.T / 8) * MathF.Sin(MathF.PI * e.T / 8);
         }
-        if (!swinging && last >= 0)
-        {
-            var c = notes[last];
-            float t = age - c.Fire, beat = Math.Max(1, c.Fire - c.Born);
-            phi = c.Side * CrownAmplitude * c.Register * MathF.Exp(-t / 16) * MathF.Cos(MathF.PI * t / beat)
-                * (1 - ScarletEnvelope.Ease((t - c.Span + 12) / 12));
-        }
+        float phi = swing + follow;
         return new(CrownChain * MathF.Sin(phi), CrownChain * (1 - MathF.Cos(phi)) + drop, -phi, flare, kick, 0, 0);
 
         static bool SameSide(ReadOnlySpan<ScarletNote> notes, in ScarletNote c)
@@ -73,6 +74,13 @@ internal static class ScarletGestureMotion
             foreach (var previous in notes)
                 if (!previous.Broad && previous.Fire == c.Born && previous.Fire < c.Fire)
                     return previous.Side == c.Side;
+            return false;
+        }
+        // The strike whose Fire is a lead note's Born: that note carries on from its peak.
+        static bool HandedOver(ReadOnlySpan<ScarletNote> notes, in ScarletNote c)
+        {
+            foreach (var next in notes)
+                if (!next.Broad && next.Lead && next.Born == c.Fire && next.Fire > c.Fire) return true;
             return false;
         }
     }

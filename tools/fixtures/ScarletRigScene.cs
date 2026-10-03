@@ -9,9 +9,10 @@
 //   1. background: CrimsonSky (ScarletBackdrop.fxc with the beat pulse and the strike impulse)
 //   2. NPCs: Main.DrawNPCs walks slots 199 -> 0, so the apparition (summoned later, higher slot) is drawn
 //      first and Vespera (the boss, lower slot) over it
-//   3. PostDrawTiles: CrimsonGestureVisuals.DrawTrackingBeams in its own order: crossflow seals while a
-//      SideBeams note is listed, then a signature move's yielding residue (under the forecasts), then every
-//      forecast (CrimsonEnergy.Draw), then live strikes and the other residues (ScarletInk)
+//   3. PostDrawTiles: CrimsonGestureVisuals.DrawTrackingBeams in its own order: the crossflow seals while they
+//      charge, then a signature move's yielding residue (under the forecasts), then every forecast
+//      (CrimsonEnergy.Draw), then live strikes and the other residues (ScarletInk), then a live crossflow's seals
+//      over its stream (protocol80)
 //   4. players (20 x 42 boxes), then 5. the participant mask (black outside the field + 2 px red edge)
 // Not reproduced offline (labelled where they would show): terrain, walls and lighting, the metaball embers of
 // basic Act I/III strikes (Luminance metaball RTs), the ChoirRakes ribbon (Luminance trail tessellator; drawn
@@ -145,13 +146,18 @@ internal static class ScarletRigPreview
     }
 }
 
-internal sealed record RigSceneDef(string Name, int Phase, int Serial, int CurtainMask = 0)
+internal sealed record RigSceneDef(string Name, int Phase, int Serial, int CurtainMask = 0, bool Pickup = false)
 {
-    // Each Act's signature phrase (serial 3) and basic phrase (serial 1); Act I also with three occupied columns.
+    // The phrases of protocol80 (CrimsonChoreography.Create): each Act's signature phrase (serial 3: four steps a dotted
+    // quarter apart, the last on the next downbeat; the crossflow that released on its downbeat is the previous phrase's
+    // closer), its first phrase (serial 1: the pickup crossflow on the downbeat, ordinary cell A on beats 3, 4.5 and 6,
+    // the closing crossflow) and its second (serial 2: cell B on beats 3.5, 5 and 6, whose third note opens as the second
+    // strikes, after the first phrase's closer); Act I's signature also with three occupied columns.
     internal static readonly RigSceneDef[] Catalog =
     {
         new("act1-signature", 0, 3), new("act2-signature", 1, 3), new("act3-signature", 2, 3),
-        new("act1-basic", 0, 1), new("act2-basic", 1, 1), new("act3-basic", 2, 1),
+        new("act1-basic", 0, 1, 0, true), new("act2-basic", 1, 1, 0, true), new("act3-basic", 2, 1, 0, true),
+        new("act1-basic2", 0, 2), new("act2-basic2", 1, 2), new("act3-basic2", 2, 2),
         new("act1-signature-trio", 0, 3, 1 << 1 | 1 << 5 | 1 << 8),
     };
     internal static RigSceneDef Find(string name)
@@ -186,7 +192,10 @@ internal sealed class RigScene
     // Stage start bars of the arrangement (Act I at musicStart; Acts II/III assumed at bars 40 / 80, bar-aligned like
     // phaseStart). A phrase sits after the opening (Act I) or the two transition bars (Acts II/III), two bars per serial.
     internal static readonly int[] StageBars = { 0, 40, 80 };
-    internal const int LeadTicks = 50, TailTicks = 44; // Begin-20 .. End+24+20
+    internal const int LeadTicks = 50, TailTicks = 44; // FirstBorn-50 .. End+24+20
+    // A phrase with a previous one starts its film where the previous closer's seals begin to bloom, two beats before the
+    // downbeat the crossflow releases on (CrimsonChoreography.Closer: 4 eighths of 14.06 ticks), so the release is on screen.
+    internal const int CloserLeadTicks = 60;
     internal RigSceneDef Def = null!;
     internal RigCamera Camera = null!;
     internal PreviewPhrase Phrase = null!;
@@ -202,6 +211,19 @@ internal sealed class RigScene
     internal int Phase => Def.Phase;
     internal int Frames => Last - First + 1;
 
+    // The scene's key notes. Notes: the phrase's strikes in order (an ordinary phrase's three cell notes, a signature
+    // phrase's four steps), never a crossflow. Second / Third: by Fire. Flow: the seal crossflow the scene is about: an
+    // ordinary phrase's own closing crossflow (released on the next downbeat), or, for a signature phrase (which has no
+    // crossflow of its own), the previous phrase's closer that releases on its downbeat.
+    internal CrimsonGesturePlan[] Notes => Phrase.Plans.Where(p => p.Technique != CrimsonTechnique.SideBeams).OrderBy(p => p.Fire).ToArray();
+    internal CrimsonGesturePlan Second => Notes[1];
+    internal CrimsonGesturePlan Third => Notes[2];
+    internal IEnumerable<CrimsonGesturePlan> Flows
+        => Phrase.Plans.Where(p => p.Technique == CrimsonTechnique.SideBeams && p.Pulse == CrimsonChoreography.Closer).Concat(
+            Previous?.Plans.Where(p => p.Technique == CrimsonTechnique.SideBeams && p.Pulse == CrimsonChoreography.Closer) ?? Enumerable.Empty<CrimsonGesturePlan>());
+    internal bool HasFlow => Flows.Any();
+    internal CrimsonGesturePlan Flow => Flows.First();
+
     internal static RigScene Build(RigSceneDef def, RigCamera camera, RigOptions o)
     {
         var field = PreviewPlanner.Field;
@@ -209,9 +231,9 @@ internal sealed class RigScene
         var player = new PreviewPlayer(camera.Subject == "air" ? "air" : "ground", new Vector2(x, y), Vector2.Zero);
         int bar = StageBars[def.Phase] + (def.Phase == 0 ? CrimsonMeter.OpeningBars : CrimsonArrangement.TransitionBars(def.Phase)) + 2 * (def.Serial - 1);
         var s = new RigScene { Def = def, Camera = camera, Player = player, PhraseBar = bar };
-        s.Phrase = PreviewPlanner.Build(def.Name, def.Phase, def.Serial, player, CrimsonMeter.BarTick(bar), MusicStart, def.CurtainMask);
+        s.Phrase = PreviewPlanner.Build(def.Name, def.Phase, def.Serial, player, CrimsonMeter.BarTick(bar), MusicStart, def.CurtainMask, def.Pickup);
         if (o.Context && def.Serial > 1)
-            s.Previous = PreviewPlanner.Build(def.Name + "-previous", def.Phase, def.Serial - 1, player, CrimsonMeter.BarTick(bar - 2), MusicStart);
+            s.Previous = PreviewPlanner.Build(def.Name + "-previous", def.Phase, def.Serial - 1, player, CrimsonMeter.BarTick(bar - 2), MusicStart, pickup: def.Serial == 2);
         if (o.Context)
             s.Next = PreviewPlanner.Build(def.Name + "-next", def.Phase, def.Serial + 1, player, CrimsonMeter.BarTick(bar + 2), MusicStart);
         var plans = new List<CrimsonGesturePlan>(); var roles = new List<string>();
@@ -219,6 +241,7 @@ internal sealed class RigScene
         Add(s.Previous, "previous"); Add(s.Phrase, "current"); Add(s.Next, "next");
         s.Plans = plans.ToArray(); s.Roles = roles.ToArray();
         s.First = s.Phrase.FirstBorn + (o.From ?? -LeadTicks);
+        if (o.From is null && s.Previous is not null) s.First = Math.Min(s.First, MusicStart + CrimsonMeter.BarTick(bar) - CloserLeadTicks);
         s.Last = s.Phrase.Plans.Max(p => p.End) + TailTicks;
         if (o.Limit > 0) s.Last = Math.Min(s.Last, s.First + o.Limit - 1);
         // Players: the aimed one, and for the trio the members standing in the other occupied columns.
@@ -297,8 +320,9 @@ internal static class RigMirror
     internal static int Notes(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age, bool flipped, Span<ScarletNote> notes, float lookback = 0)
         => ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);
 
-    // CrimsonGestureVisuals.PostUpdateEverything's Cue: a foretell on every Born and an impact on every Fire (the
-    // crossflow: charge / release); a curtain note with nothing to burn has no cue. One voice per (phrase, tick, cue).
+    // CrimsonGestureVisuals.PostUpdateEverything's Cue (protocol80): an impact on every Fire; a foretell only where a
+    // note is announced (the crossflow's charge on its Born, a signature move's first and final step); a curtain note
+    // with nothing to burn has no cue. One voice per (phrase, tick, cue).
     internal readonly record struct SoundEvent(int Tick, string Cue, int Phrase, int Pulse, string Technique);
     internal static List<SoundEvent> Sounds(IReadOnlyList<CrimsonGesturePlan> plans)
     {
@@ -311,6 +335,8 @@ internal static class RigMirror
                 if (p.Technique == CrimsonTechnique.CinderCurtain && CrimsonSignatureMoves.CurtainBurning(p) == 0) continue;
                 if (!heard.Add((p.Phrase, p.Pulse, p.Source, impact))) continue;
                 bool crossflow = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley;
+                bool announced = crossflow || p.IsSignature && (p.Pulse == 0 || p.Pulse == CrimsonChoreography.SignatureClimax);
+                if (!impact && !announced) continue;
                 string cue = crossflow ? impact ? "CrossflowRelease" : "CrossflowCharge" : impact ? "Impact" : "Foretell";
                 if (voiced.Add((p.Phrase, tick, cue))) events.Add(new(tick, cue, p.Phrase, p.Pulse, p.Technique.ToString()));
             }
@@ -408,7 +434,7 @@ internal sealed class RigRenderer : IDisposable
     private readonly SpriteBatch batch;
     private readonly ScarletInkStroke ink = new();
     private readonly ScarletGeometryOverlay overlay;
-    private readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), stand = new();
+    private readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), sealsOver = new(), stand = new();
     private readonly CrimsonStroke[] strokes = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private RenderTarget2D? frame;
@@ -517,14 +543,18 @@ internal sealed class RigRenderer : IDisposable
     private void TrackingBeams(RigScene s, in ScarletView view, float age)
     {
         CrimsonEnergy.Begin();
-        strikes.Clear(); residues.Clear(); signatures.Clear();
+        strikes.Clear(); residues.Clear(); signatures.Clear(); sealsOver.Clear();
         foreach (var p in s.Plans)
         {
             if (!RigMirror.Alive(p, age)) continue;
             if (p.IsSignature) signatures.Add(p);
             int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p) : 0;
             if ((!p.Aimed && !p.IsRift && !p.IsSignature) || age < p.Born || age >= p.End + tail) continue;
-            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);
+            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End)
+            {
+                if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);
+                else sealsOver.Add(p);
+            }
             if (ScarletInkStroke.Underlies(p, age)) { residues.Add(p); continue; }
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
@@ -551,9 +581,12 @@ internal sealed class RigRenderer : IDisposable
             foreach (var residue in residues) ink.Draw(view, Assets, residue, CollectionsMarshal.AsSpan(signatures));
         }
         CrimsonEnergy.Draw(batch);
-        if (strikes.Count == 0) return;
-        using var scope = new Convergence.Client.Graphics.WorldGraphicsScope(batch);
-        foreach (var strike in strikes) ink.Draw(view, Assets, strike, CollectionsMarshal.AsSpan(signatures));
+        if (strikes.Count > 0)
+        {
+            using var scope = new Convergence.Client.Graphics.WorldGraphicsScope(batch);
+            foreach (var strike in strikes) ink.Draw(view, Assets, strike, CollectionsMarshal.AsSpan(signatures));
+        }
+        foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);
     }
 
     // The ChoirRakes ribbon (ScarletMaterials.Strokes over Luminance's trail tessellator) is not reproduced offline: its
@@ -846,14 +879,17 @@ internal sealed class RigRun
         Console.WriteLine($"{s.Def.Name} {s.Camera.Name}-{v.Suffix}: {s.Frames} frames{(video is null ? "" : " -> video.webm")}");
     }
 
-    // The design's stills: the third note (Born+14, Fire, Fire+2, Fire+10, End+8) and the crossflow (Born+28, Fire, Fire+7, End-4).
+    // The design's stills: the third note (Born+14, Fire, Fire+2, Fire+10, End+8) and the crossflow (Born+28, Fire, Fire+7,
+    // End-4); a signature phrase's crossflow is the previous phrase's closer released on its downbeat.
     internal static Dictionary<int, string> StillTicks(RigScene s)
     {
         var result = new Dictionary<int, string>();
-        var third = s.Phrase.Plans[2]; var flow = s.Phrase.Plans[4];
+        var third = s.Third;
         void Add(int tick, string label) { if (tick >= s.First && tick <= s.Last) result.TryAdd(tick, label); }
         Add(third.Born + 14, "n3-born+14"); Add(third.Fire, "n3-fire"); Add(third.Fire + 2, "n3-fire+2");
         Add(third.Fire + 10, "n3-fire+10"); Add(third.End + 8, "n3-end+8");
+        if (!s.HasFlow) return result;
+        var flow = s.Flow;
         Add(flow.Born + 28, "crossflow-born+28"); Add(flow.Fire, "crossflow-fire"); Add(flow.Fire + 7, "crossflow-fire+7"); Add(flow.End - 4, "crossflow-end-4");
         return result;
     }
@@ -863,9 +899,12 @@ internal sealed class RigRun
         var tags = new List<string> { $"{s.Def.Name} {s.Camera.Name} {(v.Reduced ? "REDUCED" : "NORMAL")}", $"T{tick - s.Phrase.FirstBorn:+0;-0;+0}" };
         for (int i = 0; i < s.Plans.Length; i++)
         {
-            if (s.Roles[i] != "current") continue;
-            if (s.Plans[i].Born == tick) tags.Add("WARN " + (s.Plans[i].Pulse + 1));
-            if (s.Plans[i].Fire == tick) tags.Add("FIRE " + (s.Plans[i].Pulse + 1));
+            // Named by what it is: N1..N3 / S1..S4 for the notes in order, XF for a crossflow (the previous phrase's too).
+            var p = s.Plans[i];
+            string name = p.Technique == CrimsonTechnique.SideBeams ? "XF" : (p.IsSignature ? "S" : "N") + (Array.FindIndex(s.Notes, q => q.Pulse == p.Pulse) + 1);
+            if (s.Roles[i] != "current" && p.Technique != CrimsonTechnique.SideBeams) continue;
+            if (p.Born == tick) tags.Add("WARN " + name);
+            if (p.Fire == tick) tags.Add("FIRE " + name);
         }
         if (!v.Yield) tags.Add("YIELD OFF");
         if (v.Material) tags.Add("MATERIAL ON");

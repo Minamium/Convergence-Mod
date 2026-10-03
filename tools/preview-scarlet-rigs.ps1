@@ -121,7 +121,8 @@ if (Test-Path -LiteralPath $stale) { Remove-Item -LiteralPath $stale }
 
 # ---- project ----------------------------------------------------------------------------------------------------
 $files = @(
-    'tools/fixtures/ScarletRigScene.cs', 'tools/fixtures/ScarletRigGates.cs', 'tools/fixtures/ScarletConductorGates.cs', 'tools/fixtures/ScarletPreviewHost.cs',
+    'tools/fixtures/ScarletRigScene.cs', 'tools/fixtures/ScarletRigGates.cs', 'tools/fixtures/ScarletConductorGates.cs', 'tools/fixtures/ScarletInkReference.cs',
+    'tools/fixtures/ScarletPreviewHost.cs',
     'tools/fixtures/ScarletPreviewAssets.cs', 'tools/fixtures/ScarletPreviewPlanner.cs', 'tools/fixtures/ScarletPreviewContract.cs',
     'tools/fixtures/ScarletPreviewSheet.cs', 'Common/Raids/Arena/RaidFieldGeometry.cs', 'Client/Graphics/WorldGraphicsScope.cs')
 # The production presentation linked unchanged: rigs, Vespera, forecast/orb energy, seals, the shared motion clock, the music mixer.
@@ -131,8 +132,8 @@ $authority = 'CrimsonTechnique', 'CrimsonTrackingBeam', 'CrimsonChoirRakes', 'Cr
     'CrimsonChoreography', 'CrimsonEnsemble', 'CrimsonInvocation', 'CrimsonRhythm', 'CrimsonPhaseRules',
     'CrimsonCovenantRules', 'CrimsonChorusRules', 'CrimsonChorusImpactPositions', 'CrimsonState',
     'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter', 'CrimsonSignatureMoves',
-    # Vfx/*.cs includes the reward ink and particles (main #110), which read these pure reward rule files.
-    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/CanticleRules',
+    # Vfx/*.cs includes the reward ink and particles (main #110) and the Sable Scythe's crescent ink (#118), which read these pure reward rule files.
+    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/SableCrescentFlight', 'Rewards/CanticleRules',
     'Rewards/BatonRules', 'Rewards/CenserRules', 'Rewards/QuillRules'
 $files += $authority | ForEach-Object { "Content/Encounters/CrimsonFoundry/$_.cs" }
 foreach ($file in $files) { if (-not (Test-Path -LiteralPath (Join-Path $root $file))) { throw "missing $file" } }

@@ -43,7 +43,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('!m.Out && !m.Recovery.Downed',helper)
     def test_runtime_owns_full_cycle_and_resolves_chorus_before_advancement(self):
         text=(CONTENT/'CrimsonRuntime.cs').read_text()
-        self.assertIn('CrimsonChoreography.Create',text)
+        self.assertIn('CrimsonChoreography.Admit(',text)
         self.assertNotIn('nextVolley',text)
         self.assertNotIn('score.Events(',text)
         self.assertLess(text.index('if (free < count)'),text.index('Projectile.NewProjectile'))
@@ -54,7 +54,16 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('if (!TryScheduleChorus()) SchedulePhrase()',text)
         self.assertLess(text.index('TickChorus();'),text.index('cycle.TryComplete('))
         self.assertIn('if (phase < 3 && thresholdLatched',text)
-        self.assertIn('phraseEnd - CrimsonRhythm.LookAheadTicks',text)
+        # A phrase is booked on a bar head, issued one look-ahead before its first forecast and admitted on that
+        # booked bar head (CrimsonChoreography.Admit, which the domain suite chains like the runtime).
+        self.assertIn('BookPhrase(phraseEnd - musicStart, false)',text)
+        self.assertIn('nextPhrase = musicStart + CrimsonChoreography.IssueAt(start, pickup, phraseSerial + 1, phase);',text)
+        self.assertIn('CrimsonChoreography.Admit(nextStart, nextPickup, age - musicStart, unlockAt - musicStart, serial, phase)',text)
+        choreography=(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8')
+        self.assertIn('Create(booked, serial, phase, pickup).FirstWarning - CrimsonRhythm.LookAheadTicks',choreography)
+        self.assertIn('while (rhythm.FirstWarning < now + CrimsonRhythm.LookAheadTicks)',choreography)
+        chorus=(CONTENT/'CrimsonChorus.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonChorusRules.Due(phase, phrasesSinceChorus, phraseSerial + 1)',chorus)
     def test_gameplay_clock_is_the_shared_128_bpm_grid_not_a_recorded_score(self):
         self.assertFalse((ROOT/'Assets/Music/CrimsonFoundry/Score.json').exists())
         self.assertFalse((CONTENT/'CrimsonScore.cs').exists())
@@ -81,15 +90,16 @@ class ScarletContracts(unittest.TestCase):
         self.assertNotIn('CrimsonScore',project)
         self.assertNotIn('Score.json',project)
         choreography=(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8')
-        self.assertIn('internal static CrimsonRhythmPhrase Create(int earliest, int serial, bool final)',choreography)
+        self.assertIn('internal static CrimsonRhythmPhrase Create(int earliest, int serial, int phase, bool pickup)',choreography)
+        self.assertIn('CrimsonMeter.EighthTick(first + eighth)',choreography)
         self.assertIn('CrimsonMeter.BarTick(CrimsonMeter.OpeningBars)',choreography)
         runtime=(CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8')
         self.assertIn('unlockAt = musicStart + CrimsonChoreography.OpeningTicks',runtime)
         rules=(CONTENT/'CrimsonChorusRules.cs').read_text(encoding='utf-8')
-        self.assertIn('CrimsonMeter.BeatAtOrAfter(earliest)',rules)
+        self.assertIn('CrimsonMeter.BarAtOrAfter(earliest) * CrimsonMeter.BeatsPerBar',rules)
         chorus=(CONTENT/'CrimsonChorus.cs').read_text(encoding='utf-8')
         self.assertIn('CrimsonChorusRules.Schedule(earliest)',chorus)
-        self.assertIn('nextPhrase = plan.End - CrimsonRhythm.LookAheadTicks',chorus)
+        self.assertIn('BookPhrase(plan.End - musicStart, true);',chorus)
 
     def test_act_changes_are_booked_for_a_bar_head_and_unlock_on_the_arrangement_grid(self):
         text=(CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8')
@@ -106,7 +116,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertLess(advance.index('phase++; phaseStart = age;'),advance.index('CrimsonArrangement.TransitionBars(phase)'))
         self.assertIn('unlockAt = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAt(age - musicStart) + CrimsonArrangement.TransitionBars(phase));',advance)
         self.assertNotIn('CrimsonEnsemble.Transition(phase)',advance[:advance.index('SpawnSummon')])
-        self.assertIn('nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;',advance)
+        self.assertIn('BookPhrase(unlockAt - musicStart, true);',advance)
 
     def test_music_is_one_dynamic_voice_fed_by_the_mixer_and_never_reads_a_score_file(self):
         audio=(CLIENT/'CrimsonAudio.cs').read_text(encoding='utf-8')
@@ -324,7 +334,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('CrimsonSignatureMoves.CurtainImpact(p, Main.LocalPlayer.Center.X)',visual)
         self.assertIn('strokes[i * count / budget].B',(CLIENT/'ScarletAtmosphere.cs').read_text(encoding='utf-8'))
         self.assertIn('Content/Encounters/CrimsonFoundry/CrimsonSignatureMoves.cs',(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj').read_text(encoding='utf-8'))
-        self.assertIn('public const ushort CurrentVersion = 79;',(ROOT/'Common/Networking/Protocol/EncounterProtocol.cs').read_text(encoding='utf-8'))
+        self.assertIn('public const ushort CurrentVersion = 80;',(ROOT/'Common/Networking/Protocol/EncounterProtocol.cs').read_text(encoding='utf-8'))
 
     def test_covenant_follows_live_target_width_and_uses_the_same_scale_for_damage_geometry(self):
         text=(CONTENT/'CrimsonCompanion.cs').read_text()
@@ -357,8 +367,13 @@ class ScarletContracts(unittest.TestCase):
         beams=visual[visual.index('private static void DrawTrackingBeams'):visual.index('private static void DrawSources')]
         # Forecasts keep the portal energy; the two crossflow seals and the rift tears keep ScarletSorcery.
         self.assertIn('CrimsonEnergy.Add(',beams)
-        self.assertIn('ScarletSorcery.CrossflowSeals(batch,p,age)',beams)
+        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
         self.assertIn('ScarletSorcery.Tear(',beams)
+        # A live crossflow's seals are drawn after the ink, over the stream's ends (protocol80).
+        self.assertIn('else sealsOver.Add(p);',beams)
+        self.assertLess(beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'),beams.index('foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);'))
+        sorcery=(CLIENT/'ScarletSorcery.cs').read_text(encoding='utf-8')
+        self.assertIn('var (right, left) = CrimsonChoreography.Seals(p);',sorcery)
         # Live strike and residue never reach CrimsonEnergy: they are collected before it and drawn after it (over forecasts).
         self.assertLess(beams.index('ScarletInkStroke.Owns(p, age)'),beams.index('CrimsonEnergy.Add('))
         self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike'))
@@ -445,13 +460,13 @@ class ScarletContracts(unittest.TestCase):
 
     def test_offline_preview_plans_the_current_meter_and_signature_moves(self):
         planner=(ROOT/'tools/fixtures/ScarletPreviewPlanner.cs').read_text(encoding='utf-8')
-        self.assertIn('CrimsonChoreography.Create(earliest, serial - 1, phase == 3)',planner)
+        self.assertIn('CrimsonChoreography.Create(scoreStart, serial, phase, pickup)',planner)
         self.assertIn('CrimsonMeter.NextBeats(rhythm.Start, 9)',planner)
         self.assertIn('CrimsonSignatureMoves.CurtainTarget(',planner)
         self.assertIn('CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands',planner)
         preview=(ROOT/'tools/fixtures/ScarletPreview.cs').read_text(encoding='utf-8')
         self.assertIn('CrimsonMeter.Pulse(',preview)
-        for scene in ('act1-signature','act1-signature-trio','act2-signature','act3-signature'):
+        for scene in ('act1-sig','act1-sig-trio','act2-sig','act3-sig'):
             self.assertIn(f'new("{scene}"',preview)
         self.assertIn('ScarletResidueYield.Enabled = options.Yield;',preview)
         self.assertIn('PreviewContract.ResidueYield(',preview)

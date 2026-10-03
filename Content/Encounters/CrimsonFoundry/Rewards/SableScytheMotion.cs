@@ -48,16 +48,17 @@ internal static class SableScytheMotion
     // The blade is live on [LiveStart, LiveEnd]; the swept test samples the tick that just elapsed.
     internal static bool Live(int index, int age) => age > LiveStart(index) && age <= LiveEnd(index);
     internal static float Multiplier(int index) => Kind(index) == Whip ? CrimsonRewardRules.WhipMultiplier : CrimsonRewardRules.StrokeMultiplier;
-    // The Whip's crescent: written by the hook tip over the lash, live until CrescentLiveEnd, once per root.
-    internal static bool CrescentLive(int index, int age)
-        => Kind(index) == Whip && age > CrimsonRewardRules.WhipLiveStart && age <= CrimsonRewardRules.CrescentLiveEnd;
+    // The Whip's lash arc: written by the hook tip over the lash, live until LashLiveEnd, once per root (the volley of
+    // crescents leaves it at VolleyAge; SableCrescentFlight owns the thrown crescents).
+    internal static bool LashLive(int index, int age)
+        => Kind(index) == Whip && age > CrimsonRewardRules.WhipLiveStart && age <= CrimsonRewardRules.LashLiveEnd;
     private static int Index(int index) => Math.Clamp(index, 0, Strokes - 1);
 
     // Soboro's sub-tick policy: a tick draws the span it just swept, [age - 1, age]; a live tick (LiveStart + 1 ..
     // LiveEnd) therefore never shows the windup, and a recovery tick never shows a live pose.
     internal static float DrawAge(int index, int ageTick, float fraction) => Math.Clamp(ageTick - 1f + fraction, 0f, Duration(index));
-    // The last tick a stroke can still damage: a release pressed during it begins then (the Whip waits for its crescent).
-    internal static int LastDamage(int index) => Kind(index) == Whip ? CrimsonRewardRules.CrescentLiveEnd : LiveEnd(index);
+    // The last tick a stroke can still damage: a release pressed during it begins then (the Whip waits for its lash arc).
+    internal static int LastDamage(int index) => Kind(index) == Whip ? CrimsonRewardRules.LashLiveEnd : LiveEnd(index);
 
     // ---- Knots: (tick, value, value per tick) ------------------------------------------------------------------
     // Over. Spin: from behind (mid-roll) over the shoulder, through the aim at 9 at the cut's peak speed, down and
@@ -79,7 +80,7 @@ internal static class SableScytheMotion
 
     // Whip: the hook keeps rising behind the head, then draws back on 6-12 (the Mantle's brace: the spin eases back
     // while the plane rolls toward edge-on, so the 3D speed stays above 20% of the lash). It lashes forward through the
-    // aim on 14-20 in that tilted plane (a flat lash, the crescent curling back toward the reaper) while the arm thrusts
+    // aim on 14-20 in that tilted plane (a flat lash, its arc curling back toward the reaper) while the arm thrusts
     // 24 px forward, then spins on and rolls through the Under plane into the Over's starting pose, one turn and one
     // roll later.
     private static readonly float[] WhipSpin =

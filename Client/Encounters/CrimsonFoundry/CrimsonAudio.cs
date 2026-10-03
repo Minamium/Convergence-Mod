@@ -76,7 +76,7 @@ internal sealed class CrimsonAudio : ModSystem
         }
         if (!present || boss!.State.MusicStart < 0 || boss.VisualAge < boss.State.MusicStart)
         {
-            if (voice is not null) { gain = Math.Max(0, gain - .035f); voice.Volume = gain * Main.musicVolume; if (gain <= 0) Stop(); }
+            if (voice is not null) { gain = Math.Max(0, gain - .035f); voice.Volume = gain * CrimsonInvocation.MusicSlider(Main.musicVolume); if (gain <= 0) Stop(); }
             return;
         }
         var state = boss.State;
@@ -118,9 +118,10 @@ internal sealed class CrimsonAudio : ModSystem
             Mod.Logger.Info($"CrimsonFoundry event=AudioReanchor score_tick={(int)(expected / CrimsonMeter.SamplesPerTick)}");
         }
         // The source is ~2.1dB hotter than Doll P1 and this direct PCM path lacks
-        // Terraria's music-track mixing headroom.
+        // Terraria's music-track mixing headroom. The slider follows tML's music curve,
+        // as every other track does, so the Raid's sounds keep their place against it.
         gain = CrimsonInvocation.MusicGain(expected / (double)CrimsonMeter.SamplesPerTick);
-        voice.Volume = gain * Main.musicVolume;
+        voice.Volume = gain * CrimsonInvocation.MusicSlider(Main.musicVolume);
         Pump();
     }
 

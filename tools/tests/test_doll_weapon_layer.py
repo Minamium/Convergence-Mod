@@ -162,17 +162,43 @@ class DollWeaponLayerShader(unittest.TestCase):
         record = json.loads((SHADERS / "compiled.json").read_text(encoding="utf-8"))["files"]["DollPixel.fx"]
         self.assertEqual(record["source_sha256"], hashlib.sha256(source.read_bytes()).hexdigest())
         self.assertEqual(record["output_sha256"], hashlib.sha256(compiled.read_bytes()).hexdigest())
-        shader = source.read_text(encoding="utf-8")
         used = set()
-        for text in weapon_sources().values():
-            used.update(re.findall(r'"(\w+Pass)"', text))
-        self.assertTrue({"SpritePass", "LinePass", "FlatPass", "RampPass", "CompositeArtPass", "CompositeLightPass",
-                         "CompositeLightPlainPass"} <= used)
+        for file, text in weapon_sources().items():
+            names = set(re.findall(r'"(\w+Pass)"', text))
+            used |= names
+            # A file that names its own material (ShaderName = "Convergence.Doll<Weapon>Energy") uses that shader's
+            # passes; every other layer file uses DollPixel's.
+            owner = re.search(r'ShaderName = "Convergence\.(\w+)"', text)
+            shader = SHADERS / f"{owner.group(1) if owner else 'DollPixel'}.fx"
+            declared = shader.read_text(encoding="utf-8")
+            for name in names:
+                self.assertIn(f"pass {name} {{", declared, f"{file}: {name} is declared in {shader.name}")
+        base = {"SpritePass", "LinePass", "FlatPass", "RampPass", "CompositeArtPass", "CompositeLightPass", "CompositeLightPlainPass"}
+        self.assertTrue(base <= used)
+        pixel = source.read_text(encoding="utf-8")
+        for name in base:
+            self.assertIn(f"pass {name} {{", pixel, "the layer's own passes live in DollPixel.fx")
+        # A weapon's own Doll<Weapon>Energy material declares its passes there; DollPixel owns the rest.
+        materials = "".join(path.read_text(encoding="utf-8") for path in weapon_shaders())
         for name in used:
-            self.assertIn(f"pass {name} {{", shader)
+            self.assertIn(f"pass {name} {{", materials)
         art = (WEAPONS / "DollPixelArt.cs").read_text(encoding="utf-8")
         self.assertIn('ShaderName = "Convergence.DollPixel"', art)
         exports.verify()
+
+    def test_lacuna_material_has_no_preshader_and_no_uniform_branch(self):
+        # The FNA effect runtime mis-evaluates some fx_2_0 preshader code: every uniform-only quantity of the Lacuna
+        # material is computed on the CPU (LacunaEnergy.Timing), so its export carries no PRES/FXLC block at all.
+        compiled = (SHADERS / "DollLacunaEnergy.fxc").read_bytes()
+        self.assertNotIn(b"PRES", compiled)
+        self.assertNotIn(b"FXLC", compiled)
+        source = (SHADERS / "DollLacunaEnergy.fx").read_text(encoding="utf-8")
+        uniforms = set(re.findall(r"^(?:float\d?|matrix)\s+(\w+);", source, re.M))
+        self.assertEqual({"uWorldViewProjection", "dotOrigin", "timing"}, uniforms)
+        for name in uniforms - {"uWorldViewProjection"}:
+            self.assertIsNone(re.search(rf"\bif\s*\([^)]*\b{name}\b", source), f"no branch on {name}")
+        presentation = (WEAPONS / "LacunaPresentation.cs").read_text(encoding="utf-8")
+        self.assertIn('DollPixelArt.Set(shader, "timing", Timing(context.Clock, context.Reduced, pass));', presentation)
 
     def test_non_doll_shader_exports_unchanged(self):
         exports.verify()

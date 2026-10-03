@@ -58,7 +58,7 @@ internal static class CrimsonRewardRules
 
     // ---- Multiplayer readability -------------------------------------------------------------------------------
     internal const float LocalOpacity = 1, RemoteDormantOpacity = .5f, RemoteLiveOpacity = .85f;
-    internal const float RemoteShotDecibels = -8; // per-swing/per-shot cues for other players, one voice
+    internal const float RemoteCueDecibels = -8; // every reward cue another player causes, under its owner's level
     internal static float Decibels(float db) => MathF.Pow(10, db / 20);
 
     // ---- Effect bounds (per frame, all owners together) --------------------------------------------------------
@@ -76,10 +76,11 @@ internal static class CrimsonRewardRules
     internal const int ShowInkLines = 5, ShowSealCracks = 3;
 
     // ---- Melee: Sable Scythe -----------------------------------------------------------------------------------
+    // Ordinary Melee since 2026-10-03 (owner decision 4): the blade, the lash arc, the crescents and Staff Reap.
     internal const int StrokeTicks = 18, StrokeLiveStart = 5, StrokeLiveEnd = 13, WhipTicks = 28;
-    internal const int WhipDrawStart = 6, WhipDrawEnd = 12, WhipLiveStart = 14, WhipLiveEnd = 20, CrescentLiveEnd = 26;
-    internal const float StrokeMultiplier = 1, WhipMultiplier = 1.8f, CrescentMultiplier = .6f, CrescentRadius = 16, WhipThrust = 24;
-    internal const int CrescentScar = 20, ComboIdleReset = 60, MeasureStrokes = 5;
+    internal const int WhipDrawStart = 6, WhipDrawEnd = 12, WhipLiveStart = 14, WhipLiveEnd = 20, LashLiveEnd = 26;
+    internal const float StrokeMultiplier = .6f, WhipMultiplier = 1, LashMultiplier = .4f, LashRadius = 16, WhipThrust = 24;
+    internal const int LashScar = 20, ComboIdleReset = 60, MeasureStrokes = 5;
     internal const float MinTipSpeed = 3, RollSpeedFloor = .25f, DrawBackSpeedFloor = .2f, MaxAngularAcceleration = .3f;
     // The tightest turn of the hook tip scales with the blade: the figure eight was fitted with 24 px at a 136 px reach,
     // which is 20.80 px at the measured 117.89 px (the motion's shape is unchanged; only the blade is shorter).
@@ -98,7 +99,26 @@ internal static class CrimsonRewardRules
     internal static float StaffSpacing(float hitboxHeight) => Math.Clamp(hitboxHeight / 4, StaffSpacingMin, StaffSpacingMax);
     // Middle first, then outward: line order k -> staff row offset (-2..2), alternating above and below.
     internal static int StaffRow(int k) => k switch { 0 => 0, 1 => -1, 2 => 1, 3 => -2, 4 => 2, _ => throw new ArgumentOutOfRangeException(nameof(k)) };
-    internal static float MeasureMultiplier => 2 * StrokeMultiplier * 2 + WhipMultiplier + CrescentMultiplier; // 6.4
+    // Crescents (刈り月): thrown by every Over and Under (one each) and shed by the Whip's lash arc (a volley of five).
+    // Per game tick; a crescent has CrescentExtraUpdates and applies them with dt = 1 / (1 + extra updates).
+    internal const int CrescentThrowAge = 9, VolleyAge = 20, VolleyCrescents = 5, CrescentThrowSpacing = 18, CrescentExtraUpdates = 1;
+    internal const float CrescentThrowDegrees = 14, CrescentThrowSpeed = 14, VolleyFanDegrees = 16, VolleySpeed = 10;
+    internal const float VolleyWrittenFirst = .1f, VolleyWrittenStep = .2f;
+    internal const int CrescentHold = 6, VolleyHoldStep = 2, CrescentTurnRamp = 10;
+    internal const float CrescentTurnRate = .16f, CrescentTurnGain = .3f, CrescentCruise = 20, CrescentHardTurn = .6f, CrescentSpeedEase = .25f;
+    internal const float CrescentLeadMax = 8, CrescentBreakSlow = .3f;
+    internal const float CrescentMultiplier = .4f, VolleyMultiplier = .2f, CrescentKnockback = .5f;
+    internal const int CrescentRoots = 3, CrescentLife = 70, CrescentClose = 6, MaxCrescents = 8, CrescentAcquireInterval = 4;
+    internal const int CrescentSync = 12, CrescentScar = 10, CrescentSamples = 7, CrescentSerials = 1024, CrescentKeptStrokes = 16;
+    internal const float CrescentCursorRange = 960, CrescentCursorSnap = 240, CrescentConeRange = 400, CrescentConeDegrees = 75;
+    internal const float CrescentKeepRange = 1400, CrescentChainRange = 320, CrescentTipRadius = .15f;
+    internal const float CrescentWidth = 72, CrescentDepth = 32, CrescentRadius = 16, VolleyWidth = 54, VolleyDepth = 25, VolleyRadius = 14;
+    internal const float CrescentMaxStep = 16; // px per update: the validation bound on a replicated velocity
+    // A measure: Over/Under blade 4 x 0.6, their crescents 4 x 0.4, the Whip's blade 1.0, its lash arc 0.4 and the volley 5 x 0.2.
+    // The close parts (blade and lash arc) are 3.8 and the crescents 2.6: 53% blade, 6% lash arc, 41% crescents.
+    internal static float MeasureCloseMultiplier => 4 * StrokeMultiplier + WhipMultiplier + LashMultiplier;                // 3.8
+    internal static float MeasureCrescentMultiplier => 4 * CrescentMultiplier + VolleyCrescents * VolleyMultiplier;         // 2.6
+    internal static float MeasureMultiplier => MeasureCloseMultiplier + MeasureCrescentMultiplier;                         // 6.4
     internal static int MeasureTicks => 4 * StrokeTicks + WhipTicks;                                           // 100
     // A release of n lines: the multiplier and its busy ticks (full: until the follow-through ends at 56).
     internal static float StaffReleaseMultiplier(int lines)

@@ -11,7 +11,8 @@ internal enum ScarletNoteKind : byte { Curtain, Beam, Rope, Rift, Hands, Rakes, 
 //                    is [Born, Close) with Close = Fire + Span (signature moves: the prototype's 44 / 32 / 40).
 //   Side             world-space direction of the gesture (+1 = toward +x): the Crown's swing, the Mantle's cut.
 //   Low              Mantle: the low row leads (low comb / downward cut).
-//   Lead             the previous note fired on this note's Born, so no wind-up from rest.
+//   Lead             another note fired on exactly this note's Born (a hand-over), so no wind-up from rest. One plan cannot
+//                    know it: TryFrom leaves it false and Collect sets it from the source's notes.
 //   Broad            the seal crossflow (all limbs, no swing).
 //   Reach            ticks the strike takes to reach across the field; Register scales the gesture (1 = signature).
 //   ArmA, ArmB       Choir arms (texture space, flip applied) that own the struck ground; -1 = none.
@@ -115,8 +116,11 @@ internal static class ScarletNotes
             }
             case ScarletNoteKind.Rope:
                 register = 1; reach = 2;
+                // The comb that sweeps the floor is the odd steps' (the final step on the downbeat among them) since protocol80, and
+                // the rope crosses rightward on even steps (CrimsonSignatureMoves.Write), so the direction comes from the step,
+                // never from the row.
                 low = CrimsonSignatureMoves.RopeIsLow(plan.Pulse);
-                side = low ? 1 : -1; // the low comb runs rightward
+                side = (plan.Pulse & 1) == 0 ? 1 : -1;
                 (aimX, aimY) = Normalize(side, low ? .35f : -.35f);
                 break;
             case ScarletNoteKind.Hands:
@@ -144,7 +148,7 @@ internal static class ScarletNotes
                 (aimX, aimY) = (-1, 0);
                 break;
         }
-        note = new(plan.Born, plan.Fire, plan.End, span, kind, side, low, plan.Pulse > 0, broad, reach, register,
+        note = new(plan.Born, plan.Fire, plan.End, span, kind, side, low, false, broad, reach, register,
             armA, armB, aimX, aimY, Seed(plan.Phrase, plan.Pulse, plan.Source), plan.Phrase, plan.Pulse, plan.Source);
         return true;
     }
@@ -185,7 +189,22 @@ internal static class ScarletNotes
             for (int i = count; i > at; i--) output[i] = output[i - 1];
             output[at] = note; count++;
         }
+        for (int i = 0; i < count; i++)
+            if (HandedOver(plans, source, output[i])) output[i] = output[i] with { Lead = true };
         return count;
+    }
+
+    // A swing takes over from the previous strike's peak only when that strike fires on this note's Born. Since protocol80
+    // a phrase's notes sit on the eighth-note grid (one beat of warning, strikes one to one and a half beats apart), so
+    // most notes start from rest and only a note whose warning opens as another strikes is a hand-over. It is a property of
+    // the plans, not of the collected window: the strike may already have left the window when the swing is still going.
+    private static bool HandedOver(ReadOnlySpan<CrimsonGesturePlan> plans, int source, in ScarletNote note)
+    {
+        if (note.Broad) return false;
+        foreach (var previous in plans)
+            if (previous.Source == source && previous.Technique != CrimsonTechnique.SideBeams && KindOf(previous.Technique, out _)
+                && previous.Fire == note.Born && previous.Fire < note.Fire) return true;
+        return false;
     }
 
     // The accepted signal timing of a body (source < 0: every source plus the chorus): ticks until the nearest

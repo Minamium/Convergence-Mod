@@ -55,11 +55,11 @@ internal sealed class ScarletInkCanvas
     internal const int MaxCandidates = 768, MaxSamples = 16384, MaxPathSamples = 1024;
     internal readonly struct PathRecord
     {
-        internal readonly int First, Count;
+        internal readonly int First, Count, BeadSample;
         internal readonly ScarletInkStyle Style;
         internal readonly bool Bead, Droplet;
-        internal PathRecord(int first, int count, in ScarletInkStyle style, bool bead, bool droplet)
-        { First = first; Count = count; Style = style; Bead = bead; Droplet = droplet; }
+        internal PathRecord(int first, int count, in ScarletInkStyle style, bool bead, bool droplet, int beadSample = -1)
+        { First = first; Count = count; Style = style; Bead = bead; Droplet = droplet; BeadSample = beadSample; }
     }
 
     internal readonly PathRecord[] Paths = new PathRecord[MaxCandidates + CrimsonRewardRules.MaxDroplets];
@@ -99,14 +99,15 @@ internal sealed class ScarletInkCanvas
         SampleCount++;
     }
 
-    // Finish the path; bead = true puts the ember-gold writing head at its last sample (ink still being written).
-    internal void End(bool bead = false)
+    // Finish the path; bead = true puts the ember-gold writing head at its last sample (ink still being written), or at
+    // sample `beadSample` of this path when one is given (the Sable Scythe crescent carries it on its apex).
+    internal void End(bool bead = false, int beadSample = -1)
     {
         if (open == -2) { open = -1; return; }
         if (open < 0) return;
         int count = SampleCount - open;
         if (count <= 0 || !valid || style.Opacity <= .001f) SampleCount = open;
-        else { Paths[PathCount++] = new PathRecord(open, count, style, bead, false); candidates++; }
+        else { Paths[PathCount++] = new PathRecord(open, count, style, bead, false, beadSample < count ? beadSample : -1); candidates++; }
         open = -1;
     }
 
@@ -303,11 +304,15 @@ internal sealed partial class ScarletRewardInk
     {
         var c = Canvas;
         int first = p.First, n = p.Count, last = first + n - 1;
-        float length = 0;
-        for (int i = first + 1; i <= last; i++) length += Vector2.Distance(c.At[i - 1], c.At[i]);
+        float length = 0, beadU = 0;
+        for (int i = first + 1; i <= last; i++)
+        {
+            length += Vector2.Distance(c.At[i - 1], c.At[i]);
+            if (i - first == p.BeadSample) beadU = length;
+        }
         var s = p.Style;
         float opacity = s.Opacity * (s.Local ? CrimsonRewardRules.LocalOpacity : RemoteOpacity(s.Look));
-        float head = p.Bead ? length : -1;
+        float head = p.Bead ? (p.BeadSample >= 0 ? beadU : length) : -1;
         // Live ink has no warmth; its third channel marks a drying joint: an end that has dried further than the other is
         // where a moving tail meets the scar behind it, which already has a round cap there.
         float third = Math.Clamp(s.Warmth, 0, 1);

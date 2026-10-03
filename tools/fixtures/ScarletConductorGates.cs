@@ -3,8 +3,10 @@
 // CrimsonRig.Draw) and CrimsonRig.DrawPerformer (the companion), both in the linked CrimsonRig.Performer.cs. Every
 // tick of each Act's signature and basic phrase (with the neighbouring phrases alive) is checked, Normal and Reduced.
 //   G8v  identity: with no note (the plans alive, the command off) every tick draws exactly today's Vespera and held
-//        orb; the companion's performer (default arguments) is byte-identical over its charge / recoil / facing /
-//        floating / motion range. SHA-256 against a baseline written from the code before S4 (written when absent).
+//        orb, compared pixel for pixel with the pre-S4 boss path kept below as TodayVespera (the harness's own drawing
+//        before S4: DrawPerformer with today's arguments and the held orb at today's offset and radius), so it holds under
+//        any phrase timing; the companion's performer (default arguments) is byte-identical over its charge / recoil /
+//        facing / floating / motion range, SHA-256 against a baseline written from the code before S4.
 //   V94  the held orb's centre is never closer to her than 94 px nor than today's hold, moves at most 24 px, and its
 //        near edge (centre - radius toward her) never comes closer to her than today's near edge.
 //   G2v  central 94 px gap (|x - Cx| <= 47, the Hands' gap she stands in): the command adds no light outside her own
@@ -31,7 +33,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 internal sealed class ConductorGates
 {
-    internal static readonly string[] Scenes = { "act1-signature", "act2-signature", "act3-signature", "act1-basic", "act2-basic", "act3-basic" };
+    internal static readonly string[] Scenes = { "act1-signature", "act2-signature", "act3-signature", "act1-basic", "act2-basic", "act3-basic",
+        "act1-basic2", "act2-basic2", "act3-basic2" };
     // Vespera's crop at the in-game zoom 2 (camera V): world x in [Cx - 260, Cx + 120], y in [Cy - 150, Cy + 90].
     internal const int CropWidth = 760, CropHeight = 480;
     internal static readonly Vector2 CropCentre = new(-70, -30);
@@ -62,7 +65,7 @@ internal sealed class ConductorGates
         foreach (string name in Scenes)
         {
             var s = Scene(name);
-            var third = s.Phrase.Plans[2]; var flow = s.Phrase.Plans[4];
+            var third = s.Third; var flow = s.Flow;
             var ticks = new SortedDictionary<int, string>();
             foreach (int rel in new[] { -28, -24, -20, -14, -8, -3, -1, 0, 1, 2, 3, 5, 8, 12, 18, 26 }) ticks.TryAdd(third.Fire + rel, $"n3{rel:+0;-0;+0}");
             foreach (int rel in new[] { -56, -40, -28, -14, -4, -1, 0, 1, 2, 4, 7, 14, 30, 52 }) ticks.TryAdd(flow.Fire + rel, $"xf{rel:+0;-0;+0}");
@@ -219,17 +222,21 @@ internal sealed class ConductorGates
                 // peaks at about Fire+7).
                 var light = Enumerable.Range(p.Fire - 9, 22).Select(t => Light(Vespera(s, t, Commanded))).ToArray();
                 var todayLight = Enumerable.Range(p.Fire - 9, 22).Select(t => Light(Vespera(s, t, Current))).ToArray();
-                int lightPeak = Enumerable.Range(1, 21).MaxBy(i => light[i]) - 9, todayPeak = Enumerable.Range(1, 21).MaxBy(i => todayLight[i]) - 9;
+                // The bloom's peak is the strongest light after the tick the charged orb is spent on (Fire + 1 .. Fire + 12): since
+                // protocol80 the phrase's notes are a beat or more apart, so the orb is fully charged for a few ticks before Fire
+                // and today's accepted recoil spends it on Fire (today's light dips there too) before its bloom builds again.
+                int lightPeak = Enumerable.Range(10, 12).MaxBy(i => light[i]) - 9, todayPeak = Enumerable.Range(10, 12).MaxBy(i => todayLight[i]) - 9;
                 int rise = Enumerable.Range(1, 21).MaxBy(i => light[i] - light[i - 1]) - 9;
                 int todayRise = Enumerable.Range(1, 21).MaxBy(i => todayLight[i] - todayLight[i - 1]) - 9;
                 float largest = light[rise + 9] - light[rise + 8], onFire = light[9] - light[8];
                 bool good = ignite && snapPeak >= 0 && snapPeak <= 3 && heatPeak <= 0 && heatAtFire && pull <= 1 && release >= -1e-3f
-                    && rise >= 0 && rise <= 2 && onFire > 0 && lightPeak >= 0 && lightPeak <= 8;
+                    && rise >= 0 && rise <= 2 && onFire > 0 && lightPeak >= 1 && lightPeak <= 8;
                 ok &= good;
                 rows.Add(new { scene = name, technique = p.Technique.ToString(), pulse = p.Pulse, aim = new[] { aim.X, aim.Y }, igniteOnFire = ignite,
                     snapPeak, heatPeak, pullAlongAim = pull, releaseAlongAim = release, drawnLightLargestRise = rise, drawnLightPeak = lightPeak,
                     riseOnFireShare = onFire / Math.Max(1, largest), todayLargestRise = todayRise, todayPeak,
-                    lightAtFireOverToday = light[9] / Math.Max(1, todayLight[9]), ok = good });
+                    lightAtFireOverToday = light[9] / Math.Max(1, todayLight[9]), ok = good,
+                    light = good ? null : light.Select(x => (int)MathF.Round(x / 1000)).ToArray(), todayLight = good ? null : todayLight.Select(x => (int)MathF.Round(x / 1000)).ToArray() });
             }
         }
         var shift = new List<object>(); bool shifted = true;
@@ -345,6 +352,39 @@ internal sealed class ConductorGates
         return RigRenderer.Read(target);
     }
 
+    // Today's boss-path Vespera as the harness drew it before S4 (and the game before it): the performer with today's
+    // arguments (opening over, reveal 1, nothing consumed) and the held orb at facing * (94 + 12 charge) px beside her and
+    // 25 px up with radius 53 + 24 charge + 18 recoil, from the plan list's Signal only. The oracle of G8v.
+    private Color[] TodayVespera(RigScene s, int tick, bool reduced)
+    {
+        var view = Crop(tick, reduced);
+        var target = CropTarget();
+        CrimsonVisuals.Reduced = reduced;
+        Terraria.Main.screenPosition = view.ScreenPosition;
+        Terraria.Main.GameViewMatrix.TransformationMatrix = view.GameView;
+        Terraria.Main.GameViewMatrix.Zoom = new Vector2(view.Zoom);
+        r.Device.SetRenderTarget(target);
+        RigHost.CheckTarget(r.Device);
+        r.Device.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, Color.Transparent, 1f, 0);
+        var signal = RigMirror.Signal(s.Plans, -1, tick);
+        Vector2 at = RigScene.Conductor;
+        using (var batch = new SpriteBatch(r.Device))
+        {
+            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, Terraria.Main.Rasterizer, null, view.GameView);
+            RigHost.Tag = "vespera";
+            CrimsonRig.DrawPerformer(batch, Terraria.Main.screenPosition, at, tick, Vector2.Zero, RigScene.VesperaFacing, true, signal.Charge, signal.Recoil, 1, false, 1);
+            Vector2 held = new(RigScene.VesperaFacing * (94 + signal.Charge * 12), -25);
+            float radius = 53 + signal.Charge * 24 + signal.Recoil * 18;
+            CrimsonEnergy.Begin();
+            CrimsonEnergy.AddCore(at + held, radius, tick, Math.Max(signal.Charge, 0), signal.Recoil, 1, CrimsonVisuals.Reduced);
+            CrimsonEnergy.Draw(batch);
+            RigHost.Tag = "";
+            batch.End();
+        }
+        r.Device.SetRenderTarget(null);
+        return RigRenderer.Read(target);
+    }
+
     // CrimsonCompanionVisuals.PreDraw's call: positional arguments only (every new parameter at its default).
     private Color[] Companion(int tick, Vector2 velocity, int facing, bool floating, float charge, float recoil, bool reduced)
     {
@@ -385,10 +425,11 @@ internal sealed class ConductorGates
         var rows = new List<object>();
         int frames = 0, different = 0, missing = 0;
         string? firstDifferent = null;
-        void Record(string key, Color[] px)
+        void Record(string key, Color[] px, string? oracle = null)
         {
             string hash = Hash(px);
             actual[key] = hash; frames++;
+            if (oracle is not null) { if (oracle != hash) { different++; firstDifferent ??= key; } return; }
             if (expected is null) return;
             if (!expected.TryGetValue(key, out var old)) { missing++; return; }
             if (old != hash) { different++; firstDifferent ??= key; }
@@ -399,7 +440,8 @@ internal sealed class ConductorGates
             int before = different;
             foreach (bool reduced in new[] { false, true })
                 for (int tick = s.First; tick <= s.Last; tick++)
-                    Record($"{name}|{(reduced ? "reduced" : "normal")}|{tick}", Vespera(s, tick, new RigVariant(reduced, false, false, true)));
+                    Record($"{name}|{(reduced ? "reduced" : "normal")}|{tick}", Vespera(s, tick, new RigVariant(reduced, false, false, true)),
+                        compare ? Hash(TodayVespera(s, tick, reduced)) : null);
             rows.Add(new { scene = name, ticks = s.Last - s.First + 1, different = different - before });
         }
         int companionBefore = different;
@@ -422,8 +464,9 @@ internal sealed class ConductorGates
         Add("G8v", "no note: Vespera's boss path draws today's frame on every tick (Normal, Reduced); the companion is byte-identical",
             !compare ? "baseline_written" : different == 0 && missing == 0 ? "pass" : "fail",
             new { frames, different, missing, firstDifferent, rows },
-            compare ? "SHA-256 of each crop (zoom 2 around Vespera) against " + Path.GetRelativePath(output, file)
-                    + $" (rendered from {manifest!.Revision}{(manifest.Dirty ? ", dirty" : "")}, {manifest.Written})."
+            compare ? "Vespera: SHA-256 of each crop (zoom 2 around Vespera) of the boss path with the command off against TodayVespera, the pre-S4 drawing "
+                    + "(DrawPerformer with today's arguments and the held orb at today's offset and radius) over the same plans. Companion: against "
+                    + Path.GetRelativePath(output, file) + $" (rendered from {manifest!.Revision}{(manifest.Dirty ? ", dirty" : "")}, {manifest.Written})."
                 : "Hashes written to " + file + " with their manifest; run the gates on the change to compare.");
     }
 

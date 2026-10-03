@@ -2,9 +2,621 @@
 
 ## Records
 
+### Pale Meridian weapon cues — 2026-10-03
+
+Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air, a soft-mallet gong resonance for the two closing strikes); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+| metal_click | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalClick.ogg | Kenney RPG Audio metalClick.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3` |
+| metal_latch | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+| metal_pot | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalPot1.ogg | Kenney RPG Audio metalPot1.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `159def979e8e386c2c539f5e99cc30a080eb2dcb6c911fa2e4ccc0785b2522fd` |
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianAssemble.ogg`
+- Asset ID: doll-weapon-sfx-meridianassemble-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.55: -22.2 LUFS effective), true peak -8.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `194ff024bbb4066a348b5a7eb02abfd7dd3f3701110247d5ea8d996916b1d626`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote0.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote0-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -10.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `5ab7f54645b1674262a1b2ab673b3127cd40e0d967d63b0915bad1652664f30a`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote1.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `cc73bd2e120dacfe403d4b45b6654f2fbfc74530a1947207ac44f7608b172e5e`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote2.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.89 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `739b0148142facf15ff7f6817e17c1dfaf61c6a7ca12ec5816f848b32f833b21`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote3.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `822a9a408a25bc20da933959328db7dd5b65c0d73e811a0ca9ca730994159702`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote4.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -12.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c312b042581788f6fcc73c0de68a82d2d63584301831ef48f3e8eb27a891b503`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote5.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote5-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -12.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `29215522ee38cefc4277bd10e7afcb89056819d08e61cd1f99d9ccedfc0b6561`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote6.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote6-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.88 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `bc3aad28db1bbeddce18fdb8453183cafc0a25abb9945495405a3d7bab4364ed`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote7.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote7-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.88 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `873c467bde8bee18dfe73fadc88318baa91aac86e72d895b0b0197726f06a01b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote8.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote8-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.87 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `a220052ab7f6cd9afdc81bc87bcd4cecead4708d5e5cc13d7335a6aba8f6b353`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianPartWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianpartwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.45: -23.9 LUFS effective), true peak -7.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c061a0e6bf6008dc8ae30812dfdfcbec6482e2b33dc92aeb02d68670bdb2f03f`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianPartFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianpartfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.5: -19.1 LUFS effective), true peak -3.5 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `50600bef59460242026d710457be41cd55d1ab27d46ff944ec6d1917f6bd7c55`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianIgniteWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianignitewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.86 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.5 LUFS effective), true peak -4.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `7b57dc63e3ced4d280d6f16642e466e437f50240328bc28e8feaf7e36a153fd4`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianIgniteFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianignitefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.01 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.75: -14.0 LUFS effective), true peak -5.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `f9e6faaa1a065babad00cdfd8178772c4f03a0eb49f6c6eafff7d17c87ab4abc`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLoop.wav`
+- Asset ID: doll-weapon-sfx-meridianloop-20261003
+- Asset type: stereo 44.1 kHz PCM16 WAV seamless loop, 105840 samples = 144 game ticks (2.40 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 PCM16 WAV
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -6.5 dBFS; circular filtering and an equal-power crossfade of the overhang into the head, no trim or fade
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `ddd0a8409346012abf924e9451cf94a0277a12263197f7a170e7be8cf980c02d`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHeavy.ogg`
+- Asset ID: doll-weapon-sfx-meridianheavy-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.55 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.5: -19.0 LUFS effective), true peak -6.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `98a0a8804c2c030054294405ddf2407bb7f3c4bde12c5c33a43d281637ee67cd`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianstrikewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.4 LUFS effective), true peak -6.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `3cf62ac96e2ba1df8313e248b2d32b7867c21a859cd919a89ad8dacb7139be32`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianstrikefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.95 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.85: -12.9 LUFS effective), true peak -4.8 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `6e2d5b324a24c62d4af04db40555a3338a289ab7e920cf771388ae0f4bb03b1f`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeMiss.ogg`
+- Asset ID: doll-weapon-sfx-meridianstrikemiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.55: -22.2 LUFS effective), true peak -3.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `2ac293c946a969c8cac35f784f1ea0c6c2279af1aadfc52c0132500138461966`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianlatticewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.4 LUFS effective), true peak -6.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `1faaa99781cd852677f6d2b5e331d6690d4840f063bc5cb038b16cd7ed56ac91`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianlatticefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.68 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -5.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `36adbab1447815725626b7d71c4f4812df2278795a615b0e22bebe717551f01b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHit.ogg`
+- Asset ID: doll-weapon-sfx-meridianhit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.18 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.1 LUFS (played at volume 0.35: -29.2 LUFS effective), true peak -5.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `19bce4a754a54a6eb88392d32826a4c0890c931f01f20da9a595c994d724fe12`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHitHeavy.ogg`
+- Asset ID: doll-weapon-sfx-meridianhitheavy-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.1 LUFS effective), true peak -5.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `1f39873232ef5e9278baea603cbf9153fa1f15336dab8ea122f423eb6158b86f`
+
+### Pale Meridian energy material — 2026-10-03
+
+The light of the refreshed Pale Meridian on the shared Doll weapon layer ([weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)).
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollMeridianEnergy.fxc`
+- Asset ID: dollmeridianenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollMeridianEnergy.fx, evaluated per art dot in the Doll weapon layer's half-resolution Light target and quantized to the Doll light ramp with a world-stable Bayer dither (its palette block is identical to DollPixel.fx): the meridian/lattice packet (a white-hot spine and head over a pearl-violet body thinning to a plum rim, with drifting sparkles), round wakes, round glows with an optional ring, and a cooling residue that crumbles to plum; flowing noise samples Luminance's own TurbulentNoise and WavyBlotchNoise at runtime (not copied); every choice is branch-free (no uniform-only branch). No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-meridian.ps1` (the real presentation, exported PNGs and Luminance noise; pixel checks) 2026-10-03; native playtest not_run
+
+### Lacuna Testament cues — 2026-10-03
+
+The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): sixteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump; the generator adds a gong-like plate tuned into the key, also additive synthesis), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-pitch cues (`LacunaIrisTine`, `LacunaPelletFire`, every pitched layer a C, recorded at C6 and played on the ladder step of each iris); every composite cue and the loop play as rendered. The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+| metal_latch | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunairiswarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.1 LUFS (played at volume 0.7: -20.2 LUFS effective), true peak -2.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `52bb1e6166664656d2ed8fe7662c1fe74be8588122997d9e232986083bb0b078`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunairisfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.8: -21.9 LUFS effective), true peak -5.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `5948e130706efdc3c9283c51cebb718f554e239229563a2a06b3c767acf28399`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisTine.ogg`
+- Asset ID: doll-weapon-sfx-lacunairistine-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.70 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.9: -20.9 LUFS effective), true peak -14.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c22daeb5d8dd0b912e9904a6f5d4f36c6ede3360426b59cdfe3145bcfc2262ff`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunapelletwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.16 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.9 LUFS (played at volume 0.55: -26.1 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `1f40b840738368eca55260f568ee094ddeb06bb8aa0c07244ab4bab4600d70a6`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunapelletfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.7: -23.1 LUFS effective), true peak -10.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `d4500431428fd9e9f18e11898a0f56340cb808ab09a8e54388d3955ad6c1a3a2`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletHit.ogg`
+- Asset ID: doll-weapon-sfx-lacunapellethit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.22 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `6b0f021392c23d55c118bb081d7789534688d513a651a523f026356550275d27`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunamergewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `239230f8fe8d61d76ffb78c26a2f969203c7cc81301b38006275d24593a341e0`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunamergefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.76 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -12.3 LUFS (played at volume 0.85: -13.7 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings and project-owned masters; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `cafd27aff735bdd0298ccd561496626e67d482262defc9d1587c1131b4166589`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.71 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `b1c972b4ee29d3b190f4dc6e609c8ded5fb6a8c7fc62ab050782bffd60460e9d`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.57 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `ebff7a9145a06fca40c9a4116144474e3dc18c93b009cb4cb7e48f517cea3c91`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamLoop.wav`
+- Asset ID: doll-weapon-sfx-lacunabeamloop-20261003
+- Asset type: stereo 44.1 kHz PCM16 WAV Doll weapon loop (4.00 s, 176400 frames)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 PCM16 WAV (sample-exact loop)
+- Human modifications: periodic original synthesis; short-term loudness -14.0 LUFS (played at volume 0.7: -17.1 LUFS effective), true peak -9.9 dBFS; loop wrap step 0.0008 against 0.0471 inside
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `52f058f643642ce4183a41dddf0f5b0eed32fe5f3b0a2032417c85ba2a297c58`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden1.ogg`
+- Asset ID: doll-weapon-sfx-lacunawiden1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.58 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.75: -19.4 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `391e8aba1e45d22e50131cb9c358a81b13c95d1687ca6140143f18d218eb5828`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden2.ogg`
+- Asset ID: doll-weapon-sfx-lacunawiden2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.58 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.75: -19.5 LUFS effective), true peak -7.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `6f5f07c09c440df4fcfb603b5278365bb7dc2b07aa546d47c7dedbee0656c8ec`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden3.ogg`
+- Asset ID: doll-weapon-sfx-lacunawiden3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.93 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.75: -15.5 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `e8019060e7080d0fb3582b96f93ff9a83a2eb58897c7e4528e99a8b6f82fa528`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamHit.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamhit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.26 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -6.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `34eaec84cba0afb3adc23b8dd6514b6493d3196536b610706319a9d06af7feb9`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamEnd.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamend-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.68 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -3.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `9141d5eaa3a9e8ca59e9748ba1df4c9fefca407a9a641591102d90097ef7bdc5`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamMiss.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeammiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.89 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `27222a3dd45eeb4e32a0b03467a3cbc0f33bd7b56911c4c72c0821c0ab38e30f`
+
+### Lacuna Testament void material — 2026-10-03
+
+The Lacuna Testament's own light material for the shared Doll weapon layer ([WEAPONS.md](../docs/encounters/first-severance/WEAPONS.md#magic--lacuna-testament)).
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollLacunaEnergy.fxc`
+- Asset ID: dolllacunaenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollLacunaEnergy.fx, evaluated per art dot in the Doll weapon layer's half-resolution Light target and quantized to the Doll palette (its palette block is identical to DollPixel.fx): a void beam (near-black core with plum streaks drifting inward and rare pearl sparks, a one-dot pearl lip, violet/pearl rims whose folds flow outward, a one-dot pearl silhouette on the collision edge, a dithered halo, travelling pulses, a white-hot opening, a far-end cap and a mask that keeps the great aperture in front of its own light), void holes with octant-exact one-dot pearl lips and inward-spiralling violet arms, and pellet wakes; flowing Luminance WavyBlotchNoise and TurbulentNoise sampled at runtime (not copied). Written without uniform-only branches and compiled without any preshader: the flow time and sparkle thresholds are computed on the CPU and reach the pixel shaders through the vertex shader. The drawn hard edge runs at the collision width to the beam's far end, where only the core closes. No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-lacuna.ps1` (real Lacuna sprites and Emit sequence, zoom 1, dark and bright ground, pixel checks, a boss forecast under the beam, the running-dry ending) 2026-10-03; native playtest not_run
+
 ### Scarlet Invocation reward weapon audio — 2026-10-03
 
-Thirty-five cues in 38 files (`OrganShot` is one file per pipe) for the Scarlet Score Reliquary and the five Scarlet Invocation reward weapons ([rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#art-and-audio)). On 2026-10-03 the owner auditioned two takes (A and B) of each of 28 cue blocks on the local audition page and chose **B** for Cadence, ReliquaryOpen, ScytheWhip, StaffWindup, StaffBarline and RiverRelease and **A** for every other block (the Toll block is the whole Toll0–Toll7 ladder; the OrganShot block is all four pipe files of take A). That choice is the owner's approval of these exact files, which are the auditioned masters byte for byte. Each cue layers CC0 recordings from the VSCO 2 CE and VCSL sample libraries, Freesound and OpenGameArt; no synthesized tone or noise layer is used. No local recording of fire, pouring liquid, wax, bone or paper exists, so the recipe uses the stand-ins named per file (wind and the organ blower for flame, bubbles for liquid, wood chops and stone grains for bone and wax, book pages for paper). The recordings, libraries, recipe and audition page stay outside the repository; no raw sample is distributed.
+Thirty-five cues in 38 files (`OrganShot` is one file per pipe) for the Scarlet Score Reliquary and the five Scarlet Invocation reward weapons ([rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#art-and-audio)). On 2026-10-03 the owner auditioned two takes (A and B) of each of 28 cue blocks on the local audition page and chose **B** for Cadence, ReliquaryOpen, ScytheWhip, StaffWindup, StaffBarline and RiverRelease and **A** for every other block (the Toll block is the whole Toll0–Toll7 ladder; the OrganShot block is all four pipe files of take A). That choice is the owner's approval of these takes: 37 files are the auditioned masters byte for byte, and ReliquaryOpen is its master with the show's level lift baked in on 2026-10-03 (loudness revision below). Each cue layers CC0 recordings from the VSCO 2 CE and VCSL sample libraries, Freesound and OpenGameArt; no synthesized tone or noise layer is used. No local recording of fire, pouring liquid, wax, bone or paper exists, so the recipe uses the stand-ins named per file (wind and the organ blower for flame, bubbles for liquid, wood chops and stone grains for bone and wax, book pages for paper). The recordings, libraries, recipe and audition page stay outside the repository; no raw sample is distributed.
 
 Rights, checked 2026-10-03 from local records and license files (no source is unconfirmed, so no cue is held back): the thirteen Freesound and OpenGameArt recordings carry the same SHA-256 as rows already in this register (column "Same file in"), whose records state that each page showed Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/) when surveyed on 2026-10-01; Freesound files are the public HQ preview renders of those CC0 uploads. The eight Kenney files come from the local `pack-OGA-Kenney-RPGsounds.zip` (SHA256 `3ae398ad63e293f9c450bda22d5d81c3af69c74df66fc1400f33c012c0bbc231`), whose bundled `license.txt` states CC0 1.0 with optional credit; all eight are already itemised in the Ebon records. VSCO 2 CE 1.1.0 ships a CC0 1.0 `LICENSE`; every VSCO file used here was compared byte for byte with its member of the local release archive. Its organ folder's `Info.txt` credits Simon Dalzell (Ivy Audio), grants redistribution from Versilian Studios and encourages credit; its `Readme.txt` asks that the samples not be sold directly (none are distributed) and for credit to Versilian Studios / Sam Gossner and/or Ivy Audio / Simon Dalzell with a link to the VSCO: CE homepage (https://versilian-studios.com/vsco-community/), so a public credit for these cues carries both names and that link. VCSL is CC0 1.0 per its repository README ("no credit, no special terms"); every VCSL file used here is tracked and unmodified at the recorded commit.
 
@@ -75,7 +687,9 @@ Rights, checked 2026-10-03 from local records and license files (no source is un
 | woodblock_ff | Woodblock `wood_click_ff.wav` | Versilian Studios | VCSL `b6e6ac8` | `9a911c66212d50a09494821bf9af8ce6e007612e232b5905f838348cb1d63b75` | CC0 1.0 (VCSL README) | — |
 | woosh | woosh | florianreichelt | https://freesound.org/s/683096/ | `3c641d4d6ea0c6b65423d8fe1a7d72bf7bfb08a91c1640f9e9a0ab9d5d23b265` | CC0 1.0 (page surveyed 2026-10-01) | Waltz of the Ebon Manor reward weapon audio — 2026-10-02; Waltz of the Ebon Manor — 2026-10-01; Cathedral recorded audio (SFX v2) — 2026-10-02 |
 
-Recipe and common processing (external `sfx-scarlet-rewards` recipe, run with Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0 and soundfile 0.14.0 / libsndfile 1.2.2; SHA256 `common.py` `a6dcd0d619d9198081e6acdd69f944b08678f66febc3f844eb95c37019ffe4d4`, `kit.py` `239413c681c416cfb0844e984be64b8fd199f2ea28a9049dc748684905e88e15`, `parts.py` `c7133f1937a9a6ad7b06d02a85b9931931c1b509a002dbc437d640215c76367d`, `cues_shared.py` `224136bda754edfe75791f10260e2a1758f75f3a12cba85698a354d96a67114e`, `cues_scythe.py` `8fa903eaeab35cb44d044578603001a5370adce18b3f2c9b3679f6f9e633f7e0`, `cues_organ.py` `6de52aa5424c70685dd1fb759ec31e858d860293d1f28fe545c37b1566f1b035`, `cues_baton.py` `f1e921f6ef3e904ac9381a40868162fa83504511f6d6c43b79a628da3ed9dc4d`, `cues_censer.py` `ddc546a9d1da6dbcd776c17846e1396c6e058ba30df2323d74f8d185658990bf`, `cues_quill.py` `d1e81ed8a94039b386101e0e5c224c50c457e45504e92e0950412e9888f5532f`, `render.py` `b500b4c4b851b56c9351179c6fe5c90a9f364cbe6c9e97db60176f3afbbf6928`, `probe.py` `c2968ecf938aaa7a47020ccea71e55bdb1d746f08fd708286cd9b9e01f5b5357`, `sources.lock.json` `9f0bf56ba8ec5bcc9324e541ad7e56ab19d285dbaaa66ca91c9bdb0e5da540f4`). Every source is read through the lock, which refuses a file whose SHA-256 differs. Sources are decoded and resampled to 48 kHz stereo (polyphase). A tuned layer is resampled sampler-style (speed follows pitch) from its measured pitch (the recipe's reference table, measured 2026-10-02) to an exact E♭, F or B♭ target, and the recipe refuses any tuned layer off those three; drums, gongs and bells are tuned by the shift that puts their strong partials on E♭/F/B♭. Windows get 2 ms / 4 ms fades; filters are second-order Butterworth high/low/band-pass and RBJ shelves; envelopes are dB breakpoints; each layer is level-matched on its K-weighted 100 ms peak and placed on a timeline. Space is short reflections of the cue itself: convolution with a deterministic early-reflection, allpass and comb kernel (a processing kernel; no audio is generated). The master removes DC, fades the head 2 ms and the tail (a quarter of the length, 30–300 ms, unless noted), prepends 3 ms of silence, sets the maximum 400 ms momentary loudness (meant as BS.1770 K-weighting on the Ebon scale; found on 2026-10-03 to run the K-weighting biquads across the two channels instead of along time, so in effect it weights no frequency; [the rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#art-and-audio) lists both measurements) to the role target, applies a level-matched tanh glue, limits peaks only above -1.6 dBTP (at most 4 dB of gain reduction for build, per-shot and windup cues, 6 dB for releases), high-passes at 18 Hz and keeps the true peak at or under -1 dBTP after the Vorbis round trip. Targets follow the Raid's loudest strike when the cues were rendered (-7.6 LUFS on this meter, measured on the Raid's 2026-09-18 CrownRupture strike, since retired with the Raid's own sound set; the Doll beam and chorus cues the Raid then played reached -7.7 to -8.4 LUFS at their call volumes): finale -9.6, cadence -11.0, show -13.0, windup -15.0 (a ceiling), release part -15.5 (CenserPour -16.0, InkBlaze -12.0), per-shot -17.0 and build step -19.0 LUFS (ceilings). The files keep these levels; in the game each cue plays at its role's offset against the Raid's own sound set ([rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#art-and-audio)). Encoding is 48 kHz stereo Vorbis at compression level 0.5 with the Ogg serial pinned from the take's name (the first four bytes of SHA-256 of `scarlet-rewards/<take>`). A fresh render of the 35 picked takes from this recipe and lock reproduced all 38 files byte for byte on 2026-10-03.
+Recipe and common processing (external `sfx-scarlet-rewards` recipe, run with Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0 and soundfile 0.14.0 / libsndfile 1.2.2; SHA256 `common.py` `a6dcd0d619d9198081e6acdd69f944b08678f66febc3f844eb95c37019ffe4d4`, `kit.py` `239413c681c416cfb0844e984be64b8fd199f2ea28a9049dc748684905e88e15`, `parts.py` `c7133f1937a9a6ad7b06d02a85b9931931c1b509a002dbc437d640215c76367d`, `cues_shared.py` `224136bda754edfe75791f10260e2a1758f75f3a12cba85698a354d96a67114e`, `cues_scythe.py` `8fa903eaeab35cb44d044578603001a5370adce18b3f2c9b3679f6f9e633f7e0`, `cues_organ.py` `6de52aa5424c70685dd1fb759ec31e858d860293d1f28fe545c37b1566f1b035`, `cues_baton.py` `f1e921f6ef3e904ac9381a40868162fa83504511f6d6c43b79a628da3ed9dc4d`, `cues_censer.py` `ddc546a9d1da6dbcd776c17846e1396c6e058ba30df2323d74f8d185658990bf`, `cues_quill.py` `d1e81ed8a94039b386101e0e5c224c50c457e45504e92e0950412e9888f5532f`, `render.py` `b500b4c4b851b56c9351179c6fe5c90a9f364cbe6c9e97db60176f3afbbf6928`, `probe.py` `c2968ecf938aaa7a47020ccea71e55bdb1d746f08fd708286cd9b9e01f5b5357`, `sources.lock.json` `9f0bf56ba8ec5bcc9324e541ad7e56ab19d285dbaaa66ca91c9bdb0e5da540f4`). Every source is read through the lock, which refuses a file whose SHA-256 differs. Sources are decoded and resampled to 48 kHz stereo (polyphase). A tuned layer is resampled sampler-style (speed follows pitch) from its measured pitch (the recipe's reference table, measured 2026-10-02) to an exact E♭, F or B♭ target, and the recipe refuses any tuned layer off those three; drums, gongs and bells are tuned by the shift that puts their strong partials on E♭/F/B♭. Windows get 2 ms / 4 ms fades; filters are second-order Butterworth high/low/band-pass and RBJ shelves; envelopes are dB breakpoints; each layer is level-matched on its K-weighted 100 ms peak and placed on a timeline. Space is short reflections of the cue itself: convolution with a deterministic early-reflection, allpass and comb kernel (a processing kernel; no audio is generated). The master removes DC, fades the head 2 ms and the tail (a quarter of the length, 30–300 ms, unless noted), prepends 3 ms of silence, sets the maximum 400 ms momentary loudness (meant as BS.1770 K-weighting on the Ebon scale; found on 2026-10-03 to run the K-weighting biquads across the two channels instead of along time, so in effect it weights no frequency; [the rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#art-and-audio) lists both measurements) to the role target, applies a level-matched tanh glue, limits peaks only above -1.6 dBTP (at most 4 dB of gain reduction for build, per-shot and windup cues, 6 dB for releases), high-passes at 18 Hz and keeps the true peak at or under -1 dBTP after the Vorbis round trip. Targets follow the Raid's loudest strike when the cues were rendered (-7.6 LUFS on this meter, measured on the Raid's 2026-09-18 CrownRupture strike, since retired with the Raid's own sound set; the Doll beam and chorus cues the Raid then played reached -7.7 to -8.4 LUFS at their call volumes): finale -9.6, cadence -11.0, show -13.0, windup -15.0 (a ceiling), release part -15.5 (CenserPour -16.0, InkBlaze -12.0), per-shot -17.0 and build step -19.0 LUFS (ceilings). Those are the levels on the recipe's meter at render time; the loudness revision below lifts the show file, and in the game each cue plays at its role's offset ([rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#levels-against-the-raid)). Encoding is 48 kHz stereo Vorbis at compression level 0.5 with the Ogg serial pinned from the take's name (the first four bytes of SHA-256 of `scarlet-rewards/<take>`). A fresh render of the 35 picked takes from this recipe and lock reproduced all 38 auditioned files byte for byte on 2026-10-03; the shipped ReliquaryOpen is its master after the lift below, which `lift.py` reproduces byte for byte.
+
+**Loudness revision — 2026-10-03 (0.3.82).** The owner found the effects too quiet in play. The revision ([evidence](../docs/evidence/2026-10-03-scarlet-loudness.json)) stages every role against Graceful Ordeal and the Raid's lifted cues with one offset per role, so the balance inside a role stays the auditioned one, and checks the cues that sound in play in a rendered four-player fight. The tolls, one-shots, windups and cascade parts share one runtime offset (-3.5 dB; 0.3.78 played them at -8.5 dB), and the finales and the Cadence play at -0.45 dB, so those 37 files ship as auditioned. Only the reliquary's opening show had to rise above its file, by +3.83 dB. The show's lift is baked in by the external `sfx-scarlet-loud/lift.py` (SHA256 `63876b78053e5fa6135ad7a3b45904f85cef69ee3c2b5002974a87ef1dea6d5c`, run with the same Python and libraries as the recipe). It rebuilds the picked take's master from this recipe and its sources, refuses to continue unless that master encodes to the auditioned file's exact bytes, multiplies it by one gain and, only where the Vorbis round trip would otherwise exceed -1.0 dBTP, runs a look-ahead limiter (5 ms look-ahead, 80 ms release, true-peak detection by 4x polyphase oversampling, linked channels; its ceiling starts at -1.3 dBTP and is lowered until the decoded true peak is at or under -1.0 dBTP; at most 3 dB of gain reduction). The gain is the smallest that brings the file's maximum 400 ms momentary loudness (ITU-R BS.1770-4, the standard's 48 kHz K-weighting along time, padded 0.2 s before and 0.5 s after, 10 ms steps) within 0.1 dB of its auditioned level plus the lift; no limiting was needed. Encoding is the recipe's own (48 kHz stereo Vorbis at compression level 0.5 with the take's pinned serial, so the serial still names the take). No layer, envelope, filter, length or timing changes. A second run reproduced the file byte for byte, and its entry gives the gain and levels.
 
 - Runtime file: `Assets/Sounds/Weapons/ScarletRewards/ReliquaryOpen.ogg`
 - Asset ID: scarlet-reward-sfx-reliquaryopen-20261003
@@ -84,12 +698,12 @@ Recipe and common processing (external `sfx-scarlet-rewards` recipe, run with Py
 - Creation/acquisition date: 2026-10-03
 - Source type: public-domain
 - Source work and URL: bell_E3, bell_Fs3, blower, chain_grind, chime_A4, chime_As3, chime_C3, chime_D3, chime_D4, chime_E3, chime_E4, chop, door_close, gong_p, organq_137, organq_143, organq_149, organq_152, pedalq_067, rock_tumble, wind_whirl, woodblock_ff in the table above
-- Tool/model/version: external recipe cues_shared.py `reliquary_B` with common.py, kit.py, parts.py and render.py (hashes above), pinned Ogg serial of take `ReliquaryOpen_B`
-- Human modifications: owner selection of take B for the reliquary opening show. Timed to the 60-tick opening show. Ticks 0-10: heat-crackle stand-in of 8-25 ms rock_tumble grains high-passed at 2.2 kHz (-14 dB, rising) and chain_grind (0.12-0.29 s) high-passed at 1.5 kHz (-22 dB) for the one-dot tremble. Tick 10 (0.167 s): chop high-passed at 1.2 kHz (-6 dB; wax-crack stand-in), woodblock_ff tuned to E♭6 (80 ms, high-passed at 900 Hz, -14 dB) and door_close low-passed at 3.5 kHz and decayed over 0.32 s (-10 dB) as the lid. Ticks 10-20: a rising run of hand chimes on B♭3 E♭4 F4 B♭4 E♭5 F5 B♭5 (chime_C3, chime_D3, chime_E3, chime_As3, chime_D4, chime_E4, chime_A4 tuned; -8 dB rising 0.6 dB a step, one every 24 ms). Tick 20: a 1.25 s cadence (-1 dB) in the Cadence B voicing: quiet organ E♭3, B♭3, E♭4 and F4 (organq_137, organq_143, organq_149, organq_152, each tuned from its measured pitch; release 0.65 s, levels 0/-2/-3/-2 dB, swelling -3 dB to 0 dB at 0.15 s and back to -12 dB at the end), pedal E♭2 (pedalq_067, low-passed at 900 Hz, -6 dB), tubular bells bell_Fs3 to F4 (-6 dB, +6 ms) and bell_E3 to E♭3 (-8 dB), hand chime chime_As3 to B♭4 (-12 dB, +30 ms) and Gong 1 gong_p tuned so its strongest partial is E♭3 (low-passed at 2 kHz, -4 dB, decaying -4 dB by 0.3 s and -20 dB at the end), reflections wet -4 dB (size 1.3, 0.9 s). Ticks 44-60: burn stand-in, an 18-tick flame stand-in (wind_whirl band-passed 120 Hz-5 kHz plus the organ blower 250 Hz-6 kHz at -6 dB) (-16 dB) and rock_tumble grains (-20 dB). Reflections wet -10 dB (size 1.1, 0.7 s). Stand-in layers as named. Target -13.0 LUFS; measured -13.0 LUFS (400 ms momentary maximum), true peak -7.41 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_shared.py `reliquary_B` with common.py, kit.py, parts.py and render.py (hashes above), pinned Ogg serial of take `ReliquaryOpen_B`; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of take B for the reliquary opening show. Timed to the 60-tick opening show. Ticks 0-10: heat-crackle stand-in of 8-25 ms rock_tumble grains high-passed at 2.2 kHz (-14 dB, rising) and chain_grind (0.12-0.29 s) high-passed at 1.5 kHz (-22 dB) for the one-dot tremble. Tick 10 (0.167 s): chop high-passed at 1.2 kHz (-6 dB; wax-crack stand-in), woodblock_ff tuned to E♭6 (80 ms, high-passed at 900 Hz, -14 dB) and door_close low-passed at 3.5 kHz and decayed over 0.32 s (-10 dB) as the lid. Ticks 10-20: a rising run of hand chimes on B♭3 E♭4 F4 B♭4 E♭5 F5 B♭5 (chime_C3, chime_D3, chime_E3, chime_As3, chime_D4, chime_E4, chime_A4 tuned; -8 dB rising 0.6 dB a step, one every 24 ms). Tick 20: a 1.25 s cadence (-1 dB) in the Cadence B voicing: quiet organ E♭3, B♭3, E♭4 and F4 (organq_137, organq_143, organq_149, organq_152, each tuned from its measured pitch; release 0.65 s, levels 0/-2/-3/-2 dB, swelling -3 dB to 0 dB at 0.15 s and back to -12 dB at the end), pedal E♭2 (pedalq_067, low-passed at 900 Hz, -6 dB), tubular bells bell_Fs3 to F4 (-6 dB, +6 ms) and bell_E3 to E♭3 (-8 dB), hand chime chime_As3 to B♭4 (-12 dB, +30 ms) and Gong 1 gong_p tuned so its strongest partial is E♭3 (low-passed at 2 kHz, -4 dB, decaying -4 dB by 0.3 s and -20 dB at the end), reflections wet -4 dB (size 1.3, 0.9 s). Ticks 44-60: burn stand-in, an 18-tick flame stand-in (wind_whirl band-passed 120 Hz-5 kHz plus the organ blower 250 Hz-6 kHz at -6 dB) (-16 dB) and rock_tumble grains (-20 dB). Reflections wet -10 dB (size 1.1, 0.7 s). Stand-in layers as named. Target -13.0 LUFS; measured -13.0 LUFS (400 ms momentary maximum), true peak -7.41 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +3.83 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -16.15 → -12.30 LUFS (+3.84 dB of the show's planned +3.83 dB), true peak -3.29 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of the take, 2026-10-03; Claude review 2026-10-03 (source licenses and hashes, loudness, true peak, boundaries and clicks, byte-identical re-render); in-game mix not_run
-- SHA256: `e0c759e811a205a5ba3f8a53b76847ac71bae5985a80abc0bbd72f8b6c405678`
+- Reviewer and review date: owner audition and selection of the take, 2026-10-03; Claude review 2026-10-03 (source licenses and hashes, loudness, true peak, boundaries and clicks, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `bd59fb61adefbf0628dfb01cba82ae3c06ace89cd62ec1ca66b709dbfd52e69b`
 
 - Runtime file: `Assets/Sounds/Weapons/ScarletRewards/Toll0.ogg`
 - Asset ID: scarlet-reward-sfx-toll0-20261003
@@ -611,7 +1225,7 @@ Recipe and common processing (external `sfx-scarlet-rewards` recipe, run with Py
 
 ### Scarlet Invocation recorded audio — 2026-10-02
 
-Sixteen cues for every Scarlet Invocation sound moment ([Scarlet spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#sound-effects)). The owner auditioned 16 scenes x 3 variants on 2026-10-02 and chose variant A for every scene; these files are those auditioned masters, byte for byte. They replace the borrowed Doll cues in Scarlet's gesture, chorus and ceremony code and the retired 2026-09-18 Scarlet WAVs (Foretell, CrownRupture, SilkCleave, ThornRend, ScarletRelease), which are removed with their records. Each cue layers CC0 recordings from the VSCO 2 CE and VCSL sample libraries and from Freesound/OpenGameArt; no synthesized tone is used. The recordings, libraries and recipe stay outside the repository.
+Sixteen cues for every Scarlet Invocation sound moment ([Scarlet spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#sound-effects)). The owner auditioned 16 scenes x 3 variants on 2026-10-02 and chose variant A for every scene; these files are those auditioned masters with one level lift per group baked in on 2026-10-03 (loudness revision below). They replace the borrowed Doll cues in Scarlet's gesture, chorus and ceremony code and the retired 2026-09-18 Scarlet WAVs (Foretell, CrownRupture, SilkCleave, ThornRend, ScarletRelease), which are removed with their records. Each cue layers CC0 recordings from the VSCO 2 CE and VCSL sample libraries and from Freesound/OpenGameArt; no synthesized tone is used. The recordings, libraries and recipe stay outside the repository.
 
 Every Freesound/OpenGameArt source below showed Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/) on its page when it was surveyed on 2026-10-01 (local survey records; the six sources already recorded for Ghost Samurai, Soboro and Ebon Manor carry the same hashes there). Freesound files are the public HQ preview renders of those CC0 uploads. Kenney's pack carries its CC0 `license.txt`. VSCO 2 CE 1.1.0 ships a CC0 1.0 `LICENSE`; its organ folder credits Simon Dalzell (Ivy Audio) and states that Versilian Studios grants redistribution. Beside CC0, its `Readme.txt` terms ask that the samples not be sold directly (none are distributed), encourage keeping improvements to the sample set open (the set itself is not modified or redistributed), and ask for credit to Versilian Studios / Sam Gossner and/or Ivy Audio / Simon Dalzell where applicable, with a link to the VSCO: CE homepage (https://versilian-studios.com/vsco-community/); a public credit for these cues carries both names and that link. VCSL is CC0 1.0 per its repository README, which asks for no credit. BMacZero's OpenGameArt page offers an optional credit to Brian MacIntosh (page rechecked 2026-10-02).
 
@@ -668,7 +1282,9 @@ Every Freesound/OpenGameArt source below showed Creative Commons 0 (https://crea
 | swoosh | swoosh.wav | PorkMuncher | https://freesound.org/s/263595/ | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
 | wind_whirl | Wind Whirl (Small Air Blow) | DARTEKZ_GAMEZ | https://freesound.org/s/719560/ | `5b41e14eaa752d4715ee7c706b99581f3adf5b02630c1d6c565b445a4e725c75` |
 
-Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af39748179426af464a4158fec0645ecb2511d81212f5cdf1bfbdf63`, `kit.py` `91fce8bd9cf17b0a4703628a3caf7b88a6070c0f7ceddb212b0fa37dac092e31`, `cues_a.py` `884aaa253de59b59d3aa6a16e79e4f63da1bf5243606762799f40e0081a8512e`, `cues_b.py` `66b0e8ff5b62879c9cbf33b11296fbd23959ebf54cd1cac69e61025c30e731ce`, `cues_c.py` `80b961429f2b642f886988b0a3cee3df119df2f87980282130f3dd4d9a771258`, `cues_d.py` `8fbecbbf079f6eca00a770c16dd1b1f5e10d545d86f5d417a3edae8f602bca4b`, `render.py` `fe75d89668d7214f88b07a623f3069ccc0de369a10d989520f94a785465a03e7`, studio `engine.py` `36de9045f74bff3cf599c097b1ef07143744bffeb905f809d0b6d82536a3b5d3`, and the source catalog `catalog.json` `2faed1e050be83dc2023ebeeddb8694c4ce94c26d987bb49058631bb76d0af60` that `kit.py` reads beside it: the frozen 2026-10-02 source analysis that resolves the VCSL/VSCO short names to files and supplies each sample's measured nominal pitch and the shift table behind every semitone shift named below): sources are decoded and resampled to 48 kHz stereo; pitch shifts are sampler-style polyphase resampling (speed follows pitch) onto the E-flat family of Graceful Ordeal (Eb, Bb, Gb, Db) from each sample's measured nominal pitch; filters are second-order Butterworth high/low/band-pass and RBJ shelves; envelopes are dB breakpoints; each layer is level-matched on its K-weighted 100 ms peak, placed on a timeline and partly sent to a convolution reverb whose impulse response is the studio's synthetic hall (seeded filtered noise with sparse early reflections; a processing kernel, not a recording). The master removes DC, fades the head (1.5 ms) and tail (a quarter of the length, 40-300 ms, unless noted), sets the cue's K-weighted 100 ms peak target, applies a level-matched tanh soft limit and a -1.8 dBTP true-peak ceiling, and encodes 48 kHz stereo Vorbis at compression level 0.5 with a pinned Ogg serial. A fresh render from the hashed recipe and catalog reproduces all sixteen files byte for byte (rechecked 2026-10-02 after the catalog moved beside the recipe).
+Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af39748179426af464a4158fec0645ecb2511d81212f5cdf1bfbdf63`, `kit.py` `91fce8bd9cf17b0a4703628a3caf7b88a6070c0f7ceddb212b0fa37dac092e31`, `cues_a.py` `884aaa253de59b59d3aa6a16e79e4f63da1bf5243606762799f40e0081a8512e`, `cues_b.py` `66b0e8ff5b62879c9cbf33b11296fbd23959ebf54cd1cac69e61025c30e731ce`, `cues_c.py` `80b961429f2b642f886988b0a3cee3df119df2f87980282130f3dd4d9a771258`, `cues_d.py` `8fbecbbf079f6eca00a770c16dd1b1f5e10d545d86f5d417a3edae8f602bca4b`, `render.py` `fe75d89668d7214f88b07a623f3069ccc0de369a10d989520f94a785465a03e7`, studio `engine.py` `36de9045f74bff3cf599c097b1ef07143744bffeb905f809d0b6d82536a3b5d3`, and the source catalog `catalog.json` `2faed1e050be83dc2023ebeeddb8694c4ce94c26d987bb49058631bb76d0af60` that `kit.py` reads beside it: the frozen 2026-10-02 source analysis that resolves the VCSL/VSCO short names to files and supplies each sample's measured nominal pitch and the shift table behind every semitone shift named below): sources are decoded and resampled to 48 kHz stereo; pitch shifts are sampler-style polyphase resampling (speed follows pitch) onto the E-flat family of Graceful Ordeal (Eb, Bb, Gb, Db) from each sample's measured nominal pitch; filters are second-order Butterworth high/low/band-pass and RBJ shelves; envelopes are dB breakpoints; each layer is level-matched on its K-weighted 100 ms peak, placed on a timeline and partly sent to a convolution reverb whose impulse response is the studio's synthetic hall (seeded filtered noise with sparse early reflections; a processing kernel, not a recording). The master removes DC, fades the head (1.5 ms) and tail (a quarter of the length, 40-300 ms, unless noted), sets the cue's K-weighted 100 ms peak target, applies a level-matched tanh soft limit and a -1.8 dBTP true-peak ceiling, and encodes 48 kHz stereo Vorbis at compression level 0.5 with a pinned Ogg serial. A fresh render from the hashed recipe and catalog reproduced the sixteen auditioned files byte for byte (rechecked 2026-10-02 after the catalog moved beside the recipe); the shipped files are those masters after the 2026-10-03 lift below, which `lift.py` reproduces byte for byte.
+
+**Loudness revision — 2026-10-03 (0.3.82).** The owner found the effects too quiet in play. Plan A ([evidence](../docs/evidence/2026-10-03-scarlet-loudness.json)) puts Graceful Ordeal on tModLoader's music curve and lifts each group of these cues once, so the balance inside a group stays the auditioned one: the impact +4.99 dB, the foretell +6.37 dB, the big cues (crossflow release, act change, sacrifice, Victory) and the crossflow charge +1.50 dB, the six chorus cues +1.53 dB and Down, revive and Ready +2.14 dB. The lift above a file's own level is baked in by the external `sfx-scarlet-loud/lift.py` (SHA256 `63876b78053e5fa6135ad7a3b45904f85cef69ee3c2b5002974a87ef1dea6d5c`, run with the same Python and libraries as the recipe). For each lifted file it rebuilds the picked take's master from this recipe and its sources, refuses to continue unless that master encodes to the auditioned file's exact bytes, multiplies it by one gain and, only where the Vorbis round trip would otherwise exceed -1.0 dBTP, runs a look-ahead limiter (5 ms look-ahead, 80 ms release, true-peak detection by 4x polyphase oversampling, linked channels; its ceiling starts at -1.3 dBTP and is lowered until the decoded true peak is at or under -1.0 dBTP; at most 3 dB of gain reduction). The gain is the smallest that brings the file's maximum 400 ms momentary loudness (ITU-R BS.1770-4, the standard's 48 kHz K-weighting along time, padded 0.2 s before and 0.5 s after, 10 ms steps) within 0.1 dB of its auditioned level plus the lift; where limiting eats the gain first, the smallest gain reaching the highest loudness under the 3 dB cap. Encoding is the recipe's own (48 kHz stereo Vorbis at compression level 0.5 with the take's pinned serial, so the serial still names the take). No layer, envelope, filter, length or timing changes. A second run reproduced every lifted file byte for byte. Each lifted file's entry gives its gain, limiting and levels.
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletForetell.ogg`
 - Asset ID: scarlet-sfx-foretell-20261002
@@ -677,12 +1293,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: chime_As3, chime_As5, woodblock in the table above
-- Tool/model/version: external recipe cues_a.py `foretell_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Hand Chimes A#3 (sounding Bb4, unshifted, 0.6 s) and A#5 (Bb, -9 dB, 0.5 s) with fast dB decays, plus the Woodblock click high-passed at 900 Hz (-12 dB) as the beat-head attack; chimes sent to the hall at -6 dB, wet -11 dB (0.8 s IR, RT 0.7/0.35 s). Target K-weighted 100 ms peak -18 dB; measured -18.0 dB, true peak -16.27 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_a.py `foretell_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Hand Chimes A#3 (sounding Bb4, unshifted, 0.6 s) and A#5 (Bb, -9 dB, 0.5 s) with fast dB decays, plus the Woodblock click high-passed at 900 Hz (-12 dB) as the beat-head attack; chimes sent to the hall at -6 dB, wet -11 dB (0.8 s IR, RT 0.7/0.35 s). Target K-weighted 100 ms peak -18 dB; measured -18.0 dB, true peak -16.27 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +6.37 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -25.69 → -19.32 LUFS (+6.37 dB of the foretell's planned +6.37 dB), true peak -9.80 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `394270e8af7176d21843836fe5b5cec6d095efb62f9f3adf76a9504d226739e9`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `27a3fdc9a7bdd94be5dec42569187f1a58d52a2173ecd6737b8a9850fbed2678`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletCrossflowCharge.ogg`
 - Asset ID: scarlet-sfx-charge-20261002
@@ -691,12 +1307,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: cymbal_cresc, bell_D3, organ_04, organ_28 in the table above
-- Tool/model/version: external recipe cues_b.py `charge_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Organ Man3Open_04 (Eb2), Man3Open_28 (Eb3) and Man3Open_28 pitched +7 semitones (Bb3), low-passed at 2.5 kHz, each swelled from -40 dB to a peak at exactly two beats (0.9375 s) and folded away by 1.2 s; Tubular Bells D3 pitched +1 (Eb3, -14 dB); the Suspended Cymbal 2 s crescendo (0.3-1.55 s) high-passed at 1.2 kHz (-17 dB) rising to the same peak; hall wet -9 dB (1.2 s IR). Target K-weighted 100 ms peak -15 dB; measured -15.0 dB, true peak -12.3 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_b.py `charge_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Organ Man3Open_04 (Eb2), Man3Open_28 (Eb3) and Man3Open_28 pitched +7 semitones (Bb3), low-passed at 2.5 kHz, each swelled from -40 dB to a peak at exactly two beats (0.9375 s) and folded away by 1.2 s; Tubular Bells D3 pitched +1 (Eb3, -14 dB); the Suspended Cymbal 2 s crescendo (0.3-1.55 s) high-passed at 1.2 kHz (-17 dB) rising to the same peak; hall wet -9 dB (1.2 s IR). Target K-weighted 100 ms peak -15 dB; measured -15.0 dB, true peak -12.3 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.50 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -21.70 → -20.19 LUFS (+1.50 dB of its release's planned +1.50 dB), true peak -10.93 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `e1f37e0093ce31352ffb8aec3603208d6aa9e343f5176f9bd6fa8940675f7cbe`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `f21365258c9c7fcd41b1678da3c3d8e02a23a950b898381022be4e8b07e81eab`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletCrossflowRelease.ogg`
 - Asset ID: scarlet-sfx-release-20261002
@@ -705,12 +1321,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: bass_drum, timpani1, bell_D3, organ_04, organ_28, organ_pedal_04, glass, anvil, swoosh in the table above
-- Tool/model/version: external recipe cues_b.py `release_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Timpani 1 hit (Gb2) faded over 0.5 s; Bass Drum 1 low-passed at 160 Hz (-3 dB); the organ Eb2/Eb3/Bb3 chord (Man3Open_04, Man3Open_28, Man3Open_28 +7) low-passed at 2 kHz, struck within 12 ms and folded by 1.45 s; Tubular Bells D3 +1 (Eb3, -8 dB); Anvil high-passed at 2.2 kHz (-12 dB); glass_break high-passed at 3 kHz and widened 1.6x (-14 dB, +30 ms); the swoosh band-passed 180 Hz-4.2 kHz and panned left to right (-9 dB); organ Pedal_04 (Eb1) low-passed at 140 Hz (-9 dB); hall wet -9 dB (1.3 s IR). Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.2 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_b.py `release_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Timpani 1 hit (Gb2) faded over 0.5 s; Bass Drum 1 low-passed at 160 Hz (-3 dB); the organ Eb2/Eb3/Bb3 chord (Man3Open_04, Man3Open_28, Man3Open_28 +7) low-passed at 2 kHz, struck within 12 ms and folded by 1.45 s; Tubular Bells D3 +1 (Eb3, -8 dB); Anvil high-passed at 2.2 kHz (-12 dB); glass_break high-passed at 3 kHz and widened 1.6x (-14 dB, +30 ms); the swoosh band-passed 180 Hz-4.2 kHz and panned left to right (-9 dB); organ Pedal_04 (Eb1) low-passed at 140 Hz (-9 dB); hall wet -9 dB (1.3 s IR). Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.2 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.50 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -13.96 → -12.45 LUFS (+1.51 dB of the big cues' planned +1.50 dB), true peak -2.48 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `ebba33703bb0f8cd5168e2e08154a800f3919815c5771ac9956de21e2b76601d`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `422ec83ab7cc45a049b1e8da28bbcd3cab11d571fe97fed2641f25f8d2f4b9b8`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletImpact.ogg`
 - Asset ID: scarlet-sfx-impact-20261002
@@ -719,12 +1335,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: chime_As5, slit_drum, glass3, knife_slice in the table above
-- Tool/model/version: external recipe cues_a.py `impact_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Kenney knifeSlice high-passed at 1.8 kHz (-2 dB); the first 0.14 s of glass_break3 high-passed at 3.5 kHz (-9 dB); Hand Chimes A#5 (Bb) low-passed at 8 kHz (-6 dB); the Slit Drum (Eb3) low-passed at 600 Hz (-8 dB); every layer is silent by 0.45 s; hall wet -10 dB (0.6 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.3 dB, true peak -5.96 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_a.py `impact_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Kenney knifeSlice high-passed at 1.8 kHz (-2 dB); the first 0.14 s of glass_break3 high-passed at 3.5 kHz (-9 dB); Hand Chimes A#5 (Bb) low-passed at 8 kHz (-6 dB); the Slit Drum (Eb3) low-passed at 600 Hz (-8 dB); every layer is silent by 0.45 s; hall wet -10 dB (0.6 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.3 dB, true peak -5.96 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +6.74 dB of gain and the look-ahead limiter at a -1.45 dBTP ceiling (2.58 dB of gain reduction at most); maximum 400 ms momentary loudness (BS.1770) -20.31 → -15.39 LUFS (+4.91 dB of the impact's planned +4.99 dB), true peak -1.17 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `0d0be61da34644546938ea2fb2e410beac43c37748fe7e2996e446ba1ebc0aac`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `7ffadc5a4c4226c7c7be0907a874be80e0ece9e8a0b9c00d1d765bdcf54225c8`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletStackSummon.ogg`
 - Asset ID: scarlet-sfx-stack-summon-20261002
@@ -733,12 +1349,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: gong_f, timpani1, organ_04, chain_loop in the table above
-- Tool/model/version: external recipe cues_c.py `stack_summon_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Gong 1 gong_2_f pitched -0.12 semitone (Eb): its first 1.0 s reversed, low-passed at 3 kHz and swelled to a 1.0 s peak, then the same gong forward (low-passed at 1.5 kHz, -8 dB) with the Timpani 1 hit (Gb2, -7 dB) at 0.988 s; organ Man3Open_04 (Eb2) low-passed at 500 Hz swelling into the hit (-4 dB); chaingrindLoop high-passed at 700 Hz (-16 dB); hall wet -8 dB (1.1 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.0 dB, true peak -12.64 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_c.py `stack_summon_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Gong 1 gong_2_f pitched -0.12 semitone (Eb): its first 1.0 s reversed, low-passed at 3 kHz and swelled to a 1.0 s peak, then the same gong forward (low-passed at 1.5 kHz, -8 dB) with the Timpani 1 hit (Gb2, -7 dB) at 0.988 s; organ Man3Open_04 (Eb2) low-passed at 500 Hz swelling into the hit (-4 dB); chaingrindLoop high-passed at 700 Hz (-16 dB); hall wet -8 dB (1.1 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.0 dB, true peak -12.64 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.53 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -19.27 → -17.74 LUFS (+1.53 dB of the chorus cues' planned +1.53 dB), true peak -10.98 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `c26a8f4c19bdb2d27ebb5121a76c228409edcb3281c14c0fecb81c1f55b82bb2`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `e8db43813d432733069e60412c5a17ac544fc089b1a1244ce5d19f6cd4cec635`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletStackSuccess.ogg`
 - Asset ID: scarlet-sfx-stack-success-20261002
@@ -747,12 +1363,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: bass_drum, chime_As5, chime_E4, chime_Fs4, bell_As3, bell_D3, organ_04 in the table above
-- Tool/model/version: external recipe cues_c.py `stack_success_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Tubular Bells D3 +1 (Eb3) and A#3 (Bb3, -4 dB, +12 ms); Hand Chimes F#4 (Gb, -9 dB), A#5 (Bb, -11 dB) and E4 pitched -1 then +12 (Eb, -10 dB) entering at 20/45/70 ms; organ Man3Open_04 (Eb2) low-passed at 600 Hz (-9 dB); Bass Drum 1 low-passed at 150 Hz (-9 dB); hall wet -8 dB (1.3 s IR). Target K-weighted 100 ms peak -13 dB; measured -13.1 dB, true peak -8.37 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_c.py `stack_success_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Tubular Bells D3 +1 (Eb3) and A#3 (Bb3, -4 dB, +12 ms); Hand Chimes F#4 (Gb, -9 dB), A#5 (Bb, -11 dB) and E4 pitched -1 then +12 (Eb, -10 dB) entering at 20/45/70 ms; organ Man3Open_04 (Eb2) low-passed at 600 Hz (-9 dB); Bass Drum 1 low-passed at 150 Hz (-9 dB); hall wet -8 dB (1.3 s IR). Target K-weighted 100 ms peak -13 dB; measured -13.1 dB, true peak -8.37 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.53 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -18.22 → -16.68 LUFS (+1.54 dB of the chorus cues' planned +1.53 dB), true peak -6.51 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `020bfbaedb1bce1f9a2d4654d4bbdd1a53562821802dfa7a93e8f4049f4b1e4e`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `50eada0980c30caaaec64fa425794721b8c46a90f47c08e9797b8dcde290c60b`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletStackFail.ogg`
 - Asset ID: scarlet-sfx-stack-fail-20261002
@@ -761,12 +1377,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: organ_pedal_16, bubbles, zap, spark_klein, spark_oga, concrete_smash, low_impact, demon_howl, wind_whirl in the table above
-- Tool/model/version: external recipe cues_c.py `stack_fail_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. The very low impact; the demon howl pitched -5 semitones and low-passed at 1.8 kHz (-3 dB); the concrete smash low-passed at 350 Hz (-6 dB); the wind whirl (0.1-1.4 s) low-passed at 700 Hz (-7 dB); a 1.2 s bed of forty 70 ms spark grains cut from the BMacZero spark, the elliott.klein spark and the JoelAudio zap (high-passed at 2.5 kHz, seeded random times, levels -14 to -2 dB and pans; bed at -16 dB); organ Pedal_16 (Eb2) low-passed at 450 Hz (-9 dB); bubbles4 low-passed at 900 Hz (-10 dB); hall wet -9 dB (1.1 s IR); the whole mix decays to silence at 1.58 s. Target K-weighted 100 ms peak -9 dB; measured -9.0 dB, true peak -7.68 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_c.py `stack_fail_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. The very low impact; the demon howl pitched -5 semitones and low-passed at 1.8 kHz (-3 dB); the concrete smash low-passed at 350 Hz (-6 dB); the wind whirl (0.1-1.4 s) low-passed at 700 Hz (-7 dB); a 1.2 s bed of forty 70 ms spark grains cut from the BMacZero spark, the elliott.klein spark and the JoelAudio zap (high-passed at 2.5 kHz, seeded random times, levels -14 to -2 dB and pans; bed at -16 dB); organ Pedal_16 (Eb2) low-passed at 450 Hz (-9 dB); bubbles4 low-passed at 900 Hz (-10 dB); hall wet -9 dB (1.1 s IR); the whole mix decays to silence at 1.58 s. Target K-weighted 100 ms peak -9 dB; measured -9.0 dB, true peak -7.68 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.53 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -15.54 → -14.02 LUFS (+1.52 dB of the chorus cues' planned +1.53 dB), true peak -6.26 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `f49997a6f9eed7f4ad5dd684da0df33dec5d376f789748fa981a787f08901bba`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `0102d0bd63fc72d550d0db66d99a7002d4d766e516acc96589b560478ab89323`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSpreadSummon.ogg`
 - Asset ID: scarlet-sfx-spread-summon-20261002
@@ -775,12 +1391,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: chime_As3, chime_As5, cymbal_hit, draw_sword in the table above
-- Tool/model/version: external recipe cues_c.py `spread_summon_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. The draw-sword ring trimmed, high-passed at 1.8 kHz and widened 1.5x (-2 dB); the Suspended Cymbal fff hit high-passed at 1.5 kHz and reversed into a 0.95 s peak (-6 dB); Hand Chimes A#5 (Bb, -4 dB) and A#3 low-passed at 3 kHz (-12 dB) entering at 0.95 s; hall wet -8 dB (1.0 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.3 dB, true peak -7.56 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_c.py `spread_summon_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. The draw-sword ring trimmed, high-passed at 1.8 kHz and widened 1.5x (-2 dB); the Suspended Cymbal fff hit high-passed at 1.5 kHz and reversed into a 0.95 s peak (-6 dB); Hand Chimes A#5 (Bb, -4 dB) and A#3 low-passed at 3 kHz (-12 dB) entering at 0.95 s; hall wet -8 dB (1.0 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.3 dB, true peak -7.56 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.53 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -17.49 → -15.96 LUFS (+1.52 dB of the chorus cues' planned +1.53 dB), true peak -6.55 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `4bd5daf64d9cef3cdd3141239b41528f166248ea6b1ccebd9ba31d63d1985182`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `b211b911d30620c371a3bd495a67711369478a8af2deb348f846a6d7d6e8718e`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSpreadSuccess.ogg`
 - Asset ID: scarlet-sfx-spread-success-20261002
@@ -789,12 +1405,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: chime_As5, chime_E4, chime_Fs4, mark_trees, timpani5, nepal_bells, glock_G4 in the table above
-- Tool/model/version: external recipe cues_c.py `spread_success_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Hand Chimes F#4 (Gb, -2 dB), A#5 (Bb, -5 dB, +25 ms) and E4 pitched -1 then +12 (Eb, -4 dB, +50 ms); Nepalese bells fx2_short low-passed at 8 kHz (-5 dB); Glockenspiel G4 pitched -1 (Gb, -8 dB); Mark Trees ascending (0.05-1.2 s) high-passed at 3 kHz (-14 dB); Timpani 5 hit (Gb3) low-passed at 350 Hz (-12 dB); hall wet -8 dB (1.2 s IR). Target K-weighted 100 ms peak -13 dB; measured -13.1 dB, true peak -6.85 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_c.py `spread_success_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Hand Chimes F#4 (Gb, -2 dB), A#5 (Bb, -5 dB, +25 ms) and E4 pitched -1 then +12 (Eb, -4 dB, +50 ms); Nepalese bells fx2_short low-passed at 8 kHz (-5 dB); Glockenspiel G4 pitched -1 (Gb, -8 dB); Mark Trees ascending (0.05-1.2 s) high-passed at 3 kHz (-14 dB); Timpani 5 hit (Gb3) low-passed at 350 Hz (-12 dB); hall wet -8 dB (1.2 s IR). Target K-weighted 100 ms peak -13 dB; measured -13.1 dB, true peak -6.85 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.53 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -18.68 → -17.14 LUFS (+1.55 dB of the chorus cues' planned +1.53 dB), true peak -5.07 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `0229687c330399e71210e1a417ec9c0ae993844802dddc3e5dbda6c90a452e14`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `84b6ffab358b5adc2121ff220a0176af205d02e09f33d4a21abc5a71fe6abffa`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSpreadFail.ogg`
 - Asset ID: scarlet-sfx-spread-fail-20261002
@@ -803,12 +1419,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: timpani5, zap, slicing_flesh, sword_hit, sword_ring in the table above
-- Tool/model/version: external recipe cues_c.py `spread_fail_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Slicing through flesh, onset-trimmed and high-passed at 400 Hz; the sword hit high-passed at 900 Hz (-4 dB); the sword ring pitched -0.71 semitone (Eb) and filtered 1.2-9 kHz (-6 dB, +20 ms); Timpani 5 hit (Gb3) low-passed at 380 Hz (-7 dB); the JoelAudio zap high-passed at 2.5 kHz (-14 dB); hall wet -12 dB (0.5 s IR); the mix is shaped down 15 dB over 0.45 s and cut there with a 12 ms fade. Target K-weighted 100 ms peak -10 dB; measured -10.3 dB, true peak -4.19 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_c.py `spread_fail_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Slicing through flesh, onset-trimmed and high-passed at 400 Hz; the sword hit high-passed at 900 Hz (-4 dB); the sword ring pitched -0.71 semitone (Eb) and filtered 1.2-9 kHz (-6 dB, +20 ms); Timpani 5 hit (Gb3) low-passed at 380 Hz (-7 dB); the JoelAudio zap high-passed at 2.5 kHz (-14 dB); hall wet -12 dB (0.5 s IR); the mix is shaped down 15 dB over 0.45 s and cut there with a 12 ms fade. Target K-weighted 100 ms peak -10 dB; measured -10.3 dB, true peak -4.19 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.53 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -14.27 → -12.65 LUFS (+1.61 dB of the chorus cues' planned +1.53 dB), true peak -3.30 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `e3ffccf84e83ef94210cf0d97c9bb637eb7917fad260e8fc50b6c2a164838c04`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `81886dafda8e43f915a64ba052312538cf54ce37f99e096ea4c1f04737697a31`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletActChange.ogg`
 - Asset ID: scarlet-sfx-act-change-20261002
@@ -817,12 +1433,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: bass_drum, gong_full, cymbal_hit, timpani1, bell_D3, stone_heavy in the table above
-- Tool/model/version: external recipe cues_d.py `act_change_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. The Gong 2 full hit (unshifted) with an explicit decay to -38 dB at 1.67 s; Tubular Bells D3 pitched -11 semitones (Eb2, -4 dB); Timpani 1 hit (Gb2, -3 dB); Bass Drum 1 low-passed at 170 Hz (-4 dB); the Suspended Cymbal fff hit high-passed at 1.5 kHz (-12 dB); the heavy stone impact low-passed at 1.8 kHz (-12 dB); hall wet -8 dB (1.6 s IR); -46.8 dB re peak at 1.67 s. Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.27 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_d.py `act_change_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. The Gong 2 full hit (unshifted) with an explicit decay to -38 dB at 1.67 s; Tubular Bells D3 pitched -11 semitones (Eb2, -4 dB); Timpani 1 hit (Gb2, -3 dB); Bass Drum 1 low-passed at 170 Hz (-4 dB); the Suspended Cymbal fff hit high-passed at 1.5 kHz (-12 dB); the heavy stone impact low-passed at 1.8 kHz (-12 dB); hall wet -8 dB (1.6 s IR); -46.8 dB re peak at 1.67 s. Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.27 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.50 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -13.69 → -12.18 LUFS (+1.52 dB of the big cues' planned +1.50 dB), true peak -2.49 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `04f8169597bdc6e00fd820a76bc69e01a18dcc337435e37e917174ae7dc2259b`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `70d3664672442484e29d18e8b6208e9424f5856fbd96df0fb97cad897c68abb9`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSacrifice.ogg`
 - Asset ID: scarlet-sfx-sacrifice-20261002
@@ -831,12 +1447,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: gong_f, timpani1, bell_D4, glass8, siren, zap, demon_howl, wind_whirl in the table above
-- Tool/model/version: external recipe cues_d.py `sacrifice_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Gong 1 gong_2_f (-0.12 semitone, Eb) and the demon howl (-3 semitones, low-passed at 3 kHz) reversed into a flash at 0.95 s, with an accelerating auto-pan (1.5 to 6 Hz) and undulation (2 to 9 Hz); the wind whirl reversed, low-passed at 1.5 kHz and auto-panned (2 to 7 Hz); siren3 (0.6-2.2 s) filtered 300 Hz-3 kHz rising into the flash; at 0.95 s glass_break8 high-passed at 2.5 kHz and widened 1.6x, Tubular Bells D4 +1 (Eb4), the JoelAudio zap high-passed at 2.5 kHz and the Timpani 1 hit (Gb2); hall wet -9 dB (0.9 s IR); -45.1 dB re peak at 1.67 s. Target K-weighted 100 ms peak -9 dB; measured -9.9 dB, true peak -2.05 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_d.py `sacrifice_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Gong 1 gong_2_f (-0.12 semitone, Eb) and the demon howl (-3 semitones, low-passed at 3 kHz) reversed into a flash at 0.95 s, with an accelerating auto-pan (1.5 to 6 Hz) and undulation (2 to 9 Hz); the wind whirl reversed, low-passed at 1.5 kHz and auto-panned (2 to 7 Hz); siren3 (0.6-2.2 s) filtered 300 Hz-3 kHz rising into the flash; at 0.95 s glass_break8 high-passed at 2.5 kHz and widened 1.6x, Tubular Bells D4 +1 (Eb4), the JoelAudio zap high-passed at 2.5 kHz and the Timpani 1 hit (Gb2); hall wet -9 dB (0.9 s IR); -45.1 dB re peak at 1.67 s. Target K-weighted 100 ms peak -9 dB; measured -9.9 dB, true peak -2.05 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +2.38 dB of gain and the look-ahead limiter at a -1.30 dBTP ceiling (1.88 dB of gain reduction at most); maximum 400 ms momentary loudness (BS.1770) -15.88 → -14.45 LUFS (+1.43 dB of the big cues' planned +1.50 dB), true peak -1.34 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `5465b94ef5916520b6add40c723000175371ee6fb896e69fbdfd6b31d8c71dde`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `b42ac77295e3e68756b4b17793c5d1661ab08f92b4b978d0693c5f2f5a5018d3`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletVictory.ogg`
 - Asset ID: scarlet-sfx-victory-20261002
@@ -845,12 +1461,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: gong_f, timpani1, bell_As3, bell_D3, bell_D4, organ_04, organ_28 in the table above
-- Tool/model/version: external recipe cues_d.py `victory_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Tubular Bells D3 +1 (Eb3), A#3 (Bb3, -3 dB) and D4 +1 (Eb4, -5 dB) staggered by 35 ms; Gong 1 gong_2_f (-0.12 semitone, Eb, -6 dB); the organ Eb2/Eb3/Bb3 chord (Man3Open_04, Man3Open_28, Man3Open_28 +7) low-passed at 2.2 kHz swelling to 0.45 s (-3 dB); Timpani 1 hit (Gb2, -5 dB); a shared decay to -36 dB at 1.67 s and silence at 2.4 s; hall wet -8 dB (1.6 s IR). Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.88 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_d.py `victory_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Tubular Bells D3 +1 (Eb3), A#3 (Bb3, -3 dB) and D4 +1 (Eb4, -5 dB) staggered by 35 ms; Gong 1 gong_2_f (-0.12 semitone, Eb, -6 dB); the organ Eb2/Eb3/Bb3 chord (Man3Open_04, Man3Open_28, Man3Open_28 +7) low-passed at 2.2 kHz swelling to 0.45 s (-3 dB); Timpani 1 hit (Gb2, -5 dB); a shared decay to -36 dB at 1.67 s and silence at 2.4 s; hall wet -8 dB (1.6 s IR). Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.88 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +1.50 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -11.82 → -10.32 LUFS (+1.50 dB of the big cues' planned +1.50 dB), true peak -3.48 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `ad457a4247f8dab3495edb983e15935bf110eb6638e06ab70fb6f2984e4d7abe`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `31ceed9449a84071cac3d4eb780fbb0b388013e7114b334fe4ba0accf7b4a1d0`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletDown.ogg`
 - Asset ID: scarlet-sfx-down-20261002
@@ -859,12 +1475,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: bass_drum, gong_p, timpani1 in the table above
-- Tool/model/version: external recipe cues_d.py `down_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Timpani 1 hit (Gb2) low-passed at 900 Hz; Bass Drum 1 low-passed at 160 Hz (-3 dB); Gong 1 gong_p pitched -0.61 semitone (Db) and low-passed at 1.2 kHz (-6 dB); all decay by 1.2 s; hall wet -9 dB (1.0 s IR). Target K-weighted 100 ms peak -13 dB; measured -12.9 dB, true peak -9.94 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_d.py `down_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Timpani 1 hit (Gb2) low-passed at 900 Hz; Bass Drum 1 low-passed at 160 Hz (-3 dB); Gong 1 gong_p pitched -0.61 semitone (Db) and low-passed at 1.2 kHz (-6 dB); all decay by 1.2 s; hall wet -9 dB (1.0 s IR). Target K-weighted 100 ms peak -13 dB; measured -12.9 dB, true peak -9.94 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +2.14 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -20.46 → -18.31 LUFS (+2.15 dB of the status cues' planned +2.14 dB), true peak -7.73 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `1301e1ce6010db7348850bca0cc1bb08dab73c179f6f2b6ecbd67f8d757bcd15`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `a1f8acd63a999f56a10e47c271a0e1aafdf862a13385c553ea4bd07d20dbd075`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletRevive.ogg`
 - Asset ID: scarlet-sfx-revive-20261002
@@ -873,12 +1489,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: chime_As5, chime_E4, chime_Fs4, timpani1, organ_04 in the table above
-- Tool/model/version: external recipe cues_d.py `revive_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Hand Chimes F#4 (Gb, -3 dB), E4 pitched -1 then +12 (Eb, -4 dB) and A#5 (Bb, -5 dB) entering at 0/70/140 ms and held 1.4 s so they blend into a chord; organ Man3Open_04 (Eb2) low-passed at 600 Hz swelling to 0.7 s (-6 dB); Timpani 1 hit low-passed at 500 Hz (-12 dB); hall wet -8 dB (1.2 s IR). Target K-weighted 100 ms peak -15 dB; measured -15.1 dB, true peak -10.4 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_d.py `revive_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Hand Chimes F#4 (Gb, -3 dB), E4 pitched -1 then +12 (Eb, -4 dB) and A#5 (Bb, -5 dB) entering at 0/70/140 ms and held 1.4 s so they blend into a chord; organ Man3Open_04 (Eb2) low-passed at 600 Hz swelling to 0.7 s (-6 dB); Timpani 1 hit low-passed at 500 Hz (-12 dB); hall wet -8 dB (1.2 s IR). Target K-weighted 100 ms peak -15 dB; measured -15.1 dB, true peak -10.4 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +2.14 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -18.93 → -16.77 LUFS (+2.16 dB of the status cues' planned +2.14 dB), true peak -8.95 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `414575544777fe04cde073fe1acbb5a40311baba9fe59df81ea42c5dc4ff05c1`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `520b56fb3462bfe65c0bcc6e8fa9b3ad87795a1419333e01a88e6014ee893079`
 
 - Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletReady.ogg`
 - Asset ID: scarlet-sfx-ready-20261002
@@ -887,12 +1503,12 @@ Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af
 - Creation/acquisition date: 2026-10-02
 - Source type: public-domain
 - Source work and URL: chime_As5, chime_E4 in the table above
-- Tool/model/version: external recipe cues_a.py `ready_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
-- Human modifications: owner selection of variant A. Hand Chimes E4 pitched -1 (Eb) and A#5 (Bb, -6 dB, +30 ms) with 0.9-1.0 s decays; hall wet -6 dB (1.1 s IR). Target K-weighted 100 ms peak -21 dB; measured -21.0 dB, true peak -14.75 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- Tool/model/version: external recipe cues_a.py `ready_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial; level lift by the external `sfx-scarlet-loud/lift.py` (loudness revision above)
+- Human modifications: owner selection of variant A. Hand Chimes E4 pitched -1 (Eb) and A#5 (Bb, -6 dB, +30 ms) with 0.9-1.0 s decays; hall wet -6 dB (1.1 s IR). Target K-weighted 100 ms peak -21 dB; measured -21.0 dB, true peak -14.75 dBTP. Recordings stay in the local source store and are excluded from distribution. Loudness revision 2026-10-03 (0.3.82): this take's recipe master, its auditioned bytes reproduced first, re-rendered with +2.14 dB of gain and no limiting; maximum 400 ms momentary loudness (BS.1770) -27.09 → -24.92 LUFS (+2.18 dB of the status cues' planned +2.14 dB), true peak -12.46 dBTP after the Vorbis round trip; same pinned serial. Nothing else changed.
 - License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
 - Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
-- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
-- SHA256: `2dfbe2901e738cad63d4fb8120341cce2ab5871e6e1d804dde6185aa2e66c6b7`
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); loudness revision by Claude 2026-10-03 (auditioned bytes reproduced before the lift, second run byte-identical, loudness and true peak measured after encoding); in-game mix not_run
+- SHA256: `ae2d69ddda29664ea653d976c7f3477b8566a18976d54175c4cabb7aeb060008`
 
 ### Doll weapon pixel art — 2026-10-02
 

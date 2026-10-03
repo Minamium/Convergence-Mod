@@ -13,15 +13,17 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // - SoundStyle is built only on a client outside the main menu, so a Dedicated Server never touches audio.
 // - Voices are bounded per cue file (MaxInstances, replace oldest), stop while the game is paused and start only with
 //   focus, like the Ebon reward audio. Tuned files play at their recorded pitch (no pitch variance).
-// - Every cue plays at its role's offset against the Raid's sound set (ScarletRewardCues.RoleDecibels); the files are
-//   never re-rendered for level.
-// - Build tolls are heard by their owner only. A per-swing or per-shot cue plays for its owner at its role's level and
-//   for other players RemoteShotDecibels lower. Everything else is positional for everyone at its role's level.
+// - Every cue plays at its role's offset against Graceful Ordeal and the Raid's sound set (ScarletRewardCues.RoleDecibels);
+//   the call sites never pass a literal volume.
+// - Build tolls are heard by their owner only. Every other cue plays for its owner at its role's level and for other
+//   players CrimsonRewardRules.RemoteCueDecibels lower, positional, so a crowd of other players' weapons stays under the
+//   Raid's warnings and the local player's own weapon (REWARDS.md#levels-against-the-raid, the four-player dense mix).
 // - Every call names the cue's owner, and other players' voices are a pool of their own (a ":peer" Identifier), so
 //   another player's cue never cuts one of the local player's: the local player holds the table's Voices (one owner's
 //   budget, replace oldest); other players together share ScarletCue.PeerVoices (one voice of a per-shot file, replace
 //   oldest; one owner's Voices of any other file, ignore new, so a ringing windup or finale is never cut).
 // - A cue whose file is missing from the package is skipped (HasAsset, cached), never thrown.
+// - A wanted cue (ScarletRewardCues.Wanted) plays its stand-in's file, StandInDecibels lower, in its own voice pool.
 internal static class ScarletRewardAudio
 {
     private const string Identity = "Convergence:ScarletReward:";
@@ -43,37 +45,32 @@ internal static class ScarletRewardAudio
     // The Sealed Score's playback: the toll chosen by height, positional for everyone because it is part of the release.
     internal static void Toll(int step, int owner, Vector2 at) => Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, Remote(owner));
 
-    // Per-swing and per-shot cues: the owner at full level, other players RemoteShotDecibels lower with one voice.
-    internal static void Shot(string cue, int owner, Vector2 at, float decibels = 0) => Shot(table[cue], 0, owner, at, decibels);
+    // Per-swing and per-shot cues: other players share one voice of the file (ScarletCue.PeerVoices).
+    internal static void Shot(string cue, int owner, Vector2 at, float decibels = 0) => Emit(table[cue], 0, at, decibels, Remote(owner));
 
     // Each organ pipe chiffs with its own recording (OrganShot1..OrganShot4).
-    internal static void OrganShot(int pipe, int owner, Vector2 at) => Shot(table[ScarletRewardCues.OrganShot], pipe, owner, at, 0);
-
-    private static void Shot(in ScarletCue cue, int variant, int owner, Vector2 at, float decibels)
-    {
-        bool remote = Remote(owner);
-        Emit(cue, variant, at, remote ? decibels + CrimsonRewardRules.RemoteShotDecibels : decibels, remote);
-    }
+    internal static void OrganShot(int pipe, int owner, Vector2 at) => Emit(table[ScarletRewardCues.OrganShot], pipe, at, 0, Remote(owner));
 
     private static bool Remote(int owner) => owner != Main.myPlayer;
 
     private static void Emit(in ScarletCue cue, int variant, Vector2 at, float decibels, bool remote)
     {
         if (!Audible) return;
-        string file = cue.File(variant);
+        string file = cue.File(variant), voice = cue.Voice(variant);
         if (!Exists(file)) return;
-        SoundStyle style = Style(cue, file, remote);
-        style.Volume = Math.Clamp(ScarletRewardCues.Gain * ScarletRewardCues.Decibels(ScarletRewardCues.RoleDecibels(cue.Role) + decibels), 0f, 1f);
+        SoundStyle style = Style(cue, voice, file, remote);
+        float db = ScarletRewardCues.RoleDecibels(cue.Role) + cue.StandInDecibels + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);
+        style.Volume = Math.Clamp(ScarletRewardCues.Gain * ScarletRewardCues.Decibels(db), 0f, 1f);
         SoundEngine.PlaySound(style, at);
     }
 
-    private static SoundStyle Style(in ScarletCue cue, string file, bool remote)
+    private static SoundStyle Style(in ScarletCue cue, string voice, string file, bool remote)
     {
         var styles = remote ? peer : own;
-        if (!styles.TryGetValue(file, out SoundStyle style))
-            styles[file] = style = new SoundStyle(ScarletRewardCues.Root + file)
+        if (!styles.TryGetValue(voice, out SoundStyle style))
+            styles[voice] = style = new SoundStyle(ScarletRewardCues.Root + file)
             {
-                Identifier = Identity + file + (remote ? ":peer" : ""),
+                Identifier = Identity + voice + (remote ? ":peer" : ""),
                 MaxInstances = remote ? cue.PeerVoices : cue.Voices,
                 SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,
                 PauseBehavior = PauseBehavior.StopWhenGamePaused,
@@ -93,6 +90,7 @@ internal static class ScarletRewardAudio
     {
         var index = new Dictionary<string, ScarletCue>(StringComparer.Ordinal);
         foreach (ScarletCue cue in ScarletRewardCues.All) index.Add(cue.Name, cue);
+        foreach (ScarletCue cue in ScarletRewardCues.Wanted) index.Add(cue.Name, cue);
         return index;
     }
 

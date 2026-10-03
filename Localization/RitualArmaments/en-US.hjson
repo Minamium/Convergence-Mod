@@ -18,9 +18,10 @@ Mods: {
 				Name: Pale Meridian
 				Tooltip:
 					'''
-					Hold to assemble one siege weapon in stages, firing throughout assembly.
-					Its mechanism locks and charges, then maintains rapid armor-piercing fire.
-					Release or switch items to stop. Uses bullets; 75% ammo conservation.
+					Hold to build a music-box siege rifle while firing; every shot rings the next note of its tune.
+					Each brass part that clicks in fires faster; once complete, the wind-up key turns and the gun overcharges into rapid homing fire.
+					Release to fire a white meridian through the cursor; held longer, it splits into a lattice of light.
+					Uses bullets; 75% chance not to consume ammo.
 					One of five equally likely rewards from the Curtainfall Treasure Box.
 					'''
 			}
@@ -29,10 +30,11 @@ Mods: {
 				Name: Lacuna Testament
 				Tooltip:
 					'''
-					Hold to attack from one sigil, then unfold six more at accelerating intervals.
-					The array merges and charges for 0.8 seconds, then sustains one powerful beam.
-					Aim while channeling. Release, switch items, or run out of mana to stop.
-					Builds over 6.8 seconds. Continuous mana drain; no forced automatic mana potions.
+					Hold: porcelain irises open one by one around the testament, each firing small seeking void pellets.
+					After about 5.7 seconds the seven irises merge before your hand into one great aperture.
+					After a 0.8-second charge it pours out a black-cored beam that pulses and slowly widens.
+					The beam can be turned while held. Releasing, switching items or running out of mana ends it.
+					Consumes mana continuously; never triggers automatic mana potions.
 					One of five equally likely rewards from the Curtainfall Treasure Box.
 					'''
 			}

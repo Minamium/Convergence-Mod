@@ -66,16 +66,25 @@ internal static class CrimsonChorusRules
     internal const int StackShareSource = 900, SpreadFailureSource = 900;
     internal const int ImpactTicks = 12, PhrasesBetween = 5;
     internal const int CallBeats = 8, MinimumRecoveryBeats = 2;
-    // Born on the first grid beat at or after earliest (relative to musicStart), the
-    // verdict eight beats later, and the end on the bar head that leaves at least two
-    // recovery beats, so the next phrase starts on a bar like every other phrase.
+    // Called on the first bar head at or after earliest (relative to musicStart), the verdict
+    // eight beats later on a bar head too, and the end on the bar head that leaves at least
+    // two recovery beats (one bar), so the next phrase starts on a bar like every other phrase.
     internal static (int Born, int Fire, int End) Schedule(int earliest)
     {
         if (earliest < 0) throw new ArgumentOutOfRangeException(nameof(earliest));
-        int born = CrimsonMeter.BeatAtOrAfter(earliest), fire = born + CallBeats;
+        int born = CrimsonMeter.BarAtOrAfter(earliest) * CrimsonMeter.BeatsPerBar, fire = born + CallBeats;
         int end = CrimsonMeter.BarAtOrAfter(CrimsonMeter.BeatTick(fire + MinimumRecoveryBeats)) * CrimsonMeter.BeatsPerBar;
         return (CrimsonMeter.BeatTick(born), CrimsonMeter.BeatTick(fire), CrimsonMeter.BeatTick(end));
     }
+
+    // A chorus takes the slot before the phrase `nextSerial` and ends in that phrase's pickup crossflow. A signature
+    // phrase never opens with a pickup, so a chorus never comes right before one: it is called after PhrasesBetween
+    // phrases, or one phrase earlier when the slot after the fifth would precede a signature phrase. Between two signature
+    // phrases (every third phrase) one of those two slots is always open, so the spacing stays four or five phrases.
+    internal static bool Due(int phase, int phrasesSince, int nextSerial)
+        => !CrimsonSignatureMoves.IsSignaturePhrase(phase, nextSerial)
+            && (phrasesSince >= PhrasesBetween
+                || phrasesSince == PhrasesBetween - 1 && CrimsonSignatureMoves.IsSignaturePhrase(phase, nextSerial + 1));
 
     internal static (bool Resolved, byte FailedMask) ReadVerdict(BinaryReader reader, byte members)
     {

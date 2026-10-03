@@ -9,11 +9,12 @@ internal static class CrimsonTrackingBeam
     internal const int LockTicks = 0;
     internal const int SampleInterval = 3;
     internal const float Radius = 36;
-    internal static int TargetIndex(int phrase, int pulse, int living)
+    // Round robin over the living roster. The runtime keeps one ordinal for crossflows and one for the other aimed
+    // notes, so every member takes crossflows and ordinary notes in turn whatever the phrase's note count.
+    internal static int TargetIndex(int ordinal, int living)
     {
-        if (phrase < 1 || pulse is < 0 or > CrimsonChoreography.BasicNotes || living is < 1 or > 8)
-            throw new ArgumentOutOfRangeException();
-        return ((phrase - 1) * (CrimsonChoreography.BasicNotes + 1) + pulse) % living;
+        if (ordinal < 0 || living is < 1 or > 8) throw new ArgumentOutOfRangeException();
+        return ordinal % living;
     }
     internal static int LockAt(in CrimsonGesturePlan p) => p.Born;
     internal static bool CanAccept(in CrimsonGesturePlan p, int previousTick, int tick, CrimsonPoint point)

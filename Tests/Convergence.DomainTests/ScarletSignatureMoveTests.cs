@@ -7,8 +7,9 @@ using Convergence.Content.Encounters.CrimsonFoundry;
 
 namespace Convergence.DomainTests;
 
-// Act signature moves (protocol 79): selection cadence, exact corridor / rope heights / quarter
-// geometry against a 20x42 player, and the descriptor codec.
+// Act signature moves (protocol 79, retimed in 80): selection cadence, exact corridor / rope heights / quarter
+// geometry against a 20x42 player, survival under the mobility model at the dotted-quarter step timing, and the
+// descriptor codec.
 internal static partial class Program
 {
     private const float ScarletPlayerWidth = 20, ScarletPlayerHeight = 42;
@@ -17,15 +18,15 @@ internal static partial class Program
     private static CrimsonGesturePlan ScarletSignaturePlan(int phase, int phrase, int note, float observedX, int groundX = 8000, int groundY = 6000, int earliest = -1, int curtainMask = 0)
     {
         var f = RaidFieldGeometry.FromGround(groundX, groundY);
-        var rhythm = CrimsonChoreography.Create(earliest < 0 ? CrimsonChoreography.OpeningTicks : earliest, phrase, false);
-        var hit = rhythm.Hits[note];
+        var rhythm = CrimsonChoreography.Create(earliest < 0 ? CrimsonChoreography.OpeningTicks : earliest, phrase, phase, false);
+        var hit = rhythm.Hits.First(h => h.Pulse == note);
         var technique = CrimsonEnsemble.Technique(phase, phrase, note, false);
         var stage = new CrimsonPoint(f.CenterX, f.Top + 210);
         // A curtain carries the occupied-column mask (solo: the observed column) instead of a position.
         var target = phase == 0 ? CrimsonSignatureMoves.CurtainTarget(curtainMask > 0 ? curtainMask : 1 << ScarletColumnOf(f, observedX))
             : new CrimsonPoint(f.CenterX, f.CenterY);
         return new(ScarletSignatureFight, 3, 500, phrase, (byte)note, (byte)phase, technique, (byte)note, 4, hit.Accent,
-            rhythm.Start - 30, hit.Warning, hit.Fire, CrimsonEnsemble.NoteEnd(technique, hit),
+            rhythm.FirstWarning - CrimsonRhythm.LookAheadTicks, hit.Warning, hit.Fire, CrimsonEnsemble.NoteEnd(technique, hit),
             rhythm.Hits[0].Fire, CrimsonEnsemble.NoteEnd(technique, rhythm.Hits[3]),
             stage, stage, target, groundX, groundY, 1);
     }
@@ -40,7 +41,7 @@ internal static partial class Program
         => ScarletHits(strokes, x, f.Bottom - h - ScarletPlayerHeight);
     private static int ScarletColumnOf(RaidFieldGeometry f, float x) => Math.Clamp((int)MathF.Floor((x - f.Left) / 256), 0, 9);
 
-    [DomainTest("Scarlet signature moves append stable IDs and replace the four basic notes of every third Act I-III phrase only")]
+    [DomainTest("Scarlet signature moves append stable IDs and replace the notes and closing crossflow of every third Act I-III phrase only")]
     private static void ScarletSignatureSelection()
     {
         AssertEqual(15, (int)CrimsonTechnique.ClusterVolley, "old ID unchanged");
@@ -49,7 +50,7 @@ internal static partial class Program
         AssertEqual(18, (int)CrimsonTechnique.ShroudRope, "append-only ID");
         AssertEqual(19, (int)CrimsonTechnique.FourHands, "append-only ID");
         AssertEqual(20, Enum.GetValues<CrimsonTechnique>().Length, "no other technique was added");
-        AssertEqual((ushort)79, EncounterProtocol.CurrentVersion, "matching peers are required for the new descriptor values");
+        AssertEqual((ushort)80, EncounterProtocol.CurrentVersion, "matching peers are required for the retimed phrases and the shorter crossflow stream");
         var signatures = new[] { CrimsonTechnique.CinderCurtain, CrimsonTechnique.ShroudRope, CrimsonTechnique.FourHands };
         for (int phase = 0; phase < 3; phase++)
         {
@@ -70,7 +71,11 @@ internal static partial class Program
                         AssertEqual(expected, CrimsonEnsemble.Technique(phase, serial, note, false), "basic note technique");
                         AssertEqual(expected, CrimsonChoreography.Technique(phase, serial, note), "choreography and ensemble agree");
                     }
-                    AssertEqual(CrimsonTechnique.SideBeams, CrimsonEnsemble.Technique(phase, serial, 4, false), "the seal crossflow always closes the phrase");
+                    var rhythm = CrimsonChoreography.Create(900, serial, phase, false);
+                    AssertEqual(signature ? 4 : 3, rhythm.Hits.Count(h => !CrimsonChoreography.IsCrossflow(h.Pulse)), "four steps or three notes");
+                    AssertEqual(!signature, rhythm.Hits.Any(h => h.Pulse == CrimsonChoreography.Closer), "the crossflow closes an ordinary phrase; the move's final step takes its place");
+                    AssertEqual(rhythm.End, rhythm.Hits[^1].Fire, "either way the closing hit lands on the next downbeat");
+                    if (signature) AssertEqual((byte)2, rhythm.Hits[^1].Accent, "the final step is accented like a crossflow");
                 }
                 AssertEqual(4, signaturePhrases, "four signature phrases per twelve-phrase cycle");
             }
@@ -311,9 +316,9 @@ internal static partial class Program
             }
         }
         // Reported numbers (px): the smallest clearance from any start in the column, and the tolerated look-ahead drift.
-        AssertEqual(true, tightest >= 40, $"every start in the column keeps at least 40 px of clearance (smallest {tightest:F1} px at {tightestAt})");
-        AssertEqual(true, worstCentre > 0, $"the centre start at note 1 keeps a positive clearance ({worstCentre:F1} px)");
-        AssertEqual(true, backward >= 150 && forward >= 280, $"look-ahead drift tolerated when moving from note 0's warning: {backward} px against the walk, {forward} px along it");
+        AssertEqual(true, tightest >= 41, $"every start in the column keeps at least 41 px of clearance (smallest {tightest:F1} px at {tightestAt})");
+        AssertEqual(true, worstCentre >= 150, $"the centre start at note 1 keeps at least 150 px (74 px at protocol 79) ({worstCentre:F1} px)");
+        AssertEqual(true, backward >= 280 && forward >= 280, $"look-ahead drift tolerated when moving from note 0's warning: {backward} px against the walk, {forward} px along it");
     }
 
     // ---------------------------------------------------------------- rope staff
@@ -386,7 +391,7 @@ internal static partial class Program
                 plan.Validate();
                 AssertEqual(CrimsonTechnique.ShroudRope, plan.Technique, "Act II signature");
                 AssertEqual(12, plan.End - plan.Fire, "rift-like live window");
-                bool low = note % 2 == 0;
+                bool low = note % 2 == 1; // odd steps (the final one among them) sweep the floor
                 AssertEqual(5, CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true), "five lines per note");
                 AssertEqual(0, CrimsonTechniqueGeometry.Write(plan, plan.Fire, live), "zero-width ignition is harmless");
                 for (int line = 0; line < 5; line++)
@@ -416,8 +421,8 @@ internal static partial class Program
                 // Grounded players keep the jump-rope rhythm: hit on even beats, safe on odd beats.
                 foreach (float x in new[] { f.Left + 5, f.CenterX - 30, f.CenterX, f.Right - 25 })
                 {
-                    AssertEqual(low, ScarletBodyHit(forecast[..5], f, x, 0), "a standing player is hit on even beats and safe on odd beats");
-                    AssertEqual(low, ScarletBodyHit(forecast[..5], f, x, 60), "anything under 70 px is the floor band of the odd beat");
+                    AssertEqual(low, ScarletBodyHit(forecast[..5], f, x, 0), "a standing player is hit on odd steps (the final one on the downbeat) and safe on even steps");
+                    AssertEqual(low, ScarletBodyHit(forecast[..5], f, x, 60), "anything under 70 px is the floor band of the high-comb step");
                     AssertEqual(false, ScarletBodyHit(forecast[..5], f, x, low ? 127 : 239), "the middle of this beat's lowest airborne band is safe");
                     AssertEqual(true, ScarletBodyHit(forecast[..5], f, x, low ? 239 : 127), "and the other beat's band is hit");
                     AssertEqual(true, ScarletBodyHit(forecast[..5], f, x, low ? 36 : 148), "heights inside a line are hit");
@@ -432,8 +437,11 @@ internal static partial class Program
         Span<CrimsonStroke> a = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         Span<CrimsonStroke> b = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         var f = RaidFieldGeometry.FromGround(8000, 6000);
-        var even = ScarletSignaturePlan(1, 9, 0, 0);
-        var odd = ScarletSignaturePlan(1, 9, 1, 0);
+        // "Even" names the low comb that sweeps the floor (odd steps since protocol80), "odd" the comb 112 px higher.
+        int lowStep = CrimsonSignatureMoves.RopeIsLow(0) ? 0 : 1;
+        AssertEqual(1, lowStep, "the final step (3) is a low-comb step");
+        var even = ScarletSignaturePlan(1, 9, lowStep, 0);
+        var odd = ScarletSignaturePlan(1, 9, 1 - lowStep, 0);
         var safeEven = ScarletStaffSafe(a[..CrimsonTechniqueGeometry.Write(even, even.Fire, a, true)], f);
         var safeOdd = ScarletStaffSafe(b[..CrimsonTechniqueGeometry.Write(odd, odd.Fire, b, true)], f);
         float widest = 0, farthest = 0, farthestAt = 0;
@@ -663,6 +671,74 @@ internal static partial class Program
         AssertEqual(true, worstBase < 0, $"four hands assumes endgame horizontal mobility like the basic beams (base worst {worstBase:F1} px, start x={worstBaseAt})");
     }
 
+    // A member observed at x0 moving at v0 (px/tick) keeps that input through the look-ahead (the phrase is issued, and the
+    // columns observed, LookAheadTicks before step 0's warning), then runs in `direction` once step 0's forecast shows.
+    private static bool ScarletCurtainDrift(RaidFieldGeometry f, CrimsonGesturePlan[] plans, float x0, float v0, int direction, ScarletMobility mobility, out float clearance)
+    {
+        Span<CrimsonStroke> now = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        float x = x0, speed = v0;
+        int lead = Math.Sign(v0);
+        clearance = float.MaxValue;
+        bool survived = true;
+        for (int tick = plans[0].Born - CrimsonRhythm.LookAheadTicks; tick < plans[3].End; tick++)
+        {
+            ScarletRunStep(mobility, ref x, ref speed, tick >= plans[0].Born ? direction : lead);
+            float clamped = Math.Clamp(x, f.Left, f.Right - ScarletPlayerWidth);
+            if (clamped != x) { x = clamped; speed = 0; }
+            for (int note = 0; note < 4; note++)
+            {
+                int count = CrimsonTechniqueGeometry.Write(plans[note], tick, now);
+                if (count == 0) continue;
+                if (ScarletHits(now[..count], x, f.Bottom - ScarletPlayerHeight)) survived = false;
+                if (tick >= plans[note].Fire + 3) clearance = Math.Min(clearance, ScarletClearance(now[..count], x));
+            }
+        }
+        return survived;
+    }
+
+    [DomainTest("Scarlet cinder curtain tolerates base-mobility drift during the look-ahead before its first step better than protocol 79")]
+    private static void ScarletCinderCurtainLookAhead()
+    {
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        float restClearance = float.MaxValue;
+        int[] runningAway = new int[2], acceleratingAway = new int[2]; // [protocol80, protocol79 control]
+        for (int column = 0; column < 10; column++) foreach (int phrase in new[] { 3, 6 })
+        {
+            var plans = new CrimsonGesturePlan[4];
+            for (int note = 0; note < 4; note++) plans[note] = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
+            AssertEqual(plans[0].Born - CrimsonRhythm.LookAheadTicks, plans[0].Begin, "the columns are observed one look-ahead before step 0's warning");
+            // Control: protocol 79 warned on beats 0-3 of the phrase and struck one beat later, with the same 30-tick look-ahead.
+            var control = new CrimsonGesturePlan[4];
+            int start = plans[0].Born - 70;
+            for (int note = 0; note < 4; note++)
+            {
+                int fire = start + CrimsonMeter.BeatTick(note + 1) - CrimsonMeter.BeatTick(0);
+                control[note] = plans[note] with { Born = start + CrimsonMeter.BeatTick(note) - CrimsonMeter.BeatTick(0), Fire = fire, End = fire + CrimsonSignatureMoves.CurtainLiveTicks };
+            }
+            var (_, direction) = ScarletOracleWalk(column, phrase);
+            float columnLeft = f.Left + 256 * column;
+            for (float x = columnLeft; x <= columnLeft + 256 - ScarletPlayerWidth; x += 1)
+            {
+                // Observed at rest, standing through the look-ahead or already accelerating the wrong way: always survives.
+                AssertEqual(true, ScarletCurtainDrift(f, plans, x, 0, direction, ScarletBaseRun, out float still), $"column {column} phrase {phrase} at rest from x={x - columnLeft}");
+                AssertEqual(true, ScarletCurtainDrift(f, plans, x, -direction * .0001f, direction, ScarletBaseRun, out float accelerating), $"column {column} phrase {phrase} accelerating away from x={x - columnLeft}");
+                restClearance = Math.Min(restClearance, Math.Min(still, accelerating));
+                if (!ScarletCurtainDrift(f, control, x, -direction * .0001f, direction, ScarletBaseRun, out _)) acceleratingAway[1]++;
+                // Observed already running away from the open side at full base speed: the only failures, at the trailing edge.
+                for (int timing = 0; timing < 2; timing++)
+                    if (!ScarletCurtainDrift(f, timing == 0 ? plans : control, x, -direction * ScarletBaseRun.MaxSpeed, direction, ScarletBaseRun, out _))
+                    {
+                        runningAway[timing]++;
+                        if (timing == 0) AssertEqual(true, direction > 0 ? x - columnLeft < 92 : columnLeft + 256 - ScarletPlayerWidth - x < 92, $"only the trailing 92 px fail (column {column}, x={x - columnLeft})");
+                    }
+            }
+        }
+        // Reported numbers: the smallest clearance from rest, and failing 1 px starts (20 interior column phrases of 237 each).
+        AssertEqual(true, restClearance >= 3, $"from rest every start keeps clear of the fire (smallest {restClearance:F1} px)");
+        AssertEqual(true, runningAway[0] <= 12 * 92 && runningAway[1] > 2 * runningAway[0], $"running away at full speed: {runningAway[0]} failing starts, protocol 79 {runningAway[1]}");
+        AssertEqual(true, acceleratingAway[1] > 0, $"protocol 79 lost {acceleratingAway[1]} starts that accelerate away; protocol 80 none");
+    }
+
     [DomainTest("Scarlet cinder curtain gives every observed member a corridor and burns only the rest")]
     private static void ScarletCinderCurtainCrowd()
     {
@@ -836,7 +912,7 @@ internal static partial class Program
         for (int phase = 0; phase < 3; phase++) for (int phrase = 3; phrase <= 36; phrase += 3)
         {
             int earliest = CrimsonChoreography.OpeningTicks + phrase * 53;
-            var rhythm = CrimsonChoreography.Create(earliest, phrase, false);
+            var rhythm = CrimsonChoreography.Create(earliest, phrase, phase, false);
             int live = CrimsonSignatureMoves.LiveTicks(CrimsonSignatureMoves.ForAct(phase));
             AssertEqual(new[] { 20, 12, 16 }[phase], live, "live ticks per Act");
             AssertEqual(new[] { 24, 20, 24 }[phase], CrimsonSignatureMoves.ResidueTicks(CrimsonSignatureMoves.ForAct(phase)), "residue ticks per Act");
@@ -845,7 +921,14 @@ internal static partial class Program
                 var plan = ScarletSignaturePlan(phase, phrase, note, 8000, 8000, 6000, earliest);
                 var hit = rhythm.Hits[note];
                 AssertEqual(hit.Fire + live, CrimsonEnsemble.NoteEnd(plan.Technique, hit), "signature notes end after their own live window");
-                AssertEqual(true, CrimsonEnsemble.NoteEnd(plan.Technique, hit) <= rhythm.Hits[note + 1].Fire, "one beat is long enough for the previous move to clear");
+                if (note < 3)
+                {
+                    var following = rhythm.Hits[note + 1];
+                    AssertEqual(true, following.Fire - hit.Fire is 42 or 43, "steps a dotted quarter apart");
+                    AssertEqual(true, CrimsonEnsemble.NoteEnd(plan.Technique, hit) <= following.Fire, "the previous step clears before the next strikes");
+                    if (phase == 1) AssertEqual(true, CrimsonEnsemble.NoteEnd(plan.Technique, hit) <= following.Warning, "a rope comb is gone before the next comb is shown");
+                }
+                else AssertEqual(rhythm.End, hit.Fire, "the final step lands on the next phrase's downbeat");
                 AssertEqual(true, hit.Fire - hit.Warning >= CrimsonRhythm.MinimumWarningTicks, "one measured beat of warning");
                 plan.Validate();
             }

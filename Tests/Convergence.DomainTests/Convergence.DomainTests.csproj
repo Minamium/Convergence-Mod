@@ -69,6 +69,9 @@
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollSpritePlacement.cs" Link="Presentation/DollSpritePlacement.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollCueClock.cs" Link="Presentation/DollCueClock.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollWeaponBudget.cs" Link="Domain/DollWeaponBudget.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianScore.cs" Link="Domain/PaleMeridianScore.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianLattice.cs" Link="Domain/PaleMeridianLattice.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianRig.cs" Link="Domain/PaleMeridianRig.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBeamIgnition.cs" Link="Domain/FirstSeveranceBeamIgnition.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreCrater.cs" Link="Presentation/FirstSeveranceCoreCrater.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEnergyPulse.cs" Link="Presentation/FirstSeveranceEnergyPulse.cs" />
@@ -85,6 +88,9 @@
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiArenaBounds.cs" Link="Domain/SamuraiArenaBounds.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollCompanionRules.cs" Link="Domain/DollCompanionRules.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollWeaponTuning.cs" Link="Domain/DollWeaponTuning.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacunaTestamentScore.cs" Link="Domain/LacunaTestamentScore.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/LacunaArtFit.cs" Link="Presentation/LacunaArtFit.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollArtAnchors.g.cs" Link="Presentation/DollArtAnchors.g.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs" Link="Presentation/FirstSeveranceDollPose.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs" Link="Presentation/FirstSeveranceDollFrames.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceMusicTimeline.cs" Link="Presentation/FirstSeveranceMusicTimeline.cs" />
@@ -254,6 +260,7 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CrimsonRewardRules.cs" Link="Domain/CrimsonRewardRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CrimsonStrokeState.cs" Link="Domain/CrimsonStrokeState.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/SableScytheMotion.cs" Link="Domain/SableScytheMotion.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/SableCrescentFlight.cs" Link="Domain/SableCrescentFlight.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CanticleRules.cs" Link="Domain/CanticleRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/BatonRules.cs" Link="Domain/BatonRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CenserRules.cs" Link="Domain/CenserRules.cs" />

@@ -201,18 +201,31 @@ internal static partial class Program
         }
     }
 
-    // A whole phrase of an Act (signature: serial 3, basic: serial 1), notes 0-4 with the crossflow.
+    // The plans of one real phrase of an Act (CrimsonChoreography.Create, protocol80), in issue order: an ordinary phrase is its
+    // three cell notes (pulses 0-2 or 1-3, one beat of warning, never on a bar head) and the closing crossflow (pulse 4,
+    // charging for two beats and released on the next downbeat); a signature phrase (serial % 3 == 0) is the Act's move in four
+    // steps (pulses 0-3, a dotted quarter apart, the last on the next downbeat) and has no crossflow of its own.
     private static CrimsonGesturePlan[] ScarletMotionPhrase(int phase, int phrase, float shift = 0, int curtainMask = 0)
     {
-        var plans = new CrimsonGesturePlan[CrimsonChoreography.BasicNotes + 1];
-        for (int note = 0; note < plans.Length; note++)
+        var rhythm = CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks, phrase, phase, false);
+        var plans = new CrimsonGesturePlan[rhythm.Hits.Count];
+        for (int i = 0; i < plans.Length; i++)
         {
+            int note = rhythm.Hits[i].Pulse;
             var p = ScarletSignaturePlan(phase, phrase, note, 0, curtainMask: curtainMask > 0 ? curtainMask : 1 << 3);
             if (phase != 0 || p.Technique != CrimsonTechnique.CinderCurtain) p = p with { Target = new(p.Field.CenterX - 300 + 150 * note, p.Field.CenterY + 60) };
             int s = (int)shift;
-            plans[note] = p with { Begin = p.Begin + s, Born = p.Born + s, Fire = p.Fire + s, End = p.End + s, FirstFire = p.FirstFire + s, LastEnd = p.LastEnd + s };
+            plans[i] = p with { Begin = p.Begin + s, Born = p.Born + s, Fire = p.Fire + s, End = p.End + s, FirstFire = p.FirstFire + s, LastEnd = p.LastEnd + s };
         }
         return plans;
+    }
+
+    // Everything the phrase's notes can still show: the latest window close.
+    private static float ScarletPhraseRungOut(ReadOnlySpan<CrimsonGesturePlan> plans)
+    {
+        float close = 0;
+        foreach (var p in plans) close = MathF.Max(close, p.Fire + ScarletNotes.SpanOf(p));
+        return close;
     }
 
     private static (float X, float Y) ScarletVespera(in CrimsonGesturePlan plan) => (plan.Field.CenterX, plan.Field.CenterY);
@@ -232,28 +245,32 @@ internal static partial class Program
                 AssertEqual(true, ScarletNotes.TryFrom(phrase[note], false, vx, vy, out var n), "curtain note");
                 AssertEqual(ScarletNoteKind.Curtain, n.Kind, "kind");
                 AssertEqual(walk * (note % 2 == 0 ? 1f : -1f), n.Side, $"column {column} note {note} swing side");
-                AssertEqual(note > 0, n.Lead, "lead after the first note");
+                AssertEqual(false, n.Lead, "one plan cannot know a hand-over: Collect decides it");
                 AssertEqual(44f, n.Span, "curtain span = live 20 + residue 24");
                 AssertEqual(1f, n.Register, "signature register");
                 AssertEqual(3f, n.Reach, "curtain reach");
                 AssertEqual(true, n.AimY > 0 && MathF.Abs(n.AimX * n.AimX + n.AimY * n.AimY - 1) < 1e-5f, "aim is a downward unit vector");
             }
-            AssertEqual(true, ScarletNotes.TryFrom(phrase[4], false, 0, 0, out var cross) && cross.Broad && cross.Kind == ScarletNoteKind.Crossflow
-                && cross.Span == phrase[4].End - phrase[4].Fire && cross.Register == ScarletNotes.CrossflowRegister && cross.AimX == -1, "crossflow note");
         }
+        // The seal crossflow is an ordinary phrase's closer (pulse 4): charge two beats, spent with its band.
+        var closer = ScarletMotionPhrase(0, 1)[^1];
+        AssertEqual(CrimsonChoreography.Closer, (int)closer.Pulse, "an ordinary phrase closes with the crossflow");
+        AssertEqual(true, ScarletNotes.TryFrom(closer, false, 0, 0, out var cross) && cross.Broad && cross.Kind == ScarletNoteKind.Crossflow
+            && cross.Span == closer.End - closer.Fire && cross.Register == ScarletNotes.CrossflowRegister && cross.AimX == -1
+            && MathF.Abs(cross.Fire - cross.Born - 2 * 28.125f) < 1.01f, "crossflow note charges for two beats");
         foreach (int phrase in new[] { 3, 6 })
         {
             var crowd = ScarletMotionPhrase(0, phrase, curtainMask: 1 << 1 | 1 << 8);
             AssertEqual(true, ScarletNotes.TryFrom(crowd[0], false, 0, 0, out var n), "crowd curtain");
             AssertEqual(phrase / 3 % 2 == 0 ? 1f : -1f, n.Side, "a crowd's walk alternates with the signature ordinal");
         }
-        // Rope: even notes run low and rightward; span 12 + 20.
+        // Rope: the odd steps (the final one on the downbeat) are the low comb, the rope crosses rightward on even steps; span 12 + 20.
         var rope = ScarletMotionPhrase(1, 3);
         for (int note = 0; note < 4; note++)
         {
             AssertEqual(true, ScarletNotes.TryFrom(rope[note], false, 0, 0, out var n) && n.Kind == ScarletNoteKind.Rope, "rope note");
-            AssertEqual(note % 2 == 0, n.Low, "low comb on even notes");
-            AssertEqual(note % 2 == 0 ? 1f : -1f, n.Side, "the low comb runs rightward");
+            AssertEqual(note % 2 == 1, n.Low, "the low comb is the odd steps' (it sweeps the floor on the downbeat)");
+            AssertEqual(note % 2 == 0 ? 1f : -1f, n.Side, "the rope crosses rightward on even steps, whichever comb they are");
             AssertEqual(32f, n.Span, "rope span");
         }
         // Hands: the arm that owns each slammed quarter; a mirrored body swaps sides.
@@ -280,27 +297,67 @@ internal static partial class Program
         var beam = ScarletMotionPhrase(0, 1);
         AssertEqual(true, ScarletNotes.TryFrom(beam[0], false, f.CenterX, f.CenterY, out var basic) && basic.Kind == ScarletNoteKind.Beam
             && basic.Register == ScarletNotes.BasicRegister && basic.Span == 44 && basic.Reach == 5, "tracking beam note");
-        var rift = ScarletMotionPhrase(1, 1);
-        for (int note = 0; note < 4; note++)
-        {
-            var direction = CrimsonChoreography.Direction(rift[note].Phrase, rift[note].Pulse);
-            AssertEqual(true, ScarletNotes.TryFrom(rift[note], false, 0, 0, out var n) && n.Kind == ScarletNoteKind.Rift && n.Span == 32, "rift note");
-            AssertEqual(direction.Y >= .7f, n.Low, "rift row from its direction");
-            if (MathF.Abs(direction.X) > .01f) AssertEqual((float)MathF.Sign(direction.X), n.Side, "rift side from its direction");
-        }
-        var rakes = ScarletMotionPhrase(2, 1);
-        for (int note = 0; note < 4; note++)
-            foreach (bool flipped in new[] { false, true })
+        // The two ordinary cells (serial % 3 == 1: pulses 0-2, == 2: pulses 1-3) between them use every pulse and so every rake edge.
+        foreach (int serial in new[] { 1, 2 })
+            foreach (var plan in ScarletMotionPhrase(1, serial))
             {
-                AssertEqual(true, ScarletNotes.TryFrom(rakes[note], flipped, 0, 0, out var n) && n.Kind == ScarletNoteKind.Rakes, "rakes note");
-                AssertEqual(36f, n.Span, "rakes span = live 12 + residue 24");
-                int edge = rakes[note].Pulse & 3, flip = flipped ? 1 : 0;
-                var expected = edge switch { 0 => (0, 1), 2 => (2, 3), 1 => (1 ^ flip, 3 ^ flip), _ => (0 ^ flip, 2 ^ flip) };
-                AssertEqual(expected, ((int)n.ArmA, (int)n.ArmB), $"edge {edge} flipped {flipped}: the arms on the entry side");
+                if (plan.Technique == CrimsonTechnique.SideBeams) continue;
+                var direction = CrimsonChoreography.Direction(plan.Phrase, plan.Pulse);
+                AssertEqual(true, ScarletNotes.TryFrom(plan, false, 0, 0, out var n) && n.Kind == ScarletNoteKind.Rift && n.Span == 32, "rift note");
+                AssertEqual(direction.Y >= .7f, n.Low, "rift row from its direction");
+                if (MathF.Abs(direction.X) > .01f) AssertEqual((float)MathF.Sign(direction.X), n.Side, "rift side from its direction");
             }
+        var edges = new HashSet<int>();
+        foreach (int serial in new[] { 1, 2 })
+            foreach (var plan in ScarletMotionPhrase(2, serial))
+            {
+                if (plan.Technique == CrimsonTechnique.SideBeams) continue;
+                foreach (bool flipped in new[] { false, true })
+                {
+                    AssertEqual(true, ScarletNotes.TryFrom(plan, flipped, 0, 0, out var n) && n.Kind == ScarletNoteKind.Rakes, "rakes note");
+                    AssertEqual(36f, n.Span, "rakes span = live 12 + residue 24");
+                    int edge = plan.Pulse & 3, flip = flipped ? 1 : 0;
+                    var expected = edge switch { 0 => (0, 1), 2 => (2, 3), 1 => (1 ^ flip, 3 ^ flip), _ => (0 ^ flip, 2 ^ flip) };
+                    AssertEqual(expected, ((int)n.ArmA, (int)n.ArmB), $"edge {edge} flipped {flipped}: the arms on the entry side");
+                    edges.Add(edge);
+                }
+            }
+        AssertEqual(4, edges.Count, "the two cells reach all four rake edges");
         // Final and other techniques produce no note.
         AssertEqual(false, ScarletNotes.TryFrom(beam[0] with { Technique = CrimsonTechnique.SpatialGrid }, false, 0, 0, out _), "grid has no note");
         AssertEqual(false, ScarletNotes.TryFrom(beam[0] with { Technique = CrimsonTechnique.ClusterVolley }, false, 0, 0, out _), "cluster has no note");
+    }
+
+    [DomainTest("Scarlet notes: only a note whose warning opens as another strikes takes the swing over (protocol80 phrases)")]
+    private static void ScarletNoteHandover()
+    {
+        var notes = new ScarletNote[ScarletNotes.Capacity];
+        // Ordinary cell A (fires on eighths 6, 9, 12 with warnings from 4, 7, 10), cell B (7, 10, 12 from 5, 8, 10) and a
+        // signature phrase (7, 10, 13, 16 from 5, 8, 11, 14). Only cell B's third note opens as the second strikes.
+        var expectedByPhrase = new Dictionary<int, string> { [1] = "", [2] = "3", [3] = "" };
+        foreach (var (serial, expected) in expectedByPhrase)
+        {
+            var plans = ScarletMotionPhrase(0, serial);
+            var v = ScarletVespera(plans[0]);
+            var seen = new List<int>();
+            for (float age = plans[0].Born; age < ScarletPhraseRungOut(plans) + 2; age += .5f)
+            {
+                int n = ScarletNotes.Collect(plans, 0, age, false, v.X, v.Y, notes);
+                for (int i = 0; i < n; i++)
+                {
+                    bool oracle = false;
+                    foreach (var p in plans)
+                        oracle |= !notes[i].Broad && p.Technique != CrimsonTechnique.SideBeams && p.Fire == notes[i].Born && p.Fire < notes[i].Fire;
+                    AssertEqual(oracle, notes[i].Lead, $"serial {serial} age {age} pulse {notes[i].Pulse}: Lead is a hand-over from a note firing on this Born");
+                    if (notes[i].Lead && !seen.Contains(notes[i].Pulse)) seen.Add(notes[i].Pulse);
+                }
+            }
+            seen.Sort();
+            AssertEqual(expected, string.Join(",", seen), $"serial {serial}: the notes that take the swing over");
+        }
+        // The crossflow never takes a swing over, and a lone note has no Lead.
+        var closer = ScarletMotionPhrase(0, 2)[^1];
+        AssertEqual(true, ScarletNotes.Collect(new[] { closer }, 0, closer.Fire, false, 0, 0, notes) == 1 && !notes[0].Lead, "a crossflow is never a hand-over");
     }
 
     [DomainTest("Scarlet notes: collection windows, order, dedupe and the Choir cues agree with the prototype")]
@@ -312,7 +369,7 @@ internal static partial class Program
         AssertEqual(0, ScarletNotes.Collect(plans, 0, plans[1].Fire, false, 0, 0, notes), "another source's notes are not this body's");
         var doubled = new CrimsonGesturePlan[plans.Length * 2];
         for (int i = 0; i < plans.Length; i++) { doubled[i] = plans[plans.Length - 1 - i]; doubled[plans.Length + i] = plans[i]; }
-        for (float age = plans[0].Born; age < plans[4].End + 2; age += .5f)
+        for (float age = plans[0].Born; age < ScarletPhraseRungOut(plans) + 2; age += .5f)
         {
             int count = ScarletNotes.Collect(doubled, 1, age, false, 0, 0, notes);
             int expected = 0;
@@ -356,7 +413,7 @@ internal static partial class Program
     {
         var plans = ScarletMotionPhrase(0, 1);
         var choruses = Array.Empty<CrimsonChorusPlan>();
-        for (float age = plans[0].Born - 70; age < plans[4].End + 120; age += .25f)
+        for (float age = plans[0].Born - 70; age < plans[^1].End + 120; age += .25f)
             for (int source = -1; source <= 3; source++)
             {
                 float until = 60, since = 100;
@@ -422,12 +479,12 @@ internal static partial class Program
     {
         var before = new List<float>(); var after = new List<float>();
         for (int phase = 0; phase < 3; phase++)
-            foreach (int serial in new[] { 1, 3 })
+            foreach (int serial in new[] { 1, 2, 3 })
             {
                 var plans = ScarletMotionPhrase(phase, serial);
                 var shifted = ScarletMotionPhrase(phase, serial, ScarletShift);
                 foreach (bool flipped in new[] { false, true })
-                    for (float age = plans[0].Born - 10; age < plans[4].End + 30; age += .375f)
+                    for (float age = plans[0].Born - 10; age < ScarletPhraseRungOut(plans) + 30; age += .375f)
                     {
                         ScarletEveryResponse(plans, phase, age, flipped, false, before);
                         ScarletEveryResponse(shifted, phase, age + ScarletShift, flipped, false, after);
@@ -463,7 +520,7 @@ internal static partial class Program
         // Outside every window the notes leave nothing behind either.
         var plans = ScarletMotionPhrase(0, 3);
         var notes = new ScarletNote[ScarletNotes.Capacity];
-        float after = plans[4].End + 1;
+        float after = ScarletPhraseRungOut(plans) + 1;
         AssertEqual(0, ScarletNotes.Collect(plans, 0, after, false, 0, 0, notes), "the phrase has rung out");
     }
 
@@ -472,7 +529,7 @@ internal static partial class Program
     {
         const float h = 1f / 64;
         for (int phase = 0; phase < 3; phase++)
-            foreach (int serial in new[] { 1, 3 })
+            foreach (int serial in new[] { 1, 2, 3 })
             {
                 var plans = ScarletMotionPhrase(phase, serial);
                 var v = ScarletVespera(plans[0]);
@@ -513,8 +570,12 @@ internal static partial class Program
                         blood.At(.5f), blood.At(.75f), blood3.At(.5f), blood3.At(.75f) };
                 }
             }
-        // Velocity bounds (per tick): offsets in px, turns in centi-radians, normalised rows x10, material 0..1.
-        static float Limit(int channel) => channel < 8 ? 12 : 1.2f;
+        // Velocity bounds (per tick): offsets in px, turns in centi-radians, normalised rows x10, material 0..1. The Crown's
+        // swing is slow (about 4.2 px/tick at its fastest) so its offset and turn are held to 6 px and 3 centi-radians, which
+        // catches the sub-pixel step a swing out that is cut when the next one begins would make. The Mantle's whip is the
+        // steepest approved motion (up to MantleTravel * 1.55 * 1.5 / WhipTicks = 14 px/tick, which since protocol80 a
+        // neighbouring note's window edge can coincide with), the pour jolt of the Crown's drop 12.
+        static float Limit(int channel) => channel switch { 0 => 6, 2 => 3, 3 or 4 => 15, < 8 => 12, _ => 1.2f };
         // Second-difference bounds (per tick^2): the Crown's 22 px pour jolt and the Mantle's rapid intake are the
         // largest approved kinks (about 7.5 px); the accepted Choir slam burst (about .83) is the largest 0..1 one.
         static float Bend(int channel) => channel < 8 ? 10 : .9f;
@@ -524,7 +585,7 @@ internal static partial class Program
     private static void ScarletMaterialParticles()
     {
         foreach (int phase in new[] { 0, 1, 2 })
-            foreach (int serial in new[] { 1, 3 })
+            foreach (int serial in new[] { 1, 2, 3 })
             {
                 var plans = ScarletMotionPhrase(phase, serial);
                 foreach (var plan in plans)
@@ -562,12 +623,12 @@ internal static partial class Program
     {
         Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
         for (int phase = 0; phase < 3; phase++)
-            foreach (int serial in new[] { 1, 3 })
+            foreach (int serial in new[] { 1, 2, 3 })
             {
                 var plans = ScarletMotionPhrase(phase, serial);
                 var v = ScarletVespera(plans[0]);
                 bool moved = false;
-                for (float age = plans[0].Born - 10; age < plans[4].End + 30; age += .5f)
+                for (float age = plans[0].Born - 10; age < ScarletPhraseRungOut(plans) + 30; age += .5f)
                 {
                     int n = ScarletNotes.Collect(plans, phase, age, false, v.X, v.Y, notes);
                     foreach (int facing in new[] { -1, 1 })
@@ -595,11 +656,11 @@ internal static partial class Program
         Span<ScarletNote> kept = stackalloc ScarletNote[ScarletNotes.Capacity];
         Span<ScarletNote> then = stackalloc ScarletNote[ScarletNotes.Capacity];
         for (int phase = 0; phase < 2; phase++)
-            foreach (int serial in new[] { 1, 3 })
+            foreach (int serial in new[] { 1, 2, 3 })
             {
                 var plans = ScarletMotionPhrase(phase, serial);
                 var v = ScarletVespera(plans[0]);
-                for (float age = plans[0].Born; age < plans[4].End + 70; age += .5f)
+                for (float age = plans[0].Born; age < plans[^1].End + 70; age += .5f)
                 {
                     int a = ScarletNotes.Collect(plans, phase, age, false, v.X, v.Y, now);
                     int b = ScarletNotes.Collect(plans, phase, age, false, v.X, v.Y, kept, ScarletNotes.PastTicks);
@@ -631,7 +692,7 @@ internal static partial class Program
     private static void ScarletChoirBloodValues()
     {
         Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
-        foreach (int serial in new[] { 1, 3 }) // ChoirRakes, FourHands
+        foreach (int serial in new[] { 1, 2, 3 }) // ChoirRakes (both cells), FourHands
             foreach (bool flipped in new[] { false, true })
             {
                 var plans = ScarletMotionPhrase(2, serial);

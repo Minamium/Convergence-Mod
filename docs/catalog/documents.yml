@@ -653,7 +653,7 @@ documents:
 - doc_id: encounter.crimson-foundry.rewards
   path: docs/encounters/crimson-foundry/REWARDS.md
   title: Scarlet Invocation — rewards
-  content_sha256: f312bf96dd51d707bb8846ce21308cdf652753a91582ddb350adcafe858c4ba2
+  content_sha256: a423130b4109bf7596e2ded2ca3714df70541a73de9a59f7ae15d0100a9ceeba
   document_type: spec
   status: provisional
   owners:
@@ -686,7 +686,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 908268c62ce5eabafe3cc2dca9300e4309693086f1cd355e196993a9cb35cc56
+  content_sha256: f1c6ad324347df9fa6b7241c145e13dd0c9a9befb37f25b09d8537bc4cccbc9d
   document_type: spec
   status: accepted
   owners:
@@ -950,13 +950,13 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 22f0fa7b84916920b4df61f02ac40b8c8a941af85a55994a68a18d80b12cc929
+  content_sha256: 4296e7e693473ea68a15f6aa4a7279b87c2e533c2a7ec2d0b1f555d218248de6
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-10-02'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -965,6 +965,7 @@ documents:
   related_code:
   - Content/Encounters/FirstSeverance/Rewards
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
+  - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
   related_docs:
   - project.status
@@ -1046,15 +1047,30 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.lacuna-testament-0234
+  path: docs/history/2026-10-03-lacuna-testament-0234.md
+  title: Lacuna Testament before the 2026-10 refresh
+  content_sha256: d25d554b7963af800b9c210f1dffb11ecfab5aa91b53d624bffbc393cf295ab3
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Lacuna Testament 0.2.34 sigil array
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 205e96f11698b4fe853cb77f1c3db1f89a143de69dd7793ba3a66d4815d9082d
+  content_sha256: 14cb3e8bf8b5df634c6917e5e2310a49a8443663c825cf70a9231c2c10fc4fa1
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-10-02'
+  last_reviewed: '2026-10-03'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1266,7 +1282,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: a9fd098c5b1b70a6b91ec6f5cb94202eb24f0b75e3c877bf57df4b6f95a428b6
+  content_sha256: b9c04fa754894d3ec977b066732740cde859a881b90c42d22c5feb50bce3486e
   document_type: spec
   status: provisional
   owners:
@@ -1403,12 +1419,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 72b87ceb0633ba64f87b44ccc3b7d874fe9ddb6ce3b722316be67941e86fd49c
+  content_sha256: 4d416437ddc1fad9cb16a83c7455f9fd20d95ae07c5b8caca30e6eecbdd26472
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -1448,7 +1464,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b53c233d809b784c9881c4add55e4e4dabffaa3d7eeb3853d49449367220a47d
+  content_sha256: ebb840f15974cfac338d02d80b56e384d776ed5a903f834769e1a781c5691e50
   document_type: status
   status: accepted
   owners:

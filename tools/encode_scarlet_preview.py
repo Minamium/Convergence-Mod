@@ -9,9 +9,10 @@
   Client/Encounters/CrimsonFoundry/ScarletSounds.cs, so the mux never drifts from the game. ReplaceOldest is a hard
   stop, as in tModLoader. With --bgm a "-bgm" version also carries the Graceful Ordeal window the harness arranged
   with the production CrimsonMusicMixer, at CrimsonInvocation.MusicGain.
-* User sliders (--sliders): "owner" = sound 0.161 and music 0.685, both LINEAR here (the Scarlet score is its own
-  DynamicSoundEffectInstance at MusicGain * Main.musicVolume; sound effects scale linearly) or "unity". One fixed
-  make-up gain (+12 dB) for every video, lowered only when a mix would pass -1 dBFS; the gain is recorded.
+* User sliders (--sliders): "owner" = sound 0.161 and music 0.685 or "unity". Sound effects scale linearly with their
+  slider; the Scarlet score is its own DynamicSoundEffectInstance at MusicGain * CrimsonInvocation.MusicSlider(Main.musicVolume),
+  tModLoader's music curve (since #116 / 0.3.82: 31 v - 36.94 dB normalised at a full slider), so 0.685 plays the score at
+  about -9.8 dB. One fixed make-up gain (+12 dB) for every video, lowered only when a mix would pass -1 dBFS; the gain is recorded.
 * --pairs: side-by-side videos (left off, right on) for the material and the residue-yield switches when both
   renders exist (<scene>-<camera>-<variant without -material>-offon.webm, <scene>-<camera>-<variant>-yield-offon.webm).
 * The page opens with the design's owner list (§4.4 videos 1-20) mapped to the files that exist.
@@ -36,6 +37,7 @@ import wave
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SOUNDS_CS = ROOT / 'Client/Encounters/CrimsonFoundry/ScarletSounds.cs'
+INVOCATION_CS = ROOT / 'Content/Encounters/CrimsonFoundry/CrimsonInvocation.cs'
 VISUALS_CS = ROOT / 'Client/Encounters/CrimsonFoundry/CrimsonGestureVisuals.cs'
 SOUND_DIR = ROOT / 'Assets/Sounds/CrimsonFoundry'
 RATE = 48000
@@ -64,6 +66,15 @@ def parse_sound_table(text: str) -> dict:
     cues = {name: {'file': f, 'ticks': int(t), 'instances': int(i), 'limit': limit, 'lease': int(t) + margin}
             for name, (f, t, i, limit) in zip(names, specs)}
     return {'gain': gain, 'fade': fade, 'cues': cues}
+
+
+def music_slider(volume: float) -> float:
+    """CrimsonInvocation.MusicSlider: the score follows tModLoader's music curve (a gain of 10^(c (v - 1) / 20), c parsed from the
+    game source), 0 at v = 0 and normalised at v = 1."""
+    match = re.search(r'MathF\.Pow\(10,\s*(\d+)\s*\*\s*\(Math\.Min\(volume, 1\) - 1\)\s*/\s*20\)', INVOCATION_CS.read_text(encoding='utf-8'))
+    if not match:
+        raise ValueError('CrimsonInvocation.MusicSlider not found')
+    return 0.0 if volume <= 0 else 10 ** (int(match.group(1)) * (min(volume, 1.0) - 1) / 20)
 
 
 def voice_capacity(text: str) -> int:
@@ -156,7 +167,8 @@ class Mixer:
         text = SOUNDS_CS.read_text(encoding='utf-8')
         self.table = parse_sound_table(text)
         self.capacity = voice_capacity(VISUALS_CS.read_text(encoding='utf-8')) if VISUALS_CS.exists() else 24
-        self.sound, self.music = SLIDERS[sliders]
+        self.sound, self.slider_music = SLIDERS[sliders]
+        self.music = music_slider(self.slider_music)
         self.sliders = sliders
         self.cache: dict = {}
 
@@ -184,7 +196,7 @@ class Mixer:
             out[: len(music)] += music * music_gain
         peak = float(np.abs(out).max()) if total else 0.0
         gain = makeup_gain(peak)
-        meta = {'sliders': {'name': self.sliders, 'sound': self.sound, 'music': self.music}, 'sfxGain': sfx_gain,
+        meta = {'sliders': {'name': self.sliders, 'sound': self.sound, 'music': self.slider_music, 'musicCurve': self.music}, 'sfxGain': sfx_gain,
                 'musicGain': music_gain, 'makeupDb': round(20 * np.log10(gain), 2), 'peakDbfs': round(20 * np.log10(max(peak * gain, 1e-9)), 2),
                 'voices': [{'cue': v['cue'], 'tick': v['tick'], 'file': self.table['cues'][v['cue']]['file'],
                             'samples': v['end'] - v['start']} for v in voices]}
@@ -378,7 +390,7 @@ def page(out: pathlib.Path, index: dict, gates: dict | None, videos: list, pairs
         parts.append('<h2>Changes in this render</h2><ul>' + ''.join(f'<li>{e(str(item))}</li>' for item in items) + '</ul>')
     if audio_meta:
         parts.append(f'<p class="cap">Sound: set A from ScarletSounds.cs on the recorded Born/Fire ticks; sliders {e(audio_meta["sliders"])}; '
-                     f'BGM = arranged Graceful Ordeal at MusicGain x music slider; one +12 dB make-up for all videos (lowered only to stay under -1 dBFS).</p>')
+                     f'BGM = arranged Graceful Ordeal at MusicGain x the music slider on the tModLoader music curve (as in game since 0.3.82); one +12 dB make-up for all videos (lowered only to stay under -1 dBFS).</p>')
     existing = {v['file'] for v in videos + pairs}
     parts.append('<h2>Owner outputs (design §4.4)</h2><p class="cap">The in-game picture is "material on, proposed motion" '
                  '(the body material, the approved motion and Vespera\'s command). Each video carries sound set A; the "-bgm" twin adds the arranged score.</p>'

@@ -151,7 +151,7 @@ internal sealed partial class CrimsonRuntime
 
     private bool TryScheduleChorus()
     {
-        if (actor is null || phase == 0 || performerDefeated || phrasesSinceChorus < CrimsonChorusRules.PhrasesBetween)
+        if (actor is null || phase == 0 || performerDefeated || !CrimsonChorusRules.Due(phase, phrasesSinceChorus, phraseSerial + 1))
             return false;
         int earliest = Math.Max(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks), cycle.FinishAt) - musicStart;
         var (born, fire, end) = CrimsonChorusRules.Schedule(earliest);
@@ -169,8 +169,9 @@ internal sealed partial class CrimsonRuntime
         chorus = plan; chorusSlot = slot; chorusResolved = false; phrasesSinceChorus = 0;
         Main.projectile[slot].timeLeft = CrimsonChorusImpactPositions.LeaseEnd(plan) - age;
         ((CrimsonChorus)Main.projectile[slot].ModProjectile).Synchronize();
-        // The call ends on a bar head; the next phrase begins exactly there.
-        nextPhrase = plan.End - CrimsonRhythm.LookAheadTicks;
+        // The call ends on a bar head; the next phrase begins exactly there with a pickup crossflow
+        // whose seals bloom two beats after the verdict and whose stream releases on that bar head.
+        BookPhrase(plan.End - musicStart, true);
         CrimsonPackets.Log($"event=ChorusCalled fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} born={plan.Born} fire={plan.Fire} members={mask}");
         return true;
     }

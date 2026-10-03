@@ -16,7 +16,10 @@ Mods: {
 				Tooltip:
 					'''
 					Hold to swing a bone-hooked scythe in an unbroken figure eight
-					Every stroke that connects engraves one line of a five-line staff behind you
+					Each cut tears off a black-blood crescent that seeks the enemy nearest your cursor
+					The closing lash sheds five smaller crescents
+					Crescents chain on to nearby enemies, cutting up to three
+					Every stroke that connects, by blade or crescent, engraves one line of a five-line staff behind you
 					Right click for Staff Reap: the staff closes on your target and its lines cut across it
 					A full staff ends on the Final Barline
 					'''
@@ -73,6 +76,7 @@ Mods: {
 			SableStaff.DisplayName: Engraved Staff
 			SableRelease.DisplayName: Sable Scythe
 			StaffCut.DisplayName: Staff Reap
+			SableCrescent.DisplayName: Reaping Crescent
 			CanticleShard.DisplayName: Bone Shard
 			BoneHand.DisplayName: Bone Hand
 			BatonSwing.DisplayName: Scarlet Baton

@@ -83,6 +83,10 @@ internal sealed class ScarletInkStroke
         int follower = yields ? ScarletResidueYield.Successor(plan, phrase) : -1;
         int next = follower >= 0 ? ScarletResidueYield.Forecast(phrase[follower], successor) : 0;
         shader.Set("signal", signal);
+        // The noise seed comes from a point that holds still for the whole strike. The crossflow's capsule start moves
+        // with its width while the stream opens and closes (its round end stays on the right stream end), so it seeds
+        // from that fixed end instead; seeding from the moving start would re-roll the black blood every tick.
+        CrimsonPoint? anchor = plan.Technique == CrimsonTechnique.SideBeams ? CrimsonChoreography.Reach(plan).Right : null;
         for (int i = 0; i < count; i++)
         {
             var s = buffer[i];
@@ -97,7 +101,8 @@ internal sealed class ScarletInkStroke
             }
             Vector2 along = length > .01f ? delta / length : Vector2.UnitX, normal = new(-along.Y, along.X);
             float extent = s.Radius + Margin;
-            shader.Set("shape", new Vector4(length, s.Radius, (s.A.X * .37f + s.A.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
+            var seed = anchor ?? s.A;
+            shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
             shader.Apply(pass);
             Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));
             device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);

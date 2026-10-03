@@ -6,13 +6,19 @@
 //   pwsh tools/preview-scarlet.ps1 -Rewards -Only scythe
 //
 // scythe-measure: Over, Under, Over, Under, Whip (100 ticks) at a stationary reaper facing right: the swing wake (live
-//   in the cut, cooling to residue), the Whip's crescent (live until 26, then its scar), glints at the aim crossings,
+//   in the cut, cooling to residue), the Whip's lash arc (live until 26, then its scar), glints at the aim crossings,
 //   droplets and bone chips from a dummy, and the hanging staff gaining a line per connecting stroke (warm when full).
 // scythe-reap: Staff Reap with five lines on a 96 px tall dummy: the middle line first and outward on sixteenths, each
 //   head crossing 840 px in 4 ticks, live 10 ticks behind it, the Final Barline at 51, the whole staff drying together.
-// These scenes mirror Client/Encounters/CrimsonFoundry/Rewards/ScytheVisuals.cs on the pure SableScytheMotion rules.
+// scythe-crescents: the same measure thrown at a boss-sized dummy with a crowd of three small ones below the aim: each
+//   Over and Under throws a crescent at age 9, the lash arc sheds the volley of five at 92, the crescents steer by
+//   SableCrescentFlight, chain through the crowd, break on their last target and leave their scars and spatters
+//   (ticks 0-170). scythe-crescents-contract draws the same frames with every crescent's collision capsules outlined.
+// These scenes mirror Client/Encounters/CrimsonFoundry/Rewards/ScytheVisuals.cs on the pure SableScytheMotion and
+// SableCrescentFlight rules; the crescent's ink itself is the production ScarletCrescentInk.
 #nullable enable
 using System;
+using System.Collections.Generic;
 using Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 using Convergence.Content.Encounters.CrimsonFoundry.Rewards;
 using Microsoft.Xna.Framework;
@@ -48,23 +54,13 @@ internal static class ScythePreview
         Line(batch, pixel, view, max, new Vector2(min.X, max.Y), color, 1.5f);
         Line(batch, pixel, view, new Vector2(min.X, max.Y), min, color, 1.5f);
     }
-}
 
-internal sealed class ScytheMeasureScene : IRewardsPreviewScene
-{
-    public string Name => "scythe-measure";
-    public int[] Ticks { get; } = { 2, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 44, 54, 62, 66, 80, 86, 88, 90, 92, 96, 99 };
-    private static Vector2 Shoulder(Vector2 c) => c + new Vector2(-2, -6);
-    // A dummy in front: every stroke connects, so the staff fills by the Whip.
-    private static readonly Vector2 DummyMin = new(96, -60), DummyMax = new(150, 40);
-    private static readonly int[] Engraved = { 7, 25, 43, 61, 87 };
-
-    public void Emit(ScarletInkCanvas canvas, Vector2 center, int tick)
+    // The swing wake at measure tick `tick`: the hook tip over the last 9 ticks, hot in the live window for 3 ticks, then
+    // residue (ScytheInk.EmitStroke).
+    internal static void EmitWake(ScarletInkCanvas canvas, Vector2 shoulder, float tick)
     {
-        Vector2 shoulder = Shoulder(center);
-        var (stroke, age) = ScythePreview.At(tick);
+        var (stroke, age) = At(tick);
         int start = SableScytheMotion.LiveStart(stroke), end = SableScytheMotion.LiveEnd(stroke);
-        // Wake: the hook tip over the last 9 ticks, hot in the live window for 3 ticks, then residue.
         const int perTick = 4;
         Span<Vector2> pts = stackalloc Vector2[9 * perTick + 1];
         Span<float> back = stackalloc float[9 * perTick + 1];
@@ -74,7 +70,7 @@ internal sealed class ScytheMeasureScene : IRewardsPreviewScene
         {
             float s = age - i / (float)perTick;
             if (s < Math.Max(0, start - 2) || s > end + 9) continue;
-            pts[n] = shoulder + ScythePreview.X(SableScytheMotion.Tip(SableScytheMotion.Pose(stroke, s)));
+            pts[n] = shoulder + X(SableScytheMotion.Tip(SableScytheMotion.Pose(stroke, s)));
             back[n] = age - s; hot[n] = s >= start && s <= end && age - s <= 3; n++;
         }
         int split = n;
@@ -89,25 +85,66 @@ internal sealed class ScytheMeasureScene : IRewardsPreviewScene
             for (int i = split; i < n; i++) canvas.Point(pts[i], 14 * (1 - back[i] / 9), back[i]);
             canvas.End();
         }
-        // The Whip's crescent.
-        float whip = tick - ScythePreview.Starts[4];
-        if (whip > CrimsonRewardRules.WhipLiveStart && whip <= CrimsonRewardRules.WhipLiveEnd + CrimsonRewardRules.CrescentScar + 6)
+    }
+
+    // The Whip's lash arc at measure tick `tick` (the Whip starts at Starts[4]): live as it is written and until 26,
+    // closing over 20-26 while the volley leaves it, then its 20-tick scar.
+    internal static void EmitLash(ScarletInkCanvas canvas, Vector2 shoulder, float tick)
+    {
+        float whip = tick - Starts[4];
+        if (!(whip > CrimsonRewardRules.WhipLiveStart && whip <= CrimsonRewardRules.WhipLiveEnd + CrimsonRewardRules.LashScar + 6)) return;
+        bool live = whip <= CrimsonRewardRules.LashLiveEnd;
+        if (!canvas.Begin(new ScarletInkStyle(live ? ScarletInkLook.Live : ScarletInkLook.Residue, true, 2.1f,
+                Remaining: CrimsonRewardRules.LashLiveEnd - whip))) return;
+        float fade = 1 - (whip - CrimsonRewardRules.LashLiveEnd) / CrimsonRewardRules.LashScar;
+        for (int i = 0; i <= 24; i++)
         {
-            bool live = whip <= CrimsonRewardRules.CrescentLiveEnd;
-            if (canvas.Begin(new ScarletInkStyle(live ? ScarletInkLook.Live : ScarletInkLook.Residue, true, 2.1f,
-                    Remaining: CrimsonRewardRules.CrescentLiveEnd - whip)))
-            {
-                float fade = 1 - (whip - CrimsonRewardRules.CrescentLiveEnd) / CrimsonRewardRules.CrescentScar;
-                for (int i = 0; i <= 24; i++)
-                {
-                    float written = CrimsonRewardRules.WhipLiveStart + i / 4f;
-                    if (written > whip || written > CrimsonRewardRules.WhipLiveEnd) break;
-                    canvas.Point(shoulder + ScythePreview.X(SableScytheMotion.Tip(SableScytheMotion.Pose(4, written))), CrimsonRewardRules.CrescentRadius,
-                        live ? whip - written : fade);
-                }
-                canvas.End(bead: live && whip < CrimsonRewardRules.WhipLiveEnd);
-            }
+            float written = CrimsonRewardRules.WhipLiveStart + i / 4f;
+            if (written > whip || written > CrimsonRewardRules.WhipLiveEnd) break;
+            canvas.Point(shoulder + X(SableScytheMotion.Tip(SableScytheMotion.Pose(4, written))), CrimsonRewardRules.LashRadius,
+                live ? whip - written : fade);
         }
+        canvas.End(bead: live && whip < CrimsonRewardRules.WhipLiveEnd);
+    }
+
+    // The reaper stand-in, the haft and the blade's three collision capsules (white), and the hook tip's path faint.
+    internal static void Reaper(SpriteBatch batch, Texture2D pixel, in ScarletView view, Vector2 center, Vector2 shoulder, float tick)
+    {
+        SablePose pose = Pose(tick);
+        Span<NVector> knots = stackalloc NVector[4];
+        SableScytheMotion.Blade(pose, knots);
+        Box(batch, pixel, view, center - new Vector2(10, 21), center + new Vector2(10, 21), new Color(90, 90, 110));
+        Vector2 grip = shoulder + X(pose.Hand);
+        Line(batch, pixel, view, grip, shoulder + X(SableScytheMotion.Project(pose, new NVector(1.006f, -.947f))), new Color(150, 150, 160), 3);
+        Color edge = new(255, 255, 255, 200);
+        for (int i = 0; i + 1 < knots.Length; i++)
+        {
+            Vector2 a = shoulder + X(knots[i]), b = shoulder + X(knots[i + 1]);
+            Vector2 d = b - a; if (d.LengthSquared() < 1e-4f) continue;
+            Vector2 n = new Vector2(-d.Y, d.X); n.Normalize(); n *= SableScytheMotion.BladeRadius;
+            Line(batch, pixel, view, a + n, b + n, edge, 1);
+            Line(batch, pixel, view, a - n, b - n, edge, 1);
+            Line(batch, pixel, view, a, b, new Color(255, 230, 200, 160), 1);
+        }
+        for (int t = 1; t <= 400; t++)
+            Line(batch, pixel, view, Tip(shoulder, (t - 1) * .2497f), Tip(shoulder, t * .2497f), new Color(255, 255, 255) * .22f, 1);
+    }
+}
+
+internal sealed class ScytheMeasureScene : IRewardsPreviewScene
+{
+    public string Name => "scythe-measure";
+    public int[] Ticks { get; } = { 2, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 44, 54, 62, 66, 80, 86, 88, 90, 92, 96, 99 };
+    private static Vector2 Shoulder(Vector2 c) => c + new Vector2(-2, -6);
+    // A dummy in front: every stroke connects, so the staff fills by the Whip.
+    private static readonly Vector2 DummyMin = new(96, -60), DummyMax = new(150, 40);
+    private static readonly int[] Engraved = { 7, 25, 43, 61, 87 };
+
+    public void Emit(ScarletInkCanvas canvas, Vector2 center, int tick)
+    {
+        Vector2 shoulder = Shoulder(center);
+        ScythePreview.EmitWake(canvas, shoulder, tick);
+        ScythePreview.EmitLash(canvas, shoulder, tick);
         // Droplets from the dummy, the tick after each engraving.
         foreach (int e in Engraved)
         {
@@ -164,30 +201,10 @@ internal sealed class ScytheMeasureScene : IRewardsPreviewScene
     public void Sprites(PreviewRenderer renderer, ScarletView view, Vector2 center, int tick)
     {
         var batch = renderer.Batch;
-        Vector2 shoulder = Shoulder(center);
-        SablePose pose = ScythePreview.Pose(tick);
-        Span<NVector> knots = stackalloc NVector[4];
-        SableScytheMotion.Blade(pose, knots);
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
         ScythePreview.Box(batch, renderer.Pixel, view, center + DummyMin, center + DummyMax, new Color(120, 120, 140));
-        // The reaper (a 20 x 42 stand-in) and the haft from the grip to the head.
-        ScythePreview.Box(batch, renderer.Pixel, view, center - new Vector2(10, 21), center + new Vector2(10, 21), new Color(90, 90, 110));
-        Vector2 grip = shoulder + ScythePreview.X(pose.Hand);
-        ScythePreview.Line(batch, renderer.Pixel, view, grip, shoulder + ScythePreview.X(SableScytheMotion.Project(pose, new NVector(1.006f, -.947f))),
-            new Color(150, 150, 160), 3);
-        Color edge = new(255, 255, 255, 200);
-        for (int i = 0; i + 1 < knots.Length; i++)
-        {
-            Vector2 a = shoulder + ScythePreview.X(knots[i]), b = shoulder + ScythePreview.X(knots[i + 1]);
-            Vector2 d = b - a; if (d.LengthSquared() < 1e-4f) continue;
-            Vector2 n = new Vector2(-d.Y, d.X); n.Normalize(); n *= SableScytheMotion.BladeRadius;
-            ScythePreview.Line(batch, renderer.Pixel, view, a + n, b + n, edge, 1);
-            ScythePreview.Line(batch, renderer.Pixel, view, a - n, b - n, edge, 1);
-            ScythePreview.Line(batch, renderer.Pixel, view, a, b, new Color(255, 230, 200, 160), 1);
-        }
-        // The hook tip's path over the whole measure, faint.
-        for (int t = 1; t <= 400; t++)
-            ScythePreview.Line(batch, renderer.Pixel, view, ScythePreview.Tip(shoulder, (t - 1) * .2497f), ScythePreview.Tip(shoulder, t * .2497f), new Color(255, 255, 255) * .22f, 1);
+        // The reaper (a 20 x 42 stand-in), the haft, the blade's capsules and the hook tip's path over the measure.
+        ScythePreview.Reaper(batch, renderer.Pixel, view, center, Shoulder(center), tick);
         batch.End();
     }
 }

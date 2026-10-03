@@ -26,6 +26,10 @@ internal static class CrimsonInvocation
     }
     internal static float Ease(float x) { x = Math.Clamp(x, 0, 1); return x * x * (3 - 2 * x); }
     internal static float MusicGain(double scoreAge) => .39f * Ease((float)scoreAge / MusicFadeTicks);
+    // The music slider as tModLoader applies it to every other track (ASoundEffectBasedAudioTrack.ReMapVolumeToMatchXact:
+    // 31 v - 36.94 dB), normalised at v = 1 so a full slider keeps MusicGain's calibrated level; off below v = 0.
+    internal static float MusicSlider(float volume)
+        => volume <= 0 ? 0 : MathF.Pow(10, 31 * (Math.Min(volume, 1) - 1) / 20);
     internal static float Manifest(float age, int start) => start < 0 ? 0 : Ease((age - start) / ManifestTicks);
     internal static float OpeningBars(CrimsonStage stage, float age, int musicStart, int introTicks)
     {

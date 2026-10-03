@@ -33,7 +33,6 @@ internal static class RigBaseline
     {
         ["g8"] = new[] { "Client/Encounters/CrimsonFoundry/ScarletApparitionRig.cs", "Client/Encounters/CrimsonFoundry/CrimsonChoirRig.cs",
             "Assets/AutoloadedEffects/Shaders/ScarletApparitions.fx", "Assets/AutoloadedEffects/Shaders/ScarletChoir.fx" },
-        ["g11"] = new[] { "Client/Encounters/CrimsonFoundry/Vfx/ScarletInkStroke.cs", "Assets/AutoloadedEffects/Shaders/ScarletInk.fx" },
         ["s4"] = new[] { "Client/Encounters/CrimsonFoundry/CrimsonRig.Performer.cs", "Client/Encounters/CrimsonFoundry/Vfx/ScarletGestureMotion.cs" },
     };
     private static readonly HashSet<string> UnderChange = new() { "g8", "s4" };
@@ -147,7 +146,10 @@ internal sealed class RigGates
         return scene;
     }
     private static readonly string[] Signatures = { "act1-signature", "act2-signature", "act3-signature" };
-    private static readonly string[] Basics = { "act1-basic", "act2-basic", "act3-basic" };
+    // An Act's first phrase (pickup crossflow, cell A, closing crossflow) and its second (cell B, the third note opening as the second
+    // strikes). The idle ticks the G8 baselines were rendered at: the phrase is not part of an idle frame, only the absolute clock.
+    private static readonly string[] Basics = { "act1-basic", "act2-basic", "act3-basic", "act1-basic2", "act2-basic2", "act3-basic2" };
+    private static readonly Dictionary<string, int> IdleBase = new() { ["act1-signature"] = 3950, ["act2-signature"] = 7775, ["act3-signature"] = 12275 };
     private static readonly RigVariant Normal = new(false, false, false, true);   // today's picture
     private static readonly RigVariant Plain = new(false, false, true, true);    // proposed motion, material off
     private static readonly RigVariant Game = new(false, true, true, true);      // the in-game picture
@@ -172,6 +174,8 @@ internal sealed class RigGates
         };
         void Step(string id, Action run)
         {
+            // SCARLET_GATE_ONLY=G6,S4 runs only those steps (a review aid; the gates file then holds only them).
+            if (Environment.GetEnvironmentVariable("SCARLET_GATE_ONLY") is { Length: > 0 } only && !only.Split(',').Contains(id)) return;
             var t = watch.Elapsed;
             run();
             Console.WriteLine($"  {id} {(watch.Elapsed - t).TotalSeconds:0.0}s");
@@ -203,10 +207,10 @@ internal sealed class RigGates
             var limits = References(name);
             var offSilhouette = new List<float>(); var onSilhouette = new List<float>();
             int safePixels = 0;
-            var third = s.Phrase.Plans[2]; var flow = s.Phrase.Plans[4];
+            var third = s.Third; var flow = s.Flow;
             var ticks = new SortedDictionary<int, string>();
             foreach (int rel in new[] { -14, -3, 0, 1, 2, 4, 6, 10, 16 }) ticks.TryAdd(third.Fire + rel, $"n3{rel:+0;-0;+0}");
-            if (name.EndsWith("signature")) foreach (int rel in new[] { -28, 0, 2, 7 }) ticks.TryAdd(flow.Fire + rel, $"xf{rel:+0;-0;+0}");
+            foreach (int rel in new[] { -28, 0, 2, 7 }) ticks.TryAdd(flow.Fire + rel, $"xf{rel:+0;-0;+0}");
             foreach (var (tick, label) in ticks)
             {
                 var view = s.View(r.Device, o.Width, o.Height, tick, false);
@@ -293,16 +297,20 @@ internal sealed class RigGates
             + "addedInSafeZones: the design's count (outside the body range, NPC layer over transparent). safeGround: camera C, G1's ticks, the composited "
             + "backdrop + NPC layer, luma(Game) - luma(Plain) > 2 over safe pixels, split by the current silhouette (lag 0, alpha > .05, +4 px); "
             + "limits are the scene's G3 references (camera A2, third note). "
-            + "fourHands: every tick of every FourHands window (Born .. Fire+Span) of the Act III signature phrase, the Choir's SparkPass drawn alone: "
-            + "pixels outside the body's own silhouette (lag 0, +12 px) gate; spark pixels inside it are the free sparks fading out (handed to the attack clock).");
+            + "fourHands: every tick of every FourHands window (Born .. Fire+Span) of the Act III signature phrase, the Choir's SparkPass drawn alone in Game and in Plain: "
+            + "pixels lit only in Game (added by the material) outside the body's own silhouette (lag 0, +12 px) gate; the free sparks the Choir already draws (lit in both) "
+            + "fade out as a window opens and are reported, not gated.");
     }
 
-    // The Choir's sparks during the FourHands windows (design §2.0.3-6: no particle outside the body there).
+    // The Choir's sparks during the FourHands windows (design §2.0.3-6: no particle outside the body there). The material adds none
+    // (a SparkPass pixel lit in Game and not in Plain, outside the body, gates); the free sparks the Choir already draws (lit in both)
+    // fade out as a window opens and back in as it closes, which since protocol80 can be a few ticks after a gap (the previous
+    // closing crossflow's window ends 14 ticks before the first step is born), so they are reported, not gated.
     private (int Outside, object Measured) HandsParticles()
     {
         var s = Scene("act3-signature", "C");
-        int outside = 0, inside = 0, ticksWithSparks = 0, lastRel = int.MinValue;
-        var rows = new List<object>();
+        int outside = 0, inside = 0, free = 0, freeOutside = 0, ticksWithSparks = 0, lastRel = int.MinValue;
+        var rows = new List<object>(); var outsideTicks = new List<object>();
         foreach (var p in s.Plans)
         {
             if (p.Technique != CrimsonTechnique.FourHands || !ScarletNotes.TryFrom(p, s.Flipped, RigScene.Conductor.X, RigScene.Conductor.Y, out var note)) continue;
@@ -310,18 +318,25 @@ internal sealed class RigGates
             {
                 var view = s.View(r.Device, o.Width, o.Height, tick, false);
                 var body = BodyMask(s, view, Game, 12);
-                Color[] px;
+                Color[] px, plain;
                 RigHost.PassFilter = (shader, pass) => shader == "ScarletChoir" && pass == "SparkPass";
-                try { px = Pixels(s, view, Game, RigLayers.Apparition, Color.Transparent); }
+                try { px = Pixels(s, view, Game, RigLayers.Apparition, Color.Transparent); plain = Pixels(s, view, Plain, RigLayers.Apparition, Color.Transparent); }
                 finally { RigHost.PassFilter = null; }
                 int o0 = 0, i0 = 0;
-                for (int i = 0; i < px.Length; i++) if (Lit(px[i], 2)) { if (body[i]) i0++; else o0++; }
+                for (int i = 0; i < px.Length; i++)
+                    if (Lit(px[i], 2))
+                    {
+                        if (Lit(plain[i], 2)) { free++; if (!body[i]) freeOutside++; continue; }
+                        if (body[i]) i0++; else o0++;
+                    }
                 outside += o0; inside += i0;
+                if (o0 > 0) outsideTicks.Add(new { pulse = p.Pulse, afterBorn = tick - (int)note.Born, afterFire = tick - (int)note.Fire, outside = o0 });
                 if (o0 + i0 > 0) { ticksWithSparks++; lastRel = Math.Max(lastRel, tick - (int)note.Born); }
             }
             rows.Add(new { phrase = p.Phrase, pulse = p.Pulse, born = note.Born, fire = note.Fire, close = note.Close });
         }
-        return (outside, new { windows = rows, sparkPixelsOutsideBody = outside, sparkPixelsInsideBody = inside, ticksWithSparks,
+        return (outside, new { windows = rows, addedSparkPixelsOutsideBody = outside, addedSparkPixelsInsideBody = inside, freeSparkPixels = free,
+            freeSparkPixelsOutsideBody = freeOutside, outsideTicks, ticksWithSparks,
             lastSparkTickAfterBorn = lastRel == int.MinValue ? (int?)null : lastRel });
     }
 
@@ -332,7 +347,11 @@ internal sealed class RigGates
     {
         if (references.TryGetValue(name, out var cached)) return cached;
         var s = Scene(name, "A2");
-        var third = s.Phrase.Plans[2];
+        var third = s.Third;
+        // The Choir's rake ribbon is not reproduced offline: its hit-shape stand-in is not the live strike, so its brightness (a function
+        // of the backdrop's beat under it) is no measure of what the decoration must stay under. The Choir's basic phrases use the
+        // reference of its signature phrase, whose FourHands are drawn in ScarletInk like the other Acts' strikes.
+        if (third.Technique == CrimsonTechnique.ChoirRakes) return references[name] = References("act3-signature");
         var warnView = s.View(r.Device, o.Width, o.Height, third.Fire - 8, false);
         var warn = Pixels(s, warnView, Game, RigLayers.Backdrop | RigLayers.Field, Color.Black);
         var band = Capsules(s, warnView, third, third.Fire, true);
@@ -354,7 +373,7 @@ internal sealed class RigGates
             var (bandMedian, inkP995, limitOutside, limitInside) = References(name);
             // The decoration itself: Game - Plain on the apparition layer over black, camera C, around the third note and the crossflow.
             var c = Scene(name, "C");
-            var n3 = c.Phrase.Plans[2]; var flow = c.Phrase.Plans[4];
+            var n3 = c.Third; var flow = c.Flow;
             var sets = new Dictionary<string, (List<float> Outside, List<float> Inside)> { ["all"] = (new(), new()), ["heartExcluded"] = (new(), new()) };
             var filters = new List<(string, Func<string, string, bool>?)> { ("all", null), ("heartExcluded", (_, pass) => pass != "HeartPass") };
             foreach (string only in new[] { "AutoloadPass", "AuraPass", "RibbonPass", "HeartPass", "SparkPass", "DripPass", "WispPass" })
@@ -450,7 +469,7 @@ internal sealed class RigGates
         foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "A2");
-            var third = s.Phrase.Plans[2];
+            var third = s.Third;
             float worst = float.PositiveInfinity, worstToday = float.PositiveInfinity, ringWorst = float.PositiveInfinity; string worstAt = "";
             float worstOff = 0, worstOn = 0;
             int tiles = 0;
@@ -559,10 +578,10 @@ internal sealed class RigGates
         foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "C");
-            foreach (var (p, label) in new[] { (s.Phrase.Plans[2], "n3"), (s.Phrase.Plans[4], "crossflow") })
+            foreach (var (p, label) in new[] { (s.Third, "n3"), (s.Flow, "crossflow") })
             {
                 // The drawn body glow the material adds (sum of luma(Game) - luma(Plain) where positive) around this
-                // note's strike, Fire-10 .. Fire+12 (the previous note fires on this one's Born, 28 ticks earlier).
+                // note's strike, Fire-10 .. Fire+12 (the previous note fired one to one and a half beats earlier).
                 float best = -1; int at = 0;
                 for (int tick = p.Fire - 10; tick <= p.Fire + 12; tick++)
                 {
@@ -606,7 +625,7 @@ internal sealed class RigGates
         foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "C");
-            var third = s.Phrase.Plans[2];
+            var third = s.Third;
             double normalEnergy = 0, reducedEnergy = 0;
             foreach (int tick in new[] { third.Born + 6, third.Born + 14, third.Fire, third.Fire + 2, third.Fire + 3, third.Fire + 10, third.End })
             {
@@ -672,7 +691,7 @@ internal sealed class RigGates
             var empty = Idle(s);
             foreach (int offset in new[] { 0, 37, 91 })
             {
-                int tick = s.Phrase.FirstBorn - 400 + offset; // the rest a phrase leaves: no gesture alive
+                int tick = IdleBase[name] + offset; // the rest between phrases: no gesture alive; the clock the baselines used
                 var view = empty.View(r.Device, o.Width, o.Height, tick, false);
                 var px = Pixels(empty, view, Game, RigLayers.Apparition, Color.Transparent);
                 rows.Add(Check($"{name}-apparition-{offset}", px, view.Width, view.Height, name.StartsWith("act2") ? -1 : 1));
@@ -682,7 +701,7 @@ internal sealed class RigGates
             var s = Idle(Scene("act1-signature", "V"));
             foreach (int offset in new[] { 0, 53 })
             {
-                int tick = s.Phrase.FirstBorn - 400 + offset;
+                int tick = IdleBase["act1-signature"] + offset;
                 var view = s.View(r.Device, o.Width, o.Height, tick, false);
                 rows.Add(Check($"vespera-{offset}", Pixels(s, view, Game, RigLayers.Vespera, Color.Transparent), view.Width, view.Height, 0));
                 rows.Add(Check($"companion-{offset}", Companion(view, tick), view.Width, view.Height, 0));
@@ -723,7 +742,7 @@ internal sealed class RigGates
         foreach (string name in Signatures)
         {
             var s = Scene(name, "C");
-            var second = s.Phrase.Plans[1];
+            var second = s.Second;
             var ticks = Enumerable.Range(second.Fire - 5, 11).ToArray();
             var sequential = ticks.Select(t => Hash(s, t)).ToArray();
             var shuffled = ticks.Select((t, i) => (t, i)).OrderBy(x => (x.i * 7919) % 11).ToArray();
@@ -861,31 +880,29 @@ internal sealed class RigGates
             hashOk &= actual == expected;
             hashes.Add(new { file, ok = actual == expected });
         }
-        string dir = BaselineDir("g11");
-        RigBaseline.Manifest? manifest = null;
-        string? refused = o.WriteBaseline ? null : RigBaseline.Refuse(root, dir, "g11", out manifest);
-        bool compare = !o.WriteBaseline && refused is null;
-        var frames = new List<object>(); bool frameOk = true;
-        var s = Scene("act1-basic", "A2");
-        foreach (var p in s.Phrase.Plans.Where(q => ScarletInkStroke.Applies(q)))
-            foreach (int rel in new[] { 2, 10, p.End - p.Fire + 5 })
-            {
-                int tick = p.Fire + rel;
-                var view = s.View(r.Device, o.Width, o.Height, tick, false);
-                var px = InkOnly(s, view, p, r.Frame(view.Width, view.Height));
-                string label = $"act1-basic-n{p.Pulse + 1}-fire+{rel}", file = Path.Combine(dir, label + ".rgba.gz");
-                if (o.WriteBaseline) { Directory.CreateDirectory(dir); SaveRaw(px, view.Width, view.Height, file); frames.Add(new { label, written = true }); continue; }
-                if (!compare) continue;
-                bool same = File.Exists(file) && LoadRaw(file, view.Width, view.Height).AsSpan().SequenceEqual(px);
-                frameOk &= same;
-                frames.Add(new { label, identical = same });
-            }
-        if (o.WriteBaseline) RigBaseline.Write(root, dir, "g11", "the approved ScarletInk on the Act I basic phrase (G11)");
-        string status = !hashOk ? "fail" : o.WriteBaseline ? "baseline_written" : compare ? Status(frameOk) : "not_run";
-        Add("G11", "ink regression: ScarletInk (and the other approved field shaders) unchanged; Act I basic ink frames identical", status,
-            new { hashes, frames }, o.WriteBaseline ? "Pinned hashes checked; the Act I basic ink frames written to " + dir + " with their manifest."
-                : compare ? $"Frames against {Path.GetRelativePath(output, dir)} (rendered from {manifest!.Revision}{(manifest.Dirty ? ", dirty" : "")}, {manifest.Written})."
-                : "Pinned hashes checked; frames not compared: " + refused);
+        // The field beams of the Act I phrases (the tracking beams, the crossflows with the pickup's), the production ink against the
+        // reference class (main's ScarletInkStroke before the signature moves): live at Fire+2 and +10, residue 5 ticks after End.
+        var frames = new List<object>(); bool frameOk = true; int checkedFrames = 0;
+        foreach (string name in new[] { "act1-basic", "act1-basic2" })
+        {
+            var s = Scene(name, "A2");
+            foreach (var p in s.Phrase.Plans.Where(q => ScarletInkStroke.Applies(q)))
+                foreach (int rel in new[] { 2, 10, p.End - p.Fire + 5 })
+                {
+                    int tick = p.Fire + rel;
+                    var view = s.View(r.Device, o.Width, o.Height, tick, false);
+                    var production = InkOnly(s, view, p, r.Frame(view.Width, view.Height));
+                    var reference = InkOnlyReference(view, p, r.Frame(view.Width, view.Height));
+                    bool same = production.AsSpan().SequenceEqual(reference);
+                    frameOk &= same; checkedFrames++;
+                    frames.Add(new { label = $"{name}-{p.Technique}-p{p.Pulse}-fire+{rel}", identical = same, lit = production.Count(c => Lit(c, 3)) });
+                }
+        }
+        Add("G11", "ink regression: ScarletInk (and the other approved field shaders) unchanged; the field beams' ink identical to main's ScarletInkStroke", Status(hashOk && frameOk),
+            new { hashes, framesChecked = checkedFrames, frames },
+            "Pinned shader hashes, and every live-strike and residue frame of the Act I basic phrases (the pickup and closing crossflows, the tracking beams of cells A and B) "
+            + "drawn by the production ScarletInkStroke and by ScarletInkStrokeReference (tools/fixtures/ScarletInkReference.cs, a verbatim copy of main's class before "
+            + "the signature moves) must be pixel for pixel identical, so the signature moves' changes to the class cannot reach a basic strike.");
     }
 
     // ---- G12: draw / vertex budget -----------------------------------------------------------------------------
@@ -963,9 +980,8 @@ internal sealed class RigGates
         foreach (string name in Signatures.Concat(Basics).Append("act1-signature-trio"))
         {
             var s = Scene(name, "A2");
-            var plans = s.Phrase.Plans;
             var result = new PreviewContract.Result();
-            foreach (int tick in new[] { plans[1].Born + 10, plans[1].Fire + 5, plans[2].Fire + 2, plans[4].Fire + 14, plans[3].End + 6 })
+            foreach (int tick in new[] { s.Second.Born + 10, s.Second.Fire + 5, s.Third.Fire + 2, s.Flow.Fire + 14, s.Notes[^1].End + 6 })
                 result += PreviewContract.Run(r.Device, overlay, s.Phrase, tick);
             wrong += result.Wrong;
             rows.Add(new { scene = name, result.Checked, result.Wrong });
@@ -1159,6 +1175,17 @@ internal sealed class RigGates
         r.Device.SetRenderTarget(target);
         r.Device.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, Color.Transparent, 1f, 0);
         new ScarletInkStroke().Draw(view, r.Assets, p, s.Plans);
+        r.Device.SetRenderTarget(null);
+        return RigRenderer.Read(target);
+    }
+
+    // The same plan through the reference class (main's ScarletInkStroke).
+    private Color[] InkOnlyReference(in ScarletView view, in CrimsonGesturePlan p, RenderTarget2D target)
+    {
+        CrimsonVisuals.Reduced = view.Reduced;
+        r.Device.SetRenderTarget(target);
+        r.Device.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, Color.Transparent, 1f, 0);
+        new ScarletInkStrokeReference().Draw(view, r.Assets, p);
         r.Device.SetRenderTarget(null);
         return RigRenderer.Read(target);
     }

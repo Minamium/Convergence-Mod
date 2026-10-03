@@ -16,7 +16,10 @@ Mods: {
 				Tooltip:
 					'''
 					押し続けると、骨の鉤の大鎌を8の字に振り続ける
-					当たった一振りごとに、背後の五線に線を1本ずつ刻む（最大5本）
+					振り下ろしと振り上げのたびに、鉤から黒血の刈り月が飛び、カーソルにいちばん近い敵を追う
+					締めの薙ぎ払いは、小さな刈り月を5つ放つ
+					刈り月は近くの敵へ渡り、1つで3体まで斬る
+					刃か刈り月が当たった一振りごとに、背後の五線に線を1本ずつ刻む（最大5本）
 					右クリック：五線刈り。五線が狙った敵に寄り、線が横切って斬る
 					5本そろうと終止線で締めくくる
 					'''
@@ -73,6 +76,7 @@ Mods: {
 			SableStaff.DisplayName: 刻まれた五線
 			SableRelease.DisplayName: 帷の大鎌
 			StaffCut.DisplayName: 五線刈り
+			SableCrescent.DisplayName: 刈り月
 			CanticleShard.DisplayName: 骨の欠片
 			BoneHand.DisplayName: 骨の手
 			BatonSwing.DisplayName: 緋の指揮棒

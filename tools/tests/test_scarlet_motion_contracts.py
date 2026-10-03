@@ -50,6 +50,25 @@ class ScarletMotionContracts(unittest.TestCase):
             self.assertIn(f'Client/Encounters/CrimsonFoundry/Vfx/{path.name}', project)
         self.assertIn('<EmbeddedResource Include="Data/scarlet-motion-golden.json" LogicalName="scarlet-motion-golden.json" />', project)
 
+    def test_handover_and_rope_direction_follow_the_plans_not_the_phrase_layout(self):
+        # protocol80 phrases put the notes on the eighth-note grid: a note is not a hand-over just because it is not the first
+        # (the 0.3.79 `Pulse > 0`); it is one when another note's strike is its warning's first tick, decided from the plans.
+        notes = read(VFX/'ScarletNote.cs')
+        self.assertNotIn('plan.Pulse > 0', notes)
+        self.assertIn('HandedOver(plans, source, output[i])', notes)
+        self.assertIn('previous.Fire == note.Born && previous.Fire < note.Fire', notes)
+        motion = read(VFX/'ScarletGestureMotion.cs')
+        self.assertIn('!HandedOver(notes, c)', motion)
+        # The swing out of a strike carries on beneath the next swing (nothing steps at a Born or a Fire).
+        self.assertIn('float phi = swing + follow;', motion)
+        # The rope crosses rightward on even steps (CrimsonSignatureMoves.Write) whichever comb they are; the comb that sweeps the
+        # floor became the odd steps' in protocol80, so the Mantle's cut direction must not be derived from its row.
+        self.assertIn('side = (plan.Pulse & 1) == 0 ? 1 : -1;', notes)
+        self.assertNotIn('side = low ? 1 : -1', notes)
+        signature = read(ROOT/'Content/Encounters/CrimsonFoundry/CrimsonSignatureMoves.cs')
+        self.assertIn('bool rightward = (p.Pulse & 1) == 0;', signature)
+        self.assertIn('internal static bool RopeIsLow(int note) => (note & 1) == 1;', signature)
+
     def test_golden_comes_from_the_approved_prototype(self):
         golden = json.loads(read(TESTS/'Data/scarlet-motion-golden.json'))
         self.assertLessEqual(golden['tolerance'], 1e-4)
