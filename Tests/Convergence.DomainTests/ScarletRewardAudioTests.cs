@@ -48,8 +48,11 @@ internal static partial class Program
             AssertEqual(roles[cue.Name], cue.Role, $"{cue.Name} role");
             AssertEqual(true, ScarletRewardCues.RoleDecibels(cue.Role) <= 0, $"{cue.Name} offset only lowers the file");
         }
-        AssertEqual(ScarletRewardCues.ShotDecibels, ScarletRewardCues.BuildDecibels, "tolls keep their auditioned 2 dB under the one-shots");
-        AssertNear(.398f, ScarletRewardCues.Decibels(CrimsonRewardRules.RemoteShotDecibels), .001f, "other players' shots 8 dB lower");
+        // The cues that sound in play share one offset, so their auditioned balance is kept (REWARDS.md#levels-against-the-raid).
+        foreach (var role in new[] { ScarletCueRole.Build, ScarletCueRole.Windup, ScarletCueRole.Release })
+            AssertEqual(ScarletRewardCues.ShotDecibels, ScarletRewardCues.RoleDecibels(role), $"{role} plays at the in-play offset");
+        AssertEqual(ScarletRewardCues.InPlayDecibels, ScarletRewardCues.ShotDecibels, "one-shots play at the in-play offset");
+        AssertNear(.398f, ScarletRewardCues.Decibels(CrimsonRewardRules.RemoteCueDecibels), .001f, "other players' cues 8 dB lower");
         foreach (var cue in cues)
         {
             AssertEqual(true, cue.Voices >= 1 && cue.Voices <= 8, $"{cue.Name} voices are bounded");

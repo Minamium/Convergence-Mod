@@ -19,9 +19,9 @@ internal enum ScarletCue : byte
 internal static class ScarletSounds
 {
     internal const string Root = "Convergence/Assets/Sounds/CrimsonFoundry/";
-    // The files carry the designed relative levels, so the whole set shares one gain.
-    // At 1 the loudest cue (K100 -8.1 dB) stays about 2 dB under the loudest retired
-    // Doll cues it replaces (StackRelease at .48, WideFire at .72).
+    // The files carry their levels against Graceful Ordeal (ENCOUNTER_SPEC.md#sound-effects:
+    // each group lifted once on 2026-10-03, so the balance inside a group is the audition's),
+    // so the whole set shares one gain.
     internal const float Gain = 1f;
     // An early release (Fight end) fades over this many ticks; it is never a hard cut.
     internal const int FadeTicks = 8;

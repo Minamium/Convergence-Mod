@@ -17,7 +17,7 @@ related_docs:
 
 # Playtest feedback ledger
 
-## Scarlet rhythm-game feel and crossflow overrun — 2026-10-03 / 0.3.78 → 0.3.81
+## Scarlet rhythm-game feel and crossflow overrun — 2026-10-03 / 0.3.78 → 0.3.83
 
 After playing 0.3.78 the owner reported that the seal crossflow's stream visibly ran over and past its two seals, and that the raid leaned too hard into rhythm-game feel ("狙いすぎ"); key moments should feel like satisfying hits on the music. Code reading: every phrase struck four basic notes on four consecutive beats with a foretell and an impact each, and the stream's round ends reached 140 px past each seal centre, drawn over the seals, while its collision ran 140 px beyond the capless forecast band. Decision (two drafts reviewed by three judges): keep two-bar phrases; key moments on bar heads (crossflow releases on the next downbeat, pickups at Act starts, the Final drop and after choruses, signature finales, bar-head choruses); three syncopated eighth-grid notes between them; signature steps a dotted quarter apart; impact-only notes; stream ends at the seal centres under the seals, pair clamped to the wall; protocol80. The same report noted the companion's missing item icon, already fixed by #113 (0.3.80). [Evidence](../evidence/2026-10-03-scarlet-feel.json); in-game feel remains not_run.
 

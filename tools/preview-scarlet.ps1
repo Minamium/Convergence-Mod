@@ -27,7 +27,7 @@ param(
     [ValidateSet('off', 'on', 'both')][string]$Reduced = 'off',
     [ValidateSet('black', 'dim', 'none')][string]$Mask = 'dim',
     [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike, crossflow seals)
-    [ValidateSet('over', 'under')][string]$Seals = 'over', # proposal: crossflow seals over the live stream (production since 0.3.81) or under it (before)
+    [ValidateSet('over', 'under')][string]$Seals = 'over', # proposal: crossflow seals over the live stream (production since 0.3.83) or under it (before)
     [switch]$NoSequences,
     [switch]$NoMatrix,
     [switch]$NoSmoke,

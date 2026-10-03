@@ -4,8 +4,6 @@ Not visual-quality or native gameplay approval; the owner's play checks stay not
 """
 from pathlib import Path
 import hashlib
-import importlib.util
-import math
 import re
 import unittest
 
@@ -300,70 +298,7 @@ class ScarletRewardWiring(unittest.TestCase):
 SOUNDS = ROOT / 'Assets/Sounds/Weapons/ScarletRewards'
 CUES = CLIENT / 'Rewards/ScarletRewardCues.cs'
 AUDIO_RECORD = '### Scarlet Invocation reward weapon audio — 2026-10-03'
-RAID = ROOT / 'Assets/Sounds/CrimsonFoundry'
-# Levels against the Raid (REWARDS.md#art-and-audio): the maximum 400 ms momentary loudness of each shipped file, LUFS,
-# measured 2026-10-03 two ways, each padded 0.2 s before and 0.5 s after and stepped 10 ms. 'recipe' is the meter the
-# reward files were rendered and auditioned with (the external recipe's kit.loudness_stats): its K-weighting biquads run
-# along the two-sample channel axis, so it weights no frequency. 'bs1770' runs the same biquads along time (BS.1770).
-# The relations below must hold on both. The digests pin the files measured; a changed file needs a new measurement.
-RAID_LEVELS = {
-    'ScarletActChange': (-10.17, -13.74), 'ScarletCrossflowCharge': (-18.43, -21.74),
-    'ScarletCrossflowRelease': (-10.40, -14.00), 'ScarletDown': (-16.20, -20.50), 'ScarletForetell': (-22.77, -25.73),
-    'ScarletImpact': (-20.04, -20.35), 'ScarletReady': (-24.53, -27.13), 'ScarletRevive': (-16.89, -18.97),
-    'ScarletSacrifice': (-13.99, -15.93), 'ScarletSpreadFail': (-13.86, -14.31),
-    'ScarletSpreadSuccess': (-17.24, -18.73), 'ScarletSpreadSummon': (-16.76, -17.53),
-    'ScarletStackFail': (-9.92, -15.58), 'ScarletStackSuccess': (-16.35, -18.26),
-    'ScarletStackSummon': (-15.67, -19.32), 'ScarletVictory': (-9.58, -11.86),
-}
-RAID_LEVELS_SHA256 = '0dbcf2025f46d594415a8a33853437eae1756adce0368119495d776c23459a8a'
-REWARD_LEVELS = {
-    'BatonLift': (-15.10, -18.53), 'BatonStroke': (-17.01, -20.39), 'Cadence': (-10.99, -14.40),
-    'CenserBrace': (-15.20, -15.39), 'CenserGrandPour': (-9.63, -14.20), 'CenserPour': (-16.12, -21.06),
-    'CenserSummon': (-17.08, -19.40), 'CenserSwing': (-15.10, -16.91), 'ChoirClasp': (-9.68, -12.28),
-    'HandSlam': (-15.66, -17.88), 'HymnInhale': (-15.21, -16.85), 'InkBlaze': (-12.08, -15.82),
-    'InkIgnite': (-15.52, -19.13), 'OrganShot1': (-17.13, -17.29), 'OrganShot2': (-17.11, -17.55),
-    'OrganShot3': (-17.10, -17.09), 'OrganShot4': (-17.09, -17.02), 'QuillStick': (-17.32, -17.48),
-    'QuillThrow': (-17.03, -20.01), 'ReliquaryOpen': (-13.00, -16.19), 'RiverRelease': (-9.64, -13.37),
-    'ScoreChord': (-9.69, -12.72), 'ScoreUnseal': (-18.46, -18.59), 'ScytheSwingHigh': (-17.00, -20.31),
-    'ScytheSwingLow': (-16.98, -20.40), 'ScytheWhip': (-17.21, -18.92), 'ScytheWhipBrace': (-15.08, -18.06),
-    'StaffBarline': (-9.76, -11.98), 'StaffCut': (-15.73, -17.15), 'StaffWindup': (-15.04, -17.61),
-    'Toll0': (-19.00, -22.29), 'Toll1': (-19.03, -22.20), 'Toll2': (-18.98, -22.34), 'Toll3': (-18.95, -21.72),
-    'Toll4': (-18.96, -21.10), 'Toll5': (-18.94, -21.88), 'Toll6': (-18.95, -21.70), 'Toll7': (-18.94, -21.64),
-}
-REWARD_LEVELS_SHA256 = '03c93a9819c53a4d4ec0aca69867ff2f96e29ae83f27964a6bbbac458ca1092c'
-METERS = ('recipe', 'bs1770')
-# The role groups the levels are staged by (REWARDS.md#art-and-audio).
-ROLES = {
-    'Build': {f'Toll{k}' for k in range(8)},
-    'Shot': {'ScytheSwingHigh', 'ScytheSwingLow', 'ScytheWhip', 'OrganShot', 'BatonStroke', 'CenserSummon', 'CenserSwing',
-             'QuillThrow', 'QuillStick'},
-    'Windup': {'ScytheWhipBrace', 'StaffWindup', 'HymnInhale', 'BatonLift', 'CenserBrace', 'ScoreUnseal'},
-    'Release': {'StaffCut', 'HandSlam', 'InkIgnite', 'CenserPour', 'InkBlaze'},
-    'Finale': {'StaffBarline', 'ChoirClasp', 'RiverRelease', 'CenserGrandPour', 'ScoreChord', 'Cadence'},
-    'Show': {'ReliquaryOpen'},
-}
-
-
-def files_digest(folder, stems):
-    digest = hashlib.sha256()
-    for stem in sorted(stems):
-        digest.update(f'{stem}.ogg:{hashlib.sha256((folder / f"{stem}.ogg").read_bytes()).hexdigest()}\n'.encode())
-    return digest.hexdigest()
-
-
-def role_offsets():
-    """ScarletRewardCues.<Role>Decibels, in dB."""
-    text = read(CUES)
-    return {role: float(re.search(rf'\b{role}Decibels = (-?[\d.]+)f', text).group(1)) for role in ROLES}
-
-
-def raid_gain_db():
-    gain = float(re.search(r'internal const float Gain = ([\d.]+)f;', read(CLIENT / 'ScarletSounds.cs')).group(1))
-    return 20 * math.log10(gain)
-
-
-def numeric_audio_stack():
-    return all(importlib.util.find_spec(name) for name in ('numpy', 'scipy', 'soundfile'))
+# Levels against Graceful Ordeal and the Raid's cues: tools/tests/test_scarlet_levels.py.
 
 
 def cue_table():
@@ -514,7 +449,9 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 self.assertRegex(owner, r'^(owner|p\.owner|projectile\.owner|owner\.whoAmI|player\.whoAmI)$', f'{path}: {method}({args}) names the owner second')
         self.assertIn('PauseBehavior = PauseBehavior.StopWhenGamePaused,', audio)
         self.assertIn('PlayOnlyIfFocused = true,', audio)
-        self.assertIn('remote ? decibels + CrimsonRewardRules.RemoteShotDecibels : decibels', audio)
+        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability).
+        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
+        self.assertEqual(1, audio.count('? CrimsonRewardRules.RemoteCueDecibels'), 'one place applies the remote offset')
         self.assertIn('internal const float Gain = 1f;', read(CUES))
 
     def test_the_scythe_rings_each_cue_once_through_a_late_sync(self):
@@ -526,86 +463,6 @@ class ScarletRewardAudioContract(unittest.TestCase):
         cues = re.findall(r'Crossed\((\w+), age, ScytheLook\.(\w+)\)', stroke)
         self.assertEqual({'SwingCue', 'WhipBraceCue', 'WhipCue'}, {cue for _, cue in cues})
         self.assertEqual({'reached'}, {start for start, _ in cues})
-
-    def test_the_level_table_measures_the_shipped_files(self):
-        self.assertEqual(sorted(RAID_LEVELS), sorted(p.stem for p in RAID.glob('*.ogg')), 'every Raid cue is measured')
-        self.assertEqual(sorted(REWARD_LEVELS), sorted(cue_files(cue_table())), 'every reward file is measured')
-        message = 'a measured file changed: re-measure its level and re-check the relations (REWARDS.md#art-and-audio)'
-        self.assertEqual(RAID_LEVELS_SHA256, files_digest(RAID, RAID_LEVELS), message)
-        self.assertEqual(REWARD_LEVELS_SHA256, files_digest(SOUNDS, REWARD_LEVELS), message)
-
-    def test_reward_levels_sit_under_the_raid_cues_they_answer(self):
-        # REWARDS.md#art-and-audio: each role plays at one offset against the Raid's own sound set, as the Raid plays it.
-        table = cue_table()
-        self.assertEqual(ROLES, {role: {name for name, row in table.items() if row[6] == role} for role in ROLES}, 'role groups')
-        offsets = role_offsets()
-        for role, db in offsets.items():
-            self.assertLessEqual(db, 0, f'{role}: an offset only lowers the owner-picked files')
-        # Call offsets (other players' shots, the rolled score, a partial burst) only lower a cue further.
-        rules = read(REWARDS / 'CrimsonRewardRules.cs')
-        self.assertLessEqual(float(re.search(r'RemoteShotDecibels = (-?\d+)', rules).group(1)), 0)
-        for name in ('ScoreThrowDecibels', 'PartialScoreDecibels'):
-            self.assertLessEqual(float(re.search(rf'{name} = (-?[\d.]+)', read(CUES)).group(1)), 0, name)
-        files = cue_files(table)
-        raid_db = raid_gain_db()
-        for m, meter in enumerate(METERS):
-            with self.subTest(meter=meter):
-                raid = {stem: levels[m] + raid_db for stem, levels in RAID_LEVELS.items()}
-                played = {}
-                for stem, (cue, _) in files.items():
-                    role = table[cue][6]
-                    played.setdefault(role, []).append(REWARD_LEVELS[stem][m] + offsets[role])
-                impact, foretell = raid['ScarletImpact'], raid['ScarletForetell']
-                self.assertLessEqual(max(played['Shot']), impact - 3, 'one-shots at least 3 dB under the Raid impact')
-                self.assertLess(max(played['Build']), min(played['Shot']), 'tolls under every one-shot')
-                self.assertLessEqual(max(played['Windup']), foretell + 2, 'windups and braces at most the Raid foretell + 2 dB')
-                self.assertLess(max(played['Release']), impact, 'cascade parts under the Raid impact')
-                self.assertLessEqual(max(played['Finale']), raid['ScarletCrossflowRelease'], 'finales at most the crossflow release')
-                self.assertLessEqual(max(played['Show']), raid['ScarletVictory'], 'the reliquary show at most the Raid Victory')
-
-    @unittest.skipUnless(numeric_audio_stack(), 'numpy, scipy and soundfile are local audio tools, not CI')
-    def test_the_level_table_matches_a_fresh_measurement(self):
-        import numpy as np
-        import soundfile as sf
-        from scipy import signal
-
-        rate = 48000
-
-        def biquads():
-            # BS.1770 K-weighting as the recipe's pyloudnorm 0.2.0 builds it: RBJ high shelf (+4 dB, Q 1/sqrt 2, 1500 Hz)
-            # and high pass (Q 0.5, 38 Hz).
-            out = []
-            for shelf, gain, q, fc in ((True, 4.0, 1 / math.sqrt(2), 1500.0), (False, 0.0, 0.5, 38.0)):
-                g = 10 ** (gain / 40)
-                w0 = 2 * math.pi * fc / rate
-                alpha, c, r = math.sin(w0) / (2 * q), math.cos(w0), math.sqrt(g)
-                if shelf:
-                    b = [g * ((g + 1) + (g - 1) * c + 2 * r * alpha), -2 * g * ((g - 1) + (g + 1) * c),
-                         g * ((g + 1) + (g - 1) * c - 2 * r * alpha)]
-                    a = [(g + 1) - (g - 1) * c + 2 * r * alpha, 2 * ((g - 1) - (g + 1) * c), (g + 1) - (g - 1) * c - 2 * r * alpha]
-                else:
-                    b = [(1 + c) / 2, -(1 + c), (1 + c) / 2]
-                    a = [1 + alpha, -2 * c, 1 - alpha]
-                out.append((np.array(b) / a[0], np.array(a) / a[0]))
-            return out
-
-        def m_max(x, axis):
-            x = np.concatenate([np.zeros((round(.2 * rate), 2)), x, np.zeros((round(.5 * rate), 2))])
-            for b, a in biquads():
-                x = signal.lfilter(b, a, x, axis=axis)
-            energy = np.concatenate([[0.0], np.cumsum(np.sum(x ** 2, axis=1))])
-            win, hop = round(.4 * rate), round(.01 * rate)
-            starts = np.arange(0, len(energy) - win, hop)
-            return -0.691 + 10 * math.log10(max(float(((energy[starts + win] - energy[starts]) / win).max()), 1e-12))
-
-        for folder, levels in ((RAID, RAID_LEVELS), (SOUNDS, REWARD_LEVELS)):
-            for stem, expected in levels.items():
-                with self.subTest(file=stem):
-                    x, sr = sf.read(str(folder / f'{stem}.ogg'), always_2d=True, dtype='float64')
-                    self.assertEqual((rate, 2), (sr, x.shape[1]))
-                    # 'recipe' filters along the channel axis (axis 1), 'bs1770' along time (axis 0).
-                    for meter, got, want in zip(METERS, (m_max(x, 1), m_max(x, 0)), expected):
-                        self.assertAlmostEqual(want, got, delta=.02, msg=meter)
 
     def test_reward_audio_reuses_no_other_sound_set(self):
         # The spec gives the rewards their own cues; only the Covenant keeps the companion's existing sounds, and its

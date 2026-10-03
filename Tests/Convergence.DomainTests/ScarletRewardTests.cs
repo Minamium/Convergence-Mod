@@ -312,7 +312,7 @@ internal static partial class Program
         AssertEqual(8192, CrimsonRewardRules.MaxStripVertices, "strip vertices per frame");
         AssertEqual(24, CrimsonRewardRules.ReducedCount(48, true), "Reduced Effects halves droplets");
         AssertEqual(600, CrimsonRewardRules.ReducedCount(600, false), "normal particle cap");
-        AssertNear(.398f, CrimsonRewardRules.Decibels(CrimsonRewardRules.RemoteShotDecibels), .001f, "-8 dB for other players");
+        AssertNear(.398f, CrimsonRewardRules.Decibels(CrimsonRewardRules.RemoteCueDecibels), .001f, "-8 dB for other players");
         AssertEqual(.5f, CrimsonRewardRules.RemoteDormantOpacity, "other players' builds dimmed");
         AssertEqual(.85f, CrimsonRewardRules.RemoteLiveOpacity, "other players' releases");
         AssertEqual(0f, CrimsonRewardRules.InkOpen(0), "ink opens from nothing");

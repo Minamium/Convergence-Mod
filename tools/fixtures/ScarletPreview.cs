@@ -36,7 +36,7 @@ internal sealed class PreviewOptions
     // overlay = authoritative hit shapes, ink = ScarletInk live/residue on field beams only, portal = the PortalBeam stand-in for every plan,
     // ink+overlay = both, proposal = what production draws (portal forecast, then ScarletInk) with the overlay left out.
     internal string Look = "overlay";
-    // proposal only: the crossflow seals lie over the live stream (production since 0.3.81) or under it (before).
+    // proposal only: the crossflow seals lie over the live stream (production since 0.3.83) or under it (before).
     internal bool SealsOver = true;
 }
 
