@@ -1515,7 +1515,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 684453d95bd990e21f50a0795b018796f25e6f4de69e5714565df219b82a78a1
+  content_sha256: e924d293a82f2b615fd5fe6c07421da2294e3b0d3c63ce4fe26987d5df4587eb
   document_type: status
   status: accepted
   owners:
