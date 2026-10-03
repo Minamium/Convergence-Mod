@@ -5,11 +5,11 @@ Mods: {
 				Name: Null Refrain — Lacrimosa's Claws
 				Tooltip:
 					'''
-					Manifest the distant arms of Lacrimosa
-					Left click: alternate enormous expanding true-melee claws
-					Hold this weapon for 6 seconds to charge one execution
-					Right click: both hands crush the clicked location after a short windup
-					The charge pauses while unequipped or incapacitated; death clears it
+					Manifest the distant hands of Lacrimosa
+					Left click: a three-step true-melee kata: the right hand rakes down, the left rakes up, both hands clap
+					Landing strokes lights the six heart beads on the hands, faster while the hits keep coming; holding fills them slowly
+					Right click with six beads lit: both hands fly to the cursor, seize the enemy there and crush it
+					The beads pause while unequipped or incapacitated; death empties them
 					One of five equally likely rewards from the Curtainfall Treasure Box
 					'''
 			}
@@ -43,10 +43,10 @@ Mods: {
 				Name: Choir of the Unmade
 				Tooltip:
 					'''
-					Summon a one-slot chorister that attacks independently while the ritual grows.
-					An eleven-second concert: skirmish, assemble, charge, then a three-second chorus beam.
-					All voices power one shared organ; supports normal minion target commands.
-					One of five equally likely rewards from the Curtainfall Treasure Box.
+					Summon an unfinished porcelain chorister (1 minion slot)
+					The choir sings homing notes on the beat, then lines up before a pipe organ above you for a 3-second chorus beam
+					Every chorister adds a voice to the chord and its strength to the one beam; supports minion target commands
+					One of five equally likely rewards from the Curtainfall Treasure Box
 					'''
 			}
 
@@ -54,20 +54,34 @@ Mods: {
 				Name: Last Witness
 				Tooltip:
 					'''
-					Hold to load one execution relic, releasing seeking shards as pressure builds.
-					The relic locks and releases a devastating returning blade.
-					Stealth empowers the final blade and its converging execution seal.
-					Release early to cancel; the full ritual lasts about 4.7 seconds.
+					Hold: an execution blade hangs before you; six testimonies break from its edge as seeking porcelain shards
+					After the sixth the sentence is sealed: the blade is swung back and hurled, spinning
+					It bites its target, turns in it twice and returns to hang again
+					Stealth strike: three judgement swords fall around the target as stakes and close into a triangle of light
+					About 4.7 seconds per sentence; releasing before the seal cancels, after it the throw completes
 					One of five equally likely rewards from the Curtainfall Treasure Box.
 					'''
 			}
 		}
 
+		Projectiles: {
+			WitnessHang.DisplayName: Last Witness
+			WitnessThrownBlade.DisplayName: Last Witness
+			WitnessShard.DisplayName: Testimony Shard
+			WitnessJudgement.DisplayName: Triangle Judgement
+		}
+
 		Buffs: {
 			ChoirOfTheUnmadeBuff: {
 				DisplayName: Choir of the Unmade
-				Description: The sentinels sing for you
+				Description: Unfinished dolls sing for you
 			}
+		}
+
+		Projectiles: {
+			ChoirChorister.DisplayName: Unmade Chorister
+			ChoirSungNote.DisplayName: Sung Note
+			ChoirChorus.DisplayName: Chorus of the Unmade
 		}
 	}
 }

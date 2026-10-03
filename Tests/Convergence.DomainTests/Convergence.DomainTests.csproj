@@ -72,6 +72,9 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianScore.cs" Link="Domain/PaleMeridianScore.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianLattice.cs" Link="Domain/PaleMeridianLattice.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianRig.cs" Link="Domain/PaleMeridianRig.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/WitnessRules.cs" Link="Domain/WitnessRules.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/WitnessBladeArt.cs" Link="Presentation/WitnessBladeArt.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/ChoirConcertRules.cs" Link="Domain/ChoirConcertRules.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBeamIgnition.cs" Link="Domain/FirstSeveranceBeamIgnition.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreCrater.cs" Link="Presentation/FirstSeveranceCoreCrater.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEnergyPulse.cs" Link="Presentation/FirstSeveranceEnergyPulse.cs" />
@@ -90,6 +93,9 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollWeaponTuning.cs" Link="Domain/DollWeaponTuning.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacunaTestamentScore.cs" Link="Domain/LacunaTestamentScore.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/LacunaArtFit.cs" Link="Presentation/LacunaArtFit.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacrimosaClawMotion.cs" Link="Domain/LacrimosaClawMotion.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacrimosaClawHeart.cs" Link="Domain/LacrimosaClawHeart.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/LacrimosaClawArt.cs" Link="Presentation/LacrimosaClawArt.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollArtAnchors.g.cs" Link="Presentation/DollArtAnchors.g.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs" Link="Presentation/FirstSeveranceDollPose.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs" Link="Presentation/FirstSeveranceDollFrames.cs" />

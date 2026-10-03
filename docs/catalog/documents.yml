@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 4296e7e693473ea68a15f6aa4a7279b87c2e533c2a7ec2d0b1f555d218248de6
+  content_sha256: 645a18ac4f71b36bba2d90d3e2d575f34ef3f71349030df97089c210dedd076f
   document_type: spec
   status: provisional
   owners:
@@ -964,6 +964,7 @@ documents:
   - raid reward weapons
   related_code:
   - Content/Encounters/FirstSeverance/Rewards
+  - Client/Encounters/FirstSeverance/Weapons
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
   - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
@@ -1031,6 +1032,23 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.choir-of-the-unmade-0234
+  path: docs/history/2026-10-03-choir-of-the-unmade-0234.md
+  title: Choir of the Unmade — the 0.2.34 form
+  content_sha256: 2b369f9a25c1aed668fa11471e5127e7bcaebc20fea211c0f20bb5fff62d9234
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Choir of the Unmade 0.2.34
+  - legacy choir concert
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
+  - project.status
 - doc_id: history.encounter-evolution-0246
   path: docs/history/2026-09-11-encounter-evolution.md
   title: Encounter evolution through 0.2.46
@@ -1047,6 +1065,24 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.lacrimosa-claws-0229
+  path: docs/history/2026-10-03-lacrimosa-claws-0229.md
+  title: Lacrimosa's Claws before the 2026-10 refresh
+  content_sha256: bcc5b2899d8fbed976c4ed4eda4a56db80d88d62340180a8e412e1168a25767c
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  - art
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Lacrimosa's Claws 0.2.29 melee redesign
+  - claw swipe cleanup 0.2.38
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
+  - project.status
 - doc_id: history.lacuna-testament-0234
   path: docs/history/2026-10-03-lacuna-testament-0234.md
   title: Lacuna Testament before the 2026-10 refresh
@@ -1059,6 +1095,21 @@ documents:
   source_of_truth_for: []
   aliases:
   - Lacuna Testament 0.2.34 sigil array
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
+- doc_id: history.last-witness-v1
+  path: docs/history/2026-10-03-last-witness-v1.md
+  title: Last Witness before the 2026-10 refresh
+  content_sha256: 332bbd641fd24e94078e2fac7736ced1e28d4d9346ba932e2fdd11ae04abcce1
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Last Witness 0.2.34 score
   related_code: []
   related_docs:
   - encounter.first-severance.weapons
@@ -1282,7 +1333,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: b9c04fa754894d3ec977b066732740cde859a881b90c42d22c5feb50bce3486e
+  content_sha256: 3eb99ee9aa1134a81fc1e59c0a328e86a205f62423f1439bb6cd716cc4398fb5
   document_type: spec
   status: provisional
   owners:
@@ -1464,7 +1515,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8dbc2d43b45469936b83f5773b1aee4a5a55c17d74ebb82e18c543f5aed64c90
+  content_sha256: 02fe65dbfd802a5083404d50a12234d13b304be3b5d62b33005672ea78b4105e
   document_type: status
   status: accepted
   owners:

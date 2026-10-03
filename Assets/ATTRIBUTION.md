@@ -2,6 +2,1068 @@
 
 ## Records
 
+### Lacrimosa's Claws cues — 2026-10-03
+
+The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush). The crush closes on a soft gong tuned to F, original modal synthesis in the generator itself (`claw_gong`), over a quiet organ. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass pawls, porcelain rings and cracks, additive flue organ, shimmer, low thump), with the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. The recordings below are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. Loudness follows the Doll weapon tiers (BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip). The audition page stays in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+| air_cut | sfx-sources/cc0/wind-FS60030-qubodup-air_cut.mp3 | qubodup, Air Cut (https://freesound.org/s/60030/, CC0 1.0, HQ preview) | `0301adf448c60b80c09b89df57510fd09949d6b15bb457ef7c9e70999b8a2ad0` |
+| chop | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/chop.ogg | Kenney RPG Audio chop.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486` |
+| low_impact | sfx-sources/cc0/impact-FS541029-AudioPapkin-very_low_impact.mp3 | AudioPapkin, very low impact (https://freesound.org/s/541029/, HQ preview, CC0 1.0) | `73c25c4f49baa34cb9ad42290324fc61340124028dc0161299880b78580e335a` |
+| metal_click | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalClick.ogg | Kenney RPG Audio metalClick.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3` |
+| metal_latch | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+| stick_woosh | sfx-sources/cc0/swing-FS352719-Dalesome-woosh_stick.mp3 | Dalesome, woosh stick (https://freesound.org/s/352719/, CC0 1.0, HQ preview) | `5dc0966b3f689fde08955ab18a3b8dc636cc3db96d105e90b427af54184c3016` |
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeDownWarn.ogg`
+- Asset ID: doll-weapon-sfx-clawrakedownwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.20 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `4df6f5d362f769081d436129c791cfab40aeac2dfc1866dbb7c112f5e5b11729`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeDownFire.ogg`
+- Asset ID: doll-weapon-sfx-clawrakedownfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.29 s)
+- Creator: recordings by qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: air_cut in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.6 LUFS (played at volume 0.7: -14.7 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `6841f9493ee8ba0f6a66dd039e9a7c4f78bf03b0640bbaa489759630430bd401`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeUpWarn.ogg`
+- Asset ID: doll-weapon-sfx-clawrakeupwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.20 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.6: -21.5 LUFS effective), true peak -3.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `8db622800be50090075d95413054ad32ad0e09df6d41c2791509be91d7a18501`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeUpFire.ogg`
+- Asset ID: doll-weapon-sfx-clawrakeupfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.31 s)
+- Creator: recordings by Dalesome; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: stick_woosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.6 LUFS (played at volume 0.7: -14.7 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `82b324d7ca89233f9c84e7279283b93faaaace9bdf3602140bea119a0898072e`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawClapWarn.ogg`
+- Asset ID: doll-weapon-sfx-clawclapwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.34 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.1 LUFS (played at volume 0.8: -15.1 LUFS effective), true peak -3.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `e8af00369cebaa7bc0060a2d864594dcc1fdb79b45419fc6a79c9950bdda434c`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawClapFire.ogg`
+- Asset ID: doll-weapon-sfx-clawclapfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.59 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: chop in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.95: -12.0 LUFS effective), true peak -1.9 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `088aed1109b37453b03d4dcff8b419fd89bd8d83a0c1eb6bfa7a240531fd61e0`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawHit.ogg`
+- Asset ID: doll-weapon-sfx-clawhit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.14 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.9: -20.9 LUFS effective), true peak -4.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `f8ce3054e960ac39580df85364885a65964613ad54e4c0d3b711f792851dd1d3`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawBead.ogg`
+- Asset ID: doll-weapon-sfx-clawbead-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.68 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.85: -21.4 LUFS effective), true peak -14.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `0cae1f86d0400f61eb02d1faeb8c33c4673654fcf8dd8f397e387dd87db01cec`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawBeadsFull.ogg`
+- Asset ID: doll-weapon-sfx-clawbeadsfull-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.89 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -7.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `d5e56e54a50a381e71187db4fda0b3be6a23dfdfaf356a4443ab9ef8b25d726b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawBeadDry.ogg`
+- Asset ID: doll-weapon-sfx-clawbeaddry-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.14 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.8: -21.9 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `1b0f17a1bea13244cca7b64c5d549db60700d4d4669b9923fd5675de9022f6b5`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawGraspWarn.ogg`
+- Asset ID: doll-weapon-sfx-clawgraspwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.30 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.9: -13.9 LUFS effective), true peak -4.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `3876bec42955eee641b5d9b54f6de163443e092055382aae3eaf6d038e80bbf3`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawGraspFire.ogg`
+- Asset ID: doll-weapon-sfx-clawgraspfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.9 LUFS (played at volume 0.95: -12.3 LUFS effective), true peak -1.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `45dadbc556bf0a0ceeba2d674dadd1d4ab78ed35b8b56beac1eb505a6ac798de`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawGraspMiss.ogg`
+- Asset ID: doll-weapon-sfx-clawgraspmiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.9: -13.9 LUFS effective), true peak -2.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `2574fd71e1afcd583434961c84d9e75fb4f236146f95b933a0b0678f9f3dd326`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawCrushWarn.ogg`
+- Asset ID: doll-weapon-sfx-clawcrushwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.9: -13.9 LUFS effective), true peak -3.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `6ea7b36df95773b3b931502de2d1f3a20fd565b75d2faf5b69e2aa491c136eb2`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawCrushFire.ogg`
+- Asset ID: doll-weapon-sfx-clawcrushfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.14 s)
+- Creator: recordings by AudioPapkin and Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: chop, low_impact in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.0 LUFS (played at volume 1.0: -10.0 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `72dec2ff2b07368be0ec49b438ca741524150ad132448f8ad8cd80b2f4496451`
+
+### Lacrimosa's Claws energy material — 2026-10-03
+
+The claws' own light material on the shared Doll weapon layer (the other Doll weapons keep their own materials).
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollClawEnergy.fxc`
+- Asset ID: dollclawenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollClawEnergy.fx with the Doll palette block, drawn per art dot into the layer's half-resolution Light target and quantized to the plum-to-white ramp with a world-stable Bayer dither, written branchless: the rakes' claw-scratch ribbons (tapered tail, torn plum rim, flowing value noise, sparkle, brass glints at the head, white-hot spine, cooling to plum), a middle-hot flare band for the clap slit, its pipe bars and the crush flare, a torn ring with a white inner lip, and the crush's opaque black lacuna with a one-dot pearl lip. Noise is computed in the shader; no texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-claws.ps1` (the exported claw art, real Emit sequence, pixel checks) 2026-10-03; native playtest not_run
+
+### Choir of the Unmade cues — 2026-10-03
+
+The refreshed Choir of the Unmade's 29 cues (summon, count-in and nine sung verse notes, organ rise and six pipes, the chorus warning, six chorus renders by voice count, the success close and the failure, two hit accents). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns every pitch, time, gain and loudness target; it adds the Choir's own original synthesis (a faceless doll voice: harmonics through soprano formants with vibrato and breath, its inhale, a failing-wind organ, a soft gong of beating inharmonic modes) to the blocks of [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) and the unmodified helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py). No recording is used. Every pitch is F minor pentatonic except the fifth chorus line's Fm9 colour G. Loudness follows the Doll weapon tiers (BS.1770 K-weighted maximum 400 ms short-term LUFS), true peak at most -1 dBTP after the Vorbis round trip. The audition page and report stay in the git-ignored `.local`.
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirSummon.ogg`
+- Asset ID: doll-weapon-sfx-choirsummon-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.84 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -12.9 LUFS (played at volume 0.7: -16.1 LUFS effective), true peak -11.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `d3d1f9647d846af8555cab84386ee33590c5752444ac747381693448d7161b2f`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseWarn.ogg`
+- Asset ID: doll-weapon-sfx-choirversewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.28 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -17.5 LUFS (played at volume 0.8: -19.4 LUFS effective), true peak -1.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `43db12b618d34369c71dbf8d2e17423df0300a177954bb22ca25293622a319ae`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire0.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire0-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -14.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `0b3b9475a488a3cba6f96670a9a92f5678efe5343c7c88dbe69c7105863096d9`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire1.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -13.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `45e0ff6b060a8c66abcadeb1a913bdfd2803994f17138fd2a1461c9334dab501`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire2.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -13.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `8e032fae7a5642ec5fb35aaf85146758836ec752eb39f9a73bcea1cc9f062c61`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire3.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -15.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `30b871cb828a8814e9398057af040964ab6fba649ae22e18122505d00101b709`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire4.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -16.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `ec49ddf942a924f171ab5e4bd9498a3add9dea20cdea5f1f41e3cd59ef782c57`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire5.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire5-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -16.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c04c801580b23783eb445b927d4ebad918f41a1c58d932318321294ff17ae72b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire6.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire6-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -16.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `9907be3a138bb5f1c76a7910439f4bdb13742462e1a962eda635aad615fe7345`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire7.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire7-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -17.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c0a695ebbe1219baf8ff82422c11662dde25fd72c6b49c661569d06eff4b7ec8`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirVerseFire8.ogg`
+- Asset ID: doll-weapon-sfx-choirversefire8-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.7: -20.0 LUFS effective), true peak -17.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `51bf7840d5ad1aa6af8f2c2ed5ab8a30b3f4864b63be2e3e6dd6f9271e5bc187`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirOrganRise.ogg`
+- Asset ID: doll-weapon-sfx-choirorganrise-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.00 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -13.1 LUFS (played at volume 0.75: -15.6 LUFS effective), true peak -5.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `3040114532832f69627b394f371ad48d98ea392f8c6cd1ff2c9b617d52efa701`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirPipe0.ogg`
+- Asset ID: doll-weapon-sfx-choirpipe0-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -10.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `b8b257d29389535283c5b866bb04dafe568f2580d8a4025172568bb7ad87d74d`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirPipe1.ogg`
+- Asset ID: doll-weapon-sfx-choirpipe1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -11.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `eb6e464bc67919ae4a545fb8b19b5ab9018c4faecabdcf52f160b1419c245831`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirPipe2.ogg`
+- Asset ID: doll-weapon-sfx-choirpipe2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -11.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `7d0d5ef0a5624a8f2b9498b1ba4264d3c64486eaa48c438f7b02f19cbb53deb5`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirPipe3.ogg`
+- Asset ID: doll-weapon-sfx-choirpipe3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -16.9 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `7f7308d8fb23259c081d0f173776ed3184a26526084188ede210b14118273e92`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirPipe4.ogg`
+- Asset ID: doll-weapon-sfx-choirpipe4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -17.0 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -12.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `5c612254965fcc3b9a6664746a5cb51c9d849c69b4b847ad4e8ac6409d1348ca`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirPipe5.ogg`
+- Asset ID: doll-weapon-sfx-choirpipe5-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.38 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -17.0 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -11.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `f09001ede3567c365e340123499f9bc450013e0f8ace9b99b5347bc4c4ed42a8`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusWarn.ogg`
+- Asset ID: doll-weapon-sfx-choirchoruswarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.68 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -3.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `3c55ff477f95ff84b07ff9d7ed120f29c1d439e258d08aabaa0323ff28818c47`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusFire1.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusfire1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.96 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -6.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `341184cdb2ef1d23640089755b627af410c934201acd74c7a79aecfa85aee59d`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusFire2.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusfire2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.97 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -6.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `ec5ac8eeef0d33ccfe3c2613543d41977a6f4cd6fdb7bf14fb275acd0641dfe5`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusFire3.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusfire3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.97 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -4.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `4d167d06ba31176b200353d81e0902f7d978f25d9d98da1ce2d06ee5a591128e`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusFire4.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusfire4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.95 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -4.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `e925fc9233593514de3f69d5fa41b9af801bc05704484a80dd6082d405e82159`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusFire5.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusfire5-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.94 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -4.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `2391a9ff563e1bfd2697f8b74c90353850241e549cbffa137d7bd47a13a5e253`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusFire6.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusfire6-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.98 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -3.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `fe0d5405440f66914c6c0e2ac675dfd137189f96f4c14a4e9a72fbb65916bec4`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusEnd.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusend-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (3.20 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -13.0 LUFS (played at volume 0.7: -16.1 LUFS effective), true peak -7.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `080da01241d3dd5f179e7d75ae02a2328e8d7811b51d2fb2f13aae51d57c33bc`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusMiss.ogg`
+- Asset ID: doll-weapon-sfx-choirchorusmiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.68 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `040f7f608e86a9cd456f5c0bb7cafe06052dd07b3e9d7bfb5b762766bb7d9886`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirNoteHit.ogg`
+- Asset ID: doll-weapon-sfx-choirnotehit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.28 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -20.1 LUFS (played at volume 0.6: -24.5 LUFS effective), true peak -9.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `fbcca584737a75c6f9002e7959cd7522cf7f7162e28061859b01a3154c9b8484`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/ChoirChorusHit.ogg`
+- Asset ID: doll-weapon-sfx-choirchorushit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.34 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis and layering; short-term loudness -20.0 LUFS (played at volume 0.55: -25.2 LUFS effective), true peak -11.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `6f98dc18353e183dc9bb5fa993df86c9916a990b31b6b8bd1d2424f9b79e5637`
+
+### Last Witness v2 audio — 2026-10-03
+
+The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-severance/WEAPONS.md#rogue--last-witness)): the hang, six testimonies, the seal, the throw, the Axiom turns, the return and catch, two fixed-pitch spin loops and the stealth Triangle Judgement. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; the music-box teeth, porcelain, brass, organ and shimmer are the original synthesis of [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py), with the Ebon helpers imported unmodified. The recordings are CC0 files already recorded in the Ebon Manor and Ebon reward tables of this register (Kenney RPG Audio on OpenGameArt; Freesound uploads that showed Creative Commons 0 on 2026-10-01, public HQ preview renders); they stay in the local store, are SHA-256 verified before use and are not committed. One-shots are Vorbis; the two loops are PCM16 WAV of a whole number of blade revolutions (`WitnessSpinLoop` 82,100 samples = 8 turns at 0.45 rad/tick, `WitnessAxiomLoop` 98,942 samples = 16 turns at 0.747 rad/tick), built circularly so they repeat sample-exactly. Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding. The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store file | Source | Source SHA256 |
+|---|---|---|---|
+| air_cut | sfx-sources/cc0/wind-FS60030-qubodup-air_cut.mp3 | qubodup, Air Cut (https://freesound.org/s/60030/, CC0 1.0, HQ preview) | `0301adf448c60b80c09b89df57510fd09949d6b15bb457ef7c9e70999b8a2ad0` |
+| armor_strike | sfx-sources/cc0/metal-FS568170-Merrick079-sword_sound_1.mp3 | Merrick079, sword sound 1 (https://freesound.org/s/568170/, CC0 1.0, HQ preview) | `5f9ab16b7a74a205b1490001d4c913d0d55f561df796cb2d43c1a30b97c351b1` |
+| chop | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/chop.ogg | Kenney RPG Audio chop.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486` |
+| creak1 | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/creak1.ogg | Kenney RPG Audio creak1.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `8a346186fd297254248cab8e8117060a52a5cf2a84f603153a762108550ea95e` |
+| creak2 | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/creak2.ogg | Kenney RPG Audio creak2.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `8a990afdc03aebb91d528f5385e2f95582dbfa8e2c12c71098ab01be9142294a` |
+| draw_knife | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/drawKnife3.ogg | Kenney RPG Audio drawKnife3.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `a11ae62fb1a628425769d11a9de394980ad8909c31f4c9a4316f226963e21caf` |
+| knife_slice | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/knifeSlice2.ogg | Kenney RPG Audio knifeSlice2.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def` |
+| metal_latch | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+| rock_tumble | sfx-sources/cc0/impact-FS389618-_stubb-rock_tumble_2.mp3 | _stubb, rock tumble 2 (https://freesound.org/s/389618/, CC0 1.0, HQ preview) | `199521191be552261d6e604c8d34e40cfeac4b3d7f3075906dd27182c73adb4a` |
+| stick_woosh | sfx-sources/cc0/swing-FS352719-Dalesome-woosh_stick.mp3 | Dalesome, woosh stick (https://freesound.org/s/352719/, CC0 1.0, HQ preview) | `5dc0966b3f689fde08955ab18a3b8dc636cc3db96d105e90b427af54184c3016` |
+| swoosh | sfx-sources/cc0/swing-FS263595-PorkMuncher-swoosh.mp3 | PorkMuncher, swoosh (https://freesound.org/s/263595/, CC0 1.0, HQ preview) | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
+| sword_hit | sfx-sources/cc0/metal-FS442769-qubodup-sword_hit.mp3 | qubodup, Sword Hit (https://freesound.org/s/442769/, CC0 1.0, HQ preview) | `93d72e63bb8d9b8a60d2c0ac665c153171515645fbb85f4ec028e4a253e7b167` |
+| woosh | sfx-sources/cc0/wind-FS683096-florianreichelt-woosh.mp3 | florianreichelt, woosh (https://freesound.org/s/683096/, CC0 1.0, HQ preview) | `3c641d4d6ea0c6b65423d8fe1a7d72bf7bfb08a91c1640f9e9a0ab9d5d23b265` |
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessSettle.ogg`
+- Asset ID: doll-weapon-sfx-witnesssettle-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.7: -20.1 LUFS effective), true peak -6.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c21e9e7e928f4bc414c01e8d1c0e6569a5d037e7263690cf8262dd94cf245851`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn1.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonywarn1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.75: -22.4 LUFS effective), true peak -13.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `70ec3ec29b13d561d02cc7872dd15040375162ea73b5ac2468dacf4b66b2e30e`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn2.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonywarn2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.75: -22.4 LUFS effective), true peak -14.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `ff54334500e38e7279aa1b0fbe2bfd4484f6d3bf05526913db591b35b3842090`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn3.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonywarn3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.75: -22.5 LUFS effective), true peak -14.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `cab504664f8e3fe1b5430496d2f8e8a6bdaf82b46d2dc44f0c69644037c32375`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn4.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonywarn4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.75: -22.5 LUFS effective), true peak -14.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `31453c049320afbaaea036fcf2fc4a4c713665270b4313c17bb7c0477b4c63bb`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn5.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonywarn5-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.75: -22.5 LUFS effective), true peak -14.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `7a4c7ecbf7fa08466b6a0392b6664bedcf43d6bdd58354f3d58d6fb755cf5233`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn6.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonywarn6-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.75: -22.4 LUFS effective), true peak -15.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `fc6f7b89162ac8801070ba0f5fa18d4279c4cc331abc12acca7783303dde64cb`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyFire.ogg`
+- Asset ID: doll-weapon-sfx-witnesstestimonyfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: recordings by qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: air_cut in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -19.0 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `dde5928273ccd42e0cd12580f58d715dc6b9300a4fbe556d5f718bdd68f0f0eb`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessShardHit.ogg`
+- Asset ID: doll-weapon-sfx-witnessshardhit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.26 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.7: -23.1 LUFS effective), true peak -6.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `5883eb495a40634a4ccf63084d5f559dd8909b86dd9f069524fd59e18545a1ec`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessSeal.ogg`
+- Asset ID: doll-weapon-sfx-witnessseal-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.76 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c1cf60d873d40886b2d8dd4db9039dc3c029651c2fff726c06441674648ef3ce`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessThrowWarn.ogg`
+- Asset ID: doll-weapon-sfx-witnessthrowwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.37 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: creak1 in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -5.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `db62f91b3949225bb713c90cc692fef9ff2485b8788234e761359322784d0d35`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessThrowFire.ogg`
+- Asset ID: doll-weapon-sfx-witnessthrowfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.87 s)
+- Creator: recordings by Dalesome, Kenney, PorkMuncher; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch, stick_woosh, swoosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.7 LUFS (played at volume 0.95: -12.1 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `95b3d800dab2e1768f2e7d82f0b74c38164b23ba4e89865d307674be979de5fe`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomWarn.ogg`
+- Asset ID: doll-weapon-sfx-witnessaxiomwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.70 s)
+- Creator: recordings by Merrick079, qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: armor_strike, sword_hit in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.9 LUFS (played at volume 0.9: -12.8 LUFS effective), true peak -1.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `b177b30876e52bec856fc3b53cadc023f8696821a28e382cc77de775351326e6`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire1.ogg`
+- Asset ID: doll-weapon-sfx-witnessaxiomfire1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.32 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: knife_slice in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -19.0 LUFS effective), true peak -2.7 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `dd8d631572f3eaab47da2a884a0444a3fb4c463ba9677ab9c078df1d5637d5f1`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire2.ogg`
+- Asset ID: doll-weapon-sfx-witnessaxiomfire2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.32 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: knife_slice in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.0 LUFS (played at volume 0.8: -17.9 LUFS effective), true peak -3.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `199226ba35e19d19a0b80f29c3d6135baf0e88d5715de27cd2248f72fe000142`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire3.ogg`
+- Asset ID: doll-weapon-sfx-witnessaxiomfire3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.32 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: knife_slice in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -15.0 LUFS (played at volume 0.8: -16.9 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `8b7d16431a8b48f039565e79e54f44528affa6dab117f46b29b69c62387cbd51`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire4.ogg`
+- Asset ID: doll-weapon-sfx-witnessaxiomfire4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.32 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: knife_slice in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -3.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `01d6d29cd5644f4203f57fe920362985c3f3b40db5c6484b53b222452245b1c6`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomMiss.ogg`
+- Asset ID: doll-weapon-sfx-witnessaxiommiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.54 s)
+- Creator: recordings by qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: air_cut in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.9 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `16d4813eda7ce9ec7530484db5ae92be92b7ab5961d5f84b0c60af4d8ca160a7`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessReturnWarn.ogg`
+- Asset ID: doll-weapon-sfx-witnessreturnwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.55 s)
+- Creator: recordings by florianreichelt, Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: creak2, woosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -7.6 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `df953bf8467cf9e5d5b59381d010f8ba1dec827436cc4ecc488af0abbcfe30d8`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessReturnFire.ogg`
+- Asset ID: doll-weapon-sfx-witnessreturnfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.51 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `c2692ea0658096ff87e8ff2e0944e81005d7d17a33cd9d46af5e670669e81959`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessSpinLoop.wav`
+- Asset ID: doll-weapon-sfx-witnessspinloop-20261003
+- Asset type: stereo 44.1 kHz PCM16 WAV Doll weapon loop (1.862 s, 82114 samples)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 PCM16 WAV
+- Human modifications: original synthesis; short-term loudness -15.0 LUFS (played at volume 0.5: -21.0 LUFS effective), true peak -4.9 dBFS; built circularly, so the file repeats sample-exactly
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `66e682f2b5d0425d034c4d75e83eeb8061dc0404c1850d7d225384cb9ff477c0`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomLoop.wav`
+- Asset ID: doll-weapon-sfx-witnessaxiomloop-20261003
+- Asset type: stereo 44.1 kHz PCM16 WAV Doll weapon loop (2.244 s, 98960 samples)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 PCM16 WAV
+- Human modifications: original synthesis; short-term loudness -15.0 LUFS (played at volume 0.55: -20.2 LUFS effective), true peak -6.1 dBFS; built circularly, so the file repeats sample-exactly
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `1ae82f4d13fdb8e4036fee10550c18ec9d8983efe9c6b7c4f5a7a84bced3e2bb`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictStakeWarn.ogg`
+- Asset ID: doll-weapon-sfx-verdictstakewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.25 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.1 LUFS (played at volume 0.85: -14.5 LUFS effective), true peak -2.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `b8d5f2267ff6595d815b630d6dc6ea122c7bcf718697cfb63090096f1d67a58c`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictStakeFire.ogg`
+- Asset ID: doll-weapon-sfx-verdictstakefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.78 s)
+- Creator: recordings by _stubb, Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: chop, rock_tumble in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.9 LUFS (played at volume 0.95: -12.3 LUFS effective), true peak -1.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `a5dc4ec6fe593b157cc11d681b26621be98196231d522b1bc99316fce365e28c`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteWarn.ogg`
+- Asset ID: doll-weapon-sfx-verdictexecutewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.18 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -5.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `02e982ef2cf397dd198e6624708046d58eb538adcd1032a1b06d32bc3a5e17a1`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteFire.ogg`
+- Asset ID: doll-weapon-sfx-verdictexecutefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.55 s)
+- Creator: recordings by _stubb; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: rock_tumble in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.95: -11.9 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `d8b10955ba9fb62fe13e23a9f3b2961de41f49d1d6baef132a9ca281470b9ed8`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteMiss.ogg`
+- Asset ID: doll-weapon-sfx-verdictexecutemiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -8.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `3ccf52add00fee3593d09fcffb691470d2afcb3725a639370361440d838d46f9`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictWithdraw.ogg`
+- Asset ID: doll-weapon-sfx-verdictwithdraw-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.55 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: draw_knife in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -20.1 LUFS (played at volume 0.7: -23.2 LUFS effective), true peak -17.0 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `738f5228ba0f05fa6b24f0eafb571a5d9b8e74c696d8000b038c37db5346151a`
+
 ### Pale Meridian weapon cues — 2026-10-03
 
 Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air, a soft-mallet gong resonance for the two closing strikes); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
@@ -2734,6 +3796,36 @@ The refreshed Doll reward weapons share one original half-resolution pixel mater
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance and generation disclosure
 - Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-weapons.ps1` (synthetic sprites, pixel checks) 2026-10-02; native playtest not_run
+
+### Choir of the Unmade energy material — 2026-10-03
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollChoirEnergy.fxc`
+- Asset ID: dollchoirenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollChoirEnergy.fx for the refreshed Choir of the Unmade, drawn per art dot into the shared Doll weapon layer's Light target and quantized to the Doll palette: the Hymn chorus beam (a throat widening from the organ mouth, a seven-tone ramp with a white-hot spine and a one-dot plum fringe, two flowing Luminance noise fields, one wavefront per beat, brass standing waves per chord voice, sparkle, a deeper Fm9 hem and a pearl-gold open-fifth band), the Iris inhale (a void with a one-dot pearl lip and inward-spiralling motes) and the Trail pass for note and baton trails. Branchless on uniforms. No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-choir.ps1` (the exported Choir art, a simulated concert, pixel and tone checks) 2026-10-03; native playtest not_run
+
+### Last Witness v2 material — 2026-10-03
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollWitnessEnergy.fxc`
+- Asset ID: dollwitnessenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollWitnessEnergy.fx, the light of the refreshed Last Witness in the shared Doll weapon layer, evaluated per art dot and quantized to the Doll palette block shared with DollPixel.fx: a ribbon pass (white-hot spine, bone and pearl-violet core cooling through lilac and violet to a plum fringe, two octaves of world-locked flowing value noise, sparkles on short beats, a write head with a hot flare, a tapered and cooling tail) for the thrown blade's wake and spin arc, the testimony threads, the shard tails and the judgement's edges; a fill pass (pearl craquelure on the edges of a world-locked cell field, drawn toward the centre as it collapses into a black eye with a one-dot pearl lip) for the stealth execution. Branchless on uniforms. No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-witness.ps1` (the real exported art and both compiled materials, pixel checks, contact sheet on dark and bright ground) 2026-10-03; native playtest not_run
 
 ### Waltz of the Ebon Manor reward weapon audio — 2026-10-02
 

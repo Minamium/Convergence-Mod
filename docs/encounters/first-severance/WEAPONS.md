@@ -13,6 +13,7 @@ aliases:
   - raid reward weapons
 related_code:
   - Content/Encounters/FirstSeverance/Rewards
+  - Client/Encounters/FirstSeverance/Weapons
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
   - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
@@ -41,6 +42,7 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 | Last Witness | 6 shards ×0.28 + blade ×5.4 = 7.08× per 282 ticks | 14,581/s; the stealth verdict adds ×3.24 |
 
 - **Usability and ownership:** unchanged usability (no use while dead, Down or eliminated in the Doll Raid). One held controller projectile per weapon carries every count peers must see (lit beads, seated parts, open irises, voices, testimonies). Only the owner reads input and spends mana (native `CheckMana`) or ammo (one `PickAmmo` per real shot) and spawns children through native projectile replication. An item change, death, Down, crowd control or leaving the world ends the controller; launched projectiles stop once their owner is unusable. No Encounter packet, `ModPacket` or protocol change.
+  - **Exception, summon weapons** (Choir of the Unmade; owner-approved 2026-10-03): the minions are native minions and, as native summons do, stay summoned through an item change and a Down. Down, crowd control and item restrictions halt what they do (no new shots, launched ones turn harmless); death, removing the buff or leaving the world ends them. The weapon's section lists the exact cases.
 - **Presentation:**
   - Pixel art at the 2-pixel dot: one texel is one dot, drawn at 2 world px with point sampling. Pixel sprites are never scaled at draw time; a weapon that needs two sizes uses two integer export rungs and swaps them on its fastest frames.
   - One shared Doll weapon layer draws weapons **in front of players**; only the Choir's organ (and its gallery row) and Pale Meridian's wind-up key draw behind players (the key is a Meridian addition, owner-approved 2026-10-03). Effects get a one-dot ink outline (#121017).
@@ -49,6 +51,7 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
   - Hit shapes are the constants in Content; the art is fitted to them, never the reverse, and an art-fit test keeps drawn anchors (talon tip, muzzle, hole, mouth, blade tip) within one dot of their design anchors.
   - Swings flow through their ends without hard braking. Reduced Effects (the Doll client config) keeps bodies, forecasts, live bodies and counts, halves debris and residue time and removes glow; screen shake follows the config. No fullscreen flash, hit-stop, zoom, slow motion or input lock.
 - **Audio:** every cue is new and lives in `Assets/Sounds/Weapons/DollWeapons/`: music-box tines, brass gears and key ratchets, porcelain clinks and cracks, pipe organ, and low weight for impacts. Tonal cues use one home, F minor pentatonic (F A♭ B♭ C E♭; build-up ladder F5 A♭5 B♭5 C6 E♭6 F6 A♭6 B♭6 C7), measured against the four Doll tracks. Every release pairs a warning cue with a firing cue, and a set piece that can fail has its own, different failure cue. Composite cues and loops are never transposed at runtime. Reduced Effects never lowers weapon audio. The 0.2.x masters in `Weapons/DollTheater` stay because the companion and the Raid still play some of them; [Audio](../../AUDIO_CUE_SHEET.md) owns masters and levels.
+  - **Exception, a killed target** (Choir of the Unmade; owner-approved 2026-10-03): a chorus whose target is killed with the organ out is not a failure; it closes quietly with the success cue `ChoirChorusEnd`, and every other stop with the organ open keeps the failure cue `ChoirChorusMiss`. The weapon's section lists the exact cases.
 - **Art:** Codex pixel art from Claude's brief (DW01–DW05, delivered 2026-10-02 outside the repository under `asset-deliveries/doll-weapons/2026-10-02/`). `tools/export_doll_weapon_art.py` measures each sheet's dot pitch, snaps to the palette, reduces by whole factors and records anchors; runtime PNGs live in `Assets/Textures/Items/DollWeapons/` with exact [Attribution](../../../Assets/ATTRIBUTION.md) records.
 
 | Asset | Use |
@@ -61,6 +64,99 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 
 - **Companion:** The Unbroken Promise is unchanged except its summon sound, which plays on the same trigger.
 - **Acceptance (owner; `not_run` until played):** each weapon's build-up, release and paired cues; readability on bright and dark ground at zoom 1; weapons in front of the player without hiding the character, and the organ and the Meridian key behind; a second peer seeing the same build-up counts; Reduced Effects; FPS with eight players' weapons.
+
+## Choir of the Unmade (2026-10)
+
+The Raid sings its beams at you: a thin locked axis, then a pilot line that swells to full width. This weapon makes that technique yours. Unfinished porcelain dolls gather around you, you conduct them with a porcelain baton, and on the chorus a pipe organ rises over your head and sings one beam for the whole choir.
+
+The item `ChoirOfTheUnmade` and the buff `ChoirOfTheUnmadeBuff` keep their IDs; the [treasure box](#curtainfall-treasure-box) (20%) and the [Unbroken Promise](#doll-companion--the-unbroken-promise) recipe are unchanged. The item now summons the native types `ChoirChorister` (one voice), `ChoirSungNote` and `ChoirChorus`; the 0.2.34 types stay registered but unused until one cleanup change, and the 0.2.34 form is kept in [history](../../history/2026-10-03-choir-of-the-unmade-0234.md). `ChoirConcertRules` owns every number below; the art is fitted to it.
+
+**Item.** Summon staff, 1 minion slot per use. Base damage 968 (`RitualArmamentRules.Damage(Summon)`, unchanged; the Promise's 9680 stays tied to it), mana 10, use 24 ticks, knockback 6, crit 0. Normal minion target commands, sacrifice and switching weapons all work; the concert never needs the item held. Each use flicks the baton (`ChoirBaton`, held in the front hand) in one continuous downbeat: up behind the head, forward-down, a short follow-through and back, periodic so auto-reuse never stops dead. The new voice appears at the raised baton tip, `MountedCenter + (20·facing, −72)`, fading in from pearl, and glides to its seat.
+
+**Choristers.** Faceless porcelain busts on brass stands (`Chorister0/1/2` by `identity % 3`, 2 world px per dot, 44 × 76 px), each with three singing frames: closed, a small "o", and wide open with the head up. The export lost the closed mouth line of `Chorister0` and `Chorister2`, so frame 0 draws it in code as a two-dot Iron line. Each variant has its own design mouth, the wide-open mouth of frame 2 (on screen from the tick a note leaves it): `(10, −12)`, `(11, −13)` and `(7, −12)` px from the centre facing right for `Chorister0/1/2`, each within one dot (2 px) of its art (domain art-fit test). They never deal contact damage. The lead voice (the owner's lowest native identity) keeps the concert clock in `ai[0]` (0 idle, 1–648 running) and the target in `ai[1]`; every voice copies them, and a new voice joins the running clock. Targets are measured from the owner, not from the dolls: the manual minion target first, otherwise the nearest valid NPC, acquired within 1800 px and kept within 2100 px with line of sight from `owner.MountedCenter`.
+
+**Cloud seats** (idle and verse), around `owner.MountedCenter + (0, −80)`: ring r holds 5 + 2r voices at radius 96 + 46r px over the 140° arc above the player, filled from the top centre outward, bobbing ±3 px across and ±5 px up and down; every stand tip stays at least 40 px above the player's head. Dolls face the target. Movement is velocity steering, `desired = clamp((seat − pos)·0.14, 30 px/tick)`, `v += (desired − v)·0.30`: a 240 px move settles within 4 px in 17 ticks with under 4 px overshoot.
+
+**The concert: 18 beats at 100 BPM (beat 36 ticks, sixteenth 9), 648 ticks = 10.8 s,** looping while the lead has a target.
+
+| Beats | Ticks | Section | What happens | Light | Sound |
+|---|---|---|---|---|---|
+| 0–1 | 1, 36 | Count-in (verse warning) | Every head lifts one dot on each tap | A one-dot pearl ring blinks at every mouth | `ChoirVerseWarn` (two taps, then an inhale) |
+| 2–7 | 72–287 | Verse | Each voice sings one note a beat, a sixteenth × (ordinal mod 4) late. Harmony Fm7 Fm7 B♭7sus B♭7sus A♭maj7 E♭sus | Mouth "o" 6 ticks before each note, wide 8 after; one-dot sound arcs | `ChoirVerseFire0–8`: voices sharing a part sing one cue, a little louder |
+| 8 | 288–323 | Gather | Dolls glide from the cloud to the chorus seats; the organ case assembles from its mouth outward in 14 ticks | Pearl-violet reveal rings, pearl motes, motes behind the gliding dolls | `ChoirOrganRise` |
+| 9 | 324–359 | Pipes | Raised ranks rise centre-out, rank k from 324 + 5k over 8 ticks, sliding up behind the rail in whole dots | A brass glint as each rank seats | `ChoirPipe0–5` (F3 C4 F4 A♭4 C5 E♭5), raised ranks only |
+| 10 | 360–395 | Inhale (chorus warning) | The beam exists but is harmless: a locked one-dot axis from the mouth, turning toward the target | Forecast hairline with pulses running into the mouth; the mouth darkens to a void with a pearl lip as motes spiral in | `ChoirChorusWarn` |
+| 11–15 | 396–575 | Chorus | One beam from the organ mouth. B♭7sus (11–12) → Fm9 (13–14) → an open F5 fifth (15) | A wavefront runs down the beam on every beat; Fm9 deepens the hem; the open fifth turns the pearl band brass | `ChoirChorusFire1–6` by chord voices |
+| 16–17 | 576–647 | Release | Pipes sink outer-first (576 + 4·(5 − k)); the case fades 604–616; dolls return to the cloud over 36 ticks | The beam's axis cools from lilac to plum in 24 ticks | `ChoirChorusEnd` |
+
+**Notes.** The owner spawns each note at the singer's open mouth (its variant's design mouth, mirrored by facing), launched at 8 px/tick toward the target plus 5 px/tick upward; after 6 ticks it homes, accelerating to 30 px/tick (turn cap 0.24 rad/tick). 16 × 16 swept head, one extra update, pierce 1, one hit per NPC root, life 240 ticks, damage 0.78 × the voice's current damage. Drawn as code pixel glyphs (a quarter, an eighth, a beamed pair) with a short comet tail; never with staves. Each voice sings each verse note once per concert: when its place changes mid-verse (a new voice with a lower identity, a sacrifice) it never repeats a note and still sings the one it was about to sing, at most 29 ticks late; a new voice never sings a note whose tick came before it appeared. Sung pitches are F minor pentatonic, F4 to C6:
+
+| Part | Line (one note per verse beat) |
+|---|---|
+| 0 (melody, the lead) | A♭5 C6 B♭5 A♭5 C6 B♭5 |
+| 1 | F5 E♭5 E♭5 F5 E♭5 E♭5 |
+| 2 | C5 A♭4 B♭4 F5 C5 A♭4 |
+| 3 | F4 C5 B♭4 E♭5 A♭4 E♭5 |
+
+**Chorus formation**, around the stage anchor S (the organ mouth and beam origin), `S = owner.MountedCenter + (0, −210)`, eased at 0.25 a tick and snapped beyond 1200 px:
+
+| Row | Holds | Arc (y down, 90° straight below) | Stratum |
+|---|---|---|---|
+| 0 (front) | ordinals 0–6 | centre S + (0, −40), radius 150, 35°–145° (a cup under the mouth) | front |
+| 1 | ordinals 7–15 | centre S + (0, −122), radius 196, 30°–150° | front, behind row 0 |
+| 2 (gallery) | ordinals 16+ | centre S + (0, −70), radius 175, 200°–340° (an arch over the pipes) | back, behind the organ |
+
+A row's members share its arc evenly; the first voices of a row take the seats nearest its centre (ties go right), so the lead stands centre front under the mouth. Rows 0–1 keep at least 40 px between seats up to 16 voices, the gallery at least 24 px up to 33. During the inhale and the chorus the rows part for the beam (drawing only; the voices have no hitbox): each row stays on its arc, which may stretch (rows 0–1 to −20°…200°, the gallery to 160°…380°); the voices in the beam's corridor (its drawn half width, the throat's near the mouth, plus 40 px) slide along the arc to the nearer side of the gap and their neighbours make room, so no two of a row stand closer than 36 px (or the row's own spacing where that is tighter). The parting eases in over 12 ticks and out as the beam closes.
+
+**Organ** (`ChoirOrgan`, k = 1: one texel is one dot, 190 × 192 px), one per owner, on the back stratum behind every player. Drawn from `S + (−95, −147)`, its see-through mouth sits on S (within one dot) and its 18 px radius is the beam's throat. Voices raise ranks: `clamp(voices + 1, 2, 6)` ranks, so 1 voice raises 3 pipes, 2 → 5, 3 → 7, 4 → 9, 5 or more → all 11. A completed chorus sinks the pipes and fades the case out by tick 616. A concert that stops in its release still closes to that vanish; a target that dies with the organ out closes it quietly as a release from where it stood (pipes sink, the case is gone 40 ticks later); only a lost target crumbles it into porcelain and brass.
+
+**Chorus beam** (`ChoirChorus`, one per owner):
+- The lead spawns it at concert tick 360; its age follows the lead's clock (`ai[0]` = clock − 360): ticks 0–35 are the harmless warning, 36–215 are live.
+- It turns toward the target at 0.045 rad/tick; the first warning tick snaps.
+- Collision runs from 48 px past the mouth to 2000 px × `LengthFactor` (full length in 3 ticks). The half-width starts as the 1.5 px pilot, swells (quintic) to 46 px (92 px full width) by live tick 7 and closes back to the pilot over live ticks 168–180, the Raid's `FirstSeveranceBeamIgnition`; the first live tick cannot hit.
+- Damage is `(int)(1.05 × the sum of every living voice's current damage)`, recomputed every tick. One hit per NPC root per 12 ticks, so 15 per chorus. Never one beam per voice.
+- If the lead is removed, the next voice carries the clock, the organ and the beam on. A lost or killed target, an unusable owner or no voice left closes it harmlessly in 6 ticks (the owner decides; peers follow its update).
+- Drawn by the original `DollChoirEnergy` material. The throat widens from the organ mouth's 18 px to the full half width over the first 48 px, where collision starts: the throat glows over the organ and never hits. Past it the light stays inside the collision body.
+
+**More voices, richer chord.** Chord voices = min(voices, 6) choose `ChoirChorusFire1…6` (more sung lines; the fifth line adds Fm9's ninth) and the number of brass standing waves in the beam (at most 2 under Reduced Effects). Raised pipes grow as above, and the verse fills its four rolling parts; voices beyond four double a part. Per owner the draw is bounded: 40 voices, 64 notes (24 with trails), one beam, one organ.
+
+**Interruptions.** The minions staying through an item change and a Down, and the quiet close on a killed target, are the owner-approved (2026-10-03) exceptions in the [shared rules](#reward-refresh-2026-10--shared-rules).
+- **Target lost, or owner unusable** (dead, Doll Raid Down or eliminated, `noItems`, crowd control): the clock returns to 0 and the dolls go back to the cloud; a warning or live beam closes harmlessly in 6 ticks; an open organ crumbles over 18 ticks with `ChoirChorusMiss`, and a sounding chorus fades out over 6 ticks. The next valid target starts again from the count-in.
+- **Target killed** (inactive or no life left) with the organ out and no other target in reach: the same stop, but a quiet close instead of a failure: `ChoirChorusEnd` plays, a sounding chorus fades out over 30 ticks and the organ closes as a release from where it stood. Another target in reach is simply taken and the concert goes on.
+- **Any stop in the release** (576–647): the pipes keep sinking and the case keeps fading until it is gone at 616.
+- **Owner Down:** the choristers stay summoned (slots kept); notes in flight turn harmless and fade in 8 ticks.
+- **New voice mid-concert:** it joins the current clock and flies to its seat; its damage joins the beam on the next tick; a chorus already sounding does not change.
+- **Death or buff removed:** every chorister ends; notes and the beam stop with their owner.
+- **Item change:** nothing happens to the minions; only the baton needs the item.
+
+**Presentation.** Everything draws through the shared Doll weapon layer at one dot = 2 world px, point-sampled and snapped: the gallery row, pipes and case on the back stratum; rows 0–1, the cloud, the baton, the beam, notes and sparks in front. While the owner holds the Choir during a running concert the baton beats time, rising through the inhale and the chorus; the arm follows the baton. Another player's beam, notes and trails draw at 65% and the inhale's void at 60%; bodies stay opaque. Reduced Effects keeps the bodies, forecast, live beam and counts, uses two standing waves and wavefronts only on the chord changes, drops the motes, halves trail length and residue time and removes the glow; the screen shake (3, owner only, through `RitualWeaponFeedback.Kick`) follows the config.
+
+**Audio.** 29 original cues in `Assets/Sounds/Weapons/DollWeapons/` (no recordings): a faceless formant doll voice, porcelain taps, brass gears and pipe organ, all F minor pentatonic. Pairs: `ChoirVerseWarn` → `ChoirVerseFire0–8`, `ChoirChorusWarn` → `ChoirChorusFire1–6`; the success close `ChoirChorusEnd` and the failure `ChoirChorusMiss` sound different. The close is restrained, as the owner chose for big finishers on 2026-10-03: the chorus's open fifth falls away into its cut and `ChoirChorusEnd` (a soft gong on low F and a quiet organ fifth with a long tail) carries the ending. The owner approved all 29 cues on the audition page on 2026-10-03. Cues play on the lead's accepted clock through `DollWeaponAudio`, once per owner and concert tick; peers hear other choirs at 70%; beam contact is an owner-local accent at most every 24 ticks. [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns the levels.
+
+**Power** (raw, one target, every hit landing; per voice at 968):
+
+| | Notes | Chorus | Per concert | Per second |
+|---|---|---|---|---|
+| 0.3.70 baseline | 5–6 × 0.85 (823) by ordinal | 15 × 1016 | 19,766.5 per 660 ticks (mean) | 1,797 |
+| 2026-10 | 6 × 0.78 (755), every voice | 15 × 1016 | 19,770 per 648 ticks | 1,831 |
+
+Per cycle +0.02%, sustained +1.86%, best 600-tick window from a cold summon 19,770 against 20,178 (−2.02%): within the shared ±3%. The chorus window stays 5,080/s per voice; ten voices hit for 10,164 per chorus hit. The beam is still one 92 px line per owner.
+
+**Ownership.** The owner client targets, advances the lead's clock and spawns the notes and the beam through native minion and projectile replication; the lead syncs on clock resets and every 60 ticks, every voice every 60 ticks, the beam every 6 ticks (always, turning or not). Only the owner judges the target (range, sight), aims the beam and closes it. Peers advance the replicated clock while the owner keeps a target and stop it only on the owner's update, smooth the beam's angle toward its 6-tick corrections, and play the same cues on that clock. A new voice is spawned with the lead's clock and target, so it can take over as lead at once. No packet; protocol unchanged. Client resources are dropped on world unload; a Dedicated Server never touches graphics or audio.
+
+**What changes for players** (old → new):
+- Concert: 11.0 s (660 ticks) → 10.8 s (648 ticks, 18 beats at 100 BPM), with a two-beat count-in and a one-beat chorus warning you can see and hear.
+- Notes: 5 or 6 per voice depending on its place (×0.85, every 46 ticks) → 6 for every voice (×0.78, one per beat).
+- Notes leave the doll's mouth at 8 px/tick (plus a lift) and home after 6 ticks to 30 px/tick → was 16 px/tick from the doll, homing at once to 36 px/tick.
+- Chorus starts at concert tick 372 → 396; still 180 ticks and 15 hits × 1.05 the summed voices.
+- Beam origin: 260 px above the target, pointing down → the organ mouth 210 px above you; collision now starts 48 px past the mouth; 2000 px and 92 px unchanged; opens with the Raid's pilot-and-swell (full width by tick 7) instead of a 7-tick ease, and narrows over its last 12 ticks.
+- Choristers: orbit the target → stay over you, then line up in rows before the organ; targets are measured from you.
+- Removing the lead voice now hands the beam to the next voice instead of cancelling it.
+- Sustained output per voice 1,797 → 1,831 raw/s (+1.9%); the best cold window 20,178 → 19,770 (−2.0%); chorus window 5,080/s unchanged.
+- New pixel art (choristers, organ, baton, item and buff icons), a new beam material and 29 new cues; the 0.2.x apparatus, pose and Choir sounds no longer appear for this weapon.
+- The new voice appears at the baton tip, `(20·facing, −72)`, instead of `(0, −80)`.
+
+**Acceptance** (owner; `not_run` until played): 1, 4 and 10+ voices (formation, chord growth, pipe count); the verse rhythm, organ rise and the warning → chorus pairing; beam readability on bright and dark ground; the closed-mouth line; the parting at 10+ voices; Down, death, sacrifice, retarget and kill-closing cleanup; a second peer seeing the same concert; Reduced Effects; FPS with 10+ voices; the cues over the Raid music.
 
 ## Pale Meridian — refreshed ranged (2026-10)
 
@@ -118,9 +214,48 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 - Look: the painted gun behind the player and upside down when aiming left → the approved pixel gun (174×34 px) in front of the player, mirrored when aiming left, with its wind-up key standing behind the player; new inventory icon.
 - Sound: the 0.2.x Ranged and MeridianSustain sounds → 23 new music-box, brass, porcelain and organ cues.
 
-## Claw swipe cleanup — 0.2.38
+## Rogue — Last Witness
 
-Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. Normal swipes no longer emit radial line/shard sprays, including their normal-hit aftermath; their ribbon omits its dark opaque underlay. The palm's existing aperture and the entire right-click crush remain unchanged. The shared ribbon helper defaults to its old behavior for other weapons. Motion, hitboxes, damage, resources and audio are untouched.
+Refreshed 2026-10 under the [shared rules](#reward-refresh-2026-10--shared-rules); the 0.2.34 score is kept in [history](../../history/2026-10-03-last-witness-v1.md). The Doll's **Axiom Blade** (two accelerating revolutions) and **Iron Interdict** (forecasts held in place, then swords driven home) become the player's: a heavy execution blade hangs before you and six testimonies break off its edge as seeking porcelain shards; when the sixth has spoken the sentence is sealed, the blade swings back overhead and is hurled spinning, bites its target, turns in it twice, tears free and returns to hang again. A stealth throw also calls the **Triangle Judgement**. `WitnessRules` owns every number below; the projectiles are `WitnessHang` (held), `WitnessShard`, `WitnessThrownBlade` and `WitnessJudgement`.
+
+Unchanged: item `LastWitness`, Calamity's rogue class and stealth through `CalamityRogueArmament`, base damage 9680, crit 8, use 40, channel and auto-reuse, the [box](#curtainfall-treasure-box) and the [Promise](#doll-companion--the-unbroken-promise) recipe.
+
+**Score.** One use is one 282-tick score (4.70 s) on the `RitualGrandScore` milestones: seal 174, throw 218, end 282; attack speed never compresses it. A held trigger re-uses the item about two ticks after the end, and Calamity reads stealth once per score. Aim turns at most 0.08 rad/tick before the seal and 0.025 after.
+
+- **Hang (0–174):** the blade's tip points toward the cursor, raised 21° above the line of fire, its balance point 94 px from the hand. A freshly drawn blade settles in over 12 ticks (24 px); it breathes ±0.05 rad and ±2 px.
+- **Testimonies:** six fire at 16, 45, 74, 103, 132 and 161 (every 29 ticks), each warned 10 ticks earlier. Their seats lie along the cutting edge, 16 px apart from −24 to +56 px of the balance point, filling from the centre outward (3-4-2-5-1-6). Warning: a thread of light runs from the blade's eye along the edge to the seat, the edge cracks and a porcelain shard slides 16 px out, pulling back 4 px before it fires. Fire: the shard leaves along the aim at 44 px/tick (it updates twice a tick, as in 0.2.x), then seeks at 36 px/tick (native targeting); pierce 1, 18 px swept head, once per logical root, ×0.28. The blade kicks back 5 px and 0.05 rad, a pearl notch stays lit where the shard left and the eye glows a sixth brighter.
+- **Seal (174):** the six notches run along the edge into the eye, which flares. From here **releasing no longer cancels**: the throw completes on its own.
+- **Swing and throw:** the blade lifts over the shoulder to 137° behind the aim (radius 94 → 76 px, heavy quintic ease, 174–202), holds and trembles (202–210), then whips forward on an accelerating curve with no brake and leaves at 218, 92 px out along the aim, already spinning at the whip's speed (0.45 rad/tick). The arm rides the same curve, follows through 0.6 rad past the aim and is back on the hang by 268.
+
+**Thrown blade.**
+
+- **Outbound:** 34 px/tick, homing on the native target at 0.24 rad/tick, spinning 0.45 rad/tick. The hit shape is a **disc of radius 56 px** around the balance point, swept between ticks; the drawn blade's tip reaches 63 px from it. Outbound ends at the first contact; without one the blade stops and turns in the air after the cursor distance at 34 px/tick (4–27 ticks) when nothing is targeted, or after 27 ticks (918 px) while it homes on a target.
+- **Strike:** the first contact deals ×0.25 of the blade, once per root.
+- **Axiom turns:** the blade brakes onto the struck target and follows its centre (0.35 response, at most 34 px/tick), or holds where it stopped. Exactly two revolutions in 21 ticks, the spin rising from 0.45 to 0.747 rad/tick; a bite on each half turn at turn ticks 6, 12, 17 and 21, ×0.125 each, once per root per bite, no knockback.
+- **Return:** at turn tick 22 the blade tears free (×0.25, once per root, the struck target included) and flies home at 46 px/tick to the catch point: the hang's rest point if this owner holds a score (the blade hangs again; a new score's hanging blade stays hidden while the thrown one is out) or the hand. Caught within 28 px with a ring and its own sound; withdrawn beyond 3000 px.
+- **Blade per root:** ×5.4 = 0.25 + 4 × 0.125 + 0.25.
+
+**Stealth — Triangle Judgement.** A stealth throw marks the blade; the shards never execute. As the stealth blade's turns begin, the judgement is called on the struck target (or where the blade stopped). Damage timing, footprint and ledger are the 0.2.x verdict's, read from `RitualArmamentChoreography`: it follows the target until the lock at 16, then executes once per root inside the **185 px triangle** (SAT against the NPC box) during 28–31, ×0.60 of the blade; it ends at 56. On screen: the 185 px footprint as a forecast hairline from the call; wavering auras rising 300 px above the 265 px corners (0–10); three `WitnessSword` stakes fading in at the top (4–10), falling point first (10–16) and staking the corners at the lock; light written from stake to stake (17–22); the stakes closing inward 265 → 185 px (23–28); the execution as opaque pearl craquelure over a translucent porcelain ground (55%, so the target and anything inside stay visible), the cracks drawn toward a small black eye with a pearl lip (radius at most 22 px, opening at 28 and shut by 38), all of it cooled away 20 ticks after the live window (by 51) while the swords withdraw upward into light (36–46).
+
+**Release, item change, death and Down.** Releasing before 174 cancels: shards already fired fly on and the hanging blade crumbles. Item change, death, Raid Down or elimination, crowd control or `noItems` end the score at any time before the throw. After the throw the blade and the judgement survive an item change and end at once on death, Down or elimination. The owner alone reads input and spawns the shards, blade and judgement through native projectile replication; the score age and the testimonies spoken ride `ai`, the blade's phase, phase start, anchor and spin ride 15 bytes of `ExtraAI`. No packet and no protocol change.
+
+**Presentation.** Front stratum of the shared layer, one texel = 2 world px. `WitnessBlade` (k = 2, 130 × 24 px) hangs and is thrown: one rung, fitted to the 56 px disc (the drawn tip reaches 63 px from the balance point, so the turning blade shows how far it bites); `WitnessBlade_L` (k = 1) stays exported but is not drawn. `WitnessShards` (three frames) are the testimonies; `WitnessSword` stands on the corners with a one-dot light outline that keeps its dark steel readable; the inventory shows `LastWitnessIcon` (the V3 art no longer draws). The eye hole emits the testimony light (ruby-accented under stealth). Live light is the original `DollWitnessEnergy` material: a narrow wake that starts behind the spin so the blade stays clear, a trailing spin arc on the hit disc's rim (56 px, 0.89 of the drawn tip's reach; never inside 0.8 of it), at most 2 dots wide, 120° long and alpha .7, shard tails, testimony threads, the whip arc, the judgement's edges and the execution fill (only its cracks and lip opaque); each has at least four ramp tones, flowing noise, sparkle and a white-hot spine (the void eye takes a one-dot pearl lip), with pearl, bone and white at least 40% of the lit dots. Another player's light draws at 65% and their void (the execution's eye) at 60%. Reduced Effects shortens the arc to 80° at ×0.65, the wakes to 60% at ×0.7, halves residue and debris and drops the glow; bodies, forecasts, counts and sound stay. The owner's screen kicks on the throw (4.5), the bite (2.5), the stakes (2) and the execution (5.5) through `RitualWeaponFeedback`, following the shake setting.
+
+**Sound.** New cues in `Assets/Sounds/Weapons/DollWeapons/`, owned by the [cue sheet](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10): every release pairs a warning with a firing (testimonies, throw, Axiom turns, return, stakes, execution), the throw that bites nothing and the execution that finds no one have their own miss cues, and the flight hums on two fixed-pitch loops (cruise and Axiom) crossfaded per stage. No bell; porcelain, brass and organ in F minor pentatonic. The finishing execution stays restrained: a porcelain crack and a soft, gong-like low brass strike ringing out for about 2.5 s over a quiet organ chord, never a loud organ stab.
+
+**Nominal output** (raw, before defense, one target, every hit landing): six shards 6 × 2,710 plus the blade 52,272 (13,068 strike, 4 × 6,534 bites, 13,068 return) = **68,532 per score (7.08×)**, 14,581/s over 282 ticks and 14,479/s with the re-use gap (−0.7%); the best 600 ticks from a cold press land 139,774, the same as 0.2.x. A stealth score adds the judgement, 31,363 (3.24×), before Calamity's own stealth bonuses. **Area growth (outside the single-target budget):** the spinning disc reaches every enemy within 56 px of the turning blade, so crowds take up to four bites each; the per-root cap is unchanged.
+
+**What changes for players** (0.2.34 → refresh):
+
+- The relic becomes an execution blade: it hangs 94 px from the hand at 130 px long and is thrown at the same length.
+- Testimony shards: still six at ×0.28 on the same ticks; they now leave from six seats along the blade's edge (before: alternately 12 px either side of a point 128 px out).
+- Releasing after the seal (ticks 174–217): cancelled the throw → the throw completes.
+- Blade hit shape: a 32 px wide swept line → a 56 px radius swept disc (more crowd hits; per-root cap unchanged).
+- Blade split: 0.70 outbound / 0.30 return → 0.25 strike / 4 × 0.125 Axiom bites / 0.25 return; 5.4× per root unchanged.
+- Flight: launch 60 px/tick easing to 34 while homing (the old blade updated twice a tick) → a steady 34 px/tick; spin 0.22 → 0.45 rad/tick (0.747 in the turns); turns home 42 ticks after the throw or 8 after a hit → bites, turns 21 ticks in the target and tears free at turn tick 22; caught at the player within 32 px → caught back into the hang within 28 px.
+- Stealth: the verdict was cast 14–30 ticks into the flight on the nearest enemy → cast on the struck target as the turns begin (or where the blade stopped); its 185 px footprint, 16/28–31/56 timing and ×0.60 are unchanged.
+- Per score 68,532 (7.08×) and the best cold 600 ticks 139,774: unchanged.
+- New pixel art, icon, light and sound; the DollTheater cues are no longer played by this weapon.
 
 ## Curtainfall Treasure Box
 
@@ -128,23 +263,113 @@ Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. 
 
 Uniform selection uses `ItemDropRule.OneFromOptionsNotScalingWithLuck(1, options)` ([v2026.07 API](https://docs.tmodloader.net/docs/stable/class_item_drop_rule.html), checked 2026-09-12; package compilation checks the installed signature). The native `CanRightClick`/`ModifyItemLoot` container path owns consumption and contents; do not also spawn a weapon in `RightClick`. No `ItemID.Sets.BossBag` flag, since this is an all-difficulty treasure box without injected vanilla developer-armour drops. API checked 2026-09-12 against pinned tML [ModItem](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModItem.cs) and [ExampleMod bag](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/Items/Consumables/MinionBossBag.cs); independently implemented, no copied art/code.
 
-## Lacrimosa's Claws — accepted melee redesign, 0.2.29
+## Lacrimosa's Claws — refresh (2026-10)
 
-This section replaces the original sword/echo prototype. Internal item identity `NullRefrain` is unchanged; current acquisition is owned by [Curtainfall Treasure Box](#curtainfall-treasure-box). The other four forms follow the long-form ritual specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it. Weapon-only changes do not authorize Raid tuning.
+The owner-approved refresh of the melee box weapon (look, motion and all fifteen cues approved on the audition and review page on 2026-10-03): the boss's remote hands (Remote Clasp) and its Central Crush become the player's own technique. It replaced the 0.2.29 melee redesign and the 0.2.38 swipe cleanup on 2026-10-03; their text is [kept in history](../../history/2026-10-03-lacrimosa-claws-0229.md). The [shared rules](#reward-refresh-2026-10--shared-rules) apply.
 
-**Left click:** alternate independently articulated left/right five-finger claws using the actual P3 rig material. The hand expands from0.68x to2.30x during the stroke, then retracts; the whole attack stays inside560 world pixels of the player. Base duration28ticks, bounded10–90 after native true-melee speed. Only the palm and swept finger capsules damage, once per logical NPC root per swipe. No homing echo projectiles: this is the user's replacement true-melee design. Calamity's registered `TrueMeleeDamageClass` is resolved through the compatibility adapter, without using its internal singleton.
+What stays: the internal item `NullRefrain` and its names (断唱・虚掌 / Null Refrain — Lacrimosa's Claws), Calamity true melee through the compatibility adapter, base damage 7700 (`LacrimosaClawMotion.BaseDamage`), crit 8, Red rarity, 40 gold, its place in the [Curtainfall Treasure Box](#curtainfall-treasure-box) and as an ingredient of [The Unbroken Promise](#doll-companion--the-unbroken-promise). No packet, no protocol change (79), no Raid tuning and no Boss HP change.
 
-**Right click (0.2.31):** one charge after360 real game ticks while holding a usable claw. Holding an attack also recharges; unequipping/incapacitation pauses it, execution pauses it, death/world entry clears it. The charge belongs to the player, so extra item copies cannot duplicate it. A click spends it once and fixes a world coordinate within1120px. A fresh right click while left-clicking prioritizes execution and cancels only the owner's current swipe. Gameplay-only input ignores UI/fullscreen map/unfocused/Downed use; the ordinary alternate-use path shares the same one-charge spend. Both hands emerge diagonally in5 ticks, decelerate/brace until11, then accelerate to impact at16; one4.2x ordinary-melee strike is active during16–20 and recovery ends at42. The166x132px axis-aligned damage ellipse is unchanged and forecast; the oblique hands are its presentation, not an enlarged rotated hitbox. No forced NPC/player movement, literal instant kill, invulnerability bypass, homing after target lock, or attack-speed reduction of the six-second charge. Native NPC defenses and damage hooks remain in effect.
+**The hands.** The DW01 pixel art: a floating right porcelain hand and its mirror image, with ball-jointed fingers, long ivory talons, a black-iron cuff with a brass band and, on the back of each hand, a brass plate holding six dark glass **heart beads**. No arm, sleeve, thread or ribbon. While the claws are held and usable, one held controller keeps the hands beside the owner: the right hand floats above the front shoulder and the left above the back one, both pointing up and out, with a 2 px breathing bob. Hands and their light draw **in front of players** on the shared Doll weapon layer.
 
-The presentation uses native-resolution P3 palm/bone/talon regions, independently moving finger joints and layered violet/white crescents with negative-space interiors. The remote strike closes on a dark center before a vertical flare and ring release. Bright remnants never increase hit range. Both hands and major crescents remain under Reduced Effects; secondary shards and shake are reduced/disabled. Weapon sounds now use independent weapon masters and bounded voices; [Audio](../../AUDIO_CUE_SHEET.md#weapon-only-foley) owns current choices. No global pause, forced zoom or white-screen fill.
+### Left click — three-step kata
 
-`NullCantorClawMotion` owns the current melee budget and timing; the previous72-tick execution calculation predates the faster right-click score and is not current DPS. Measure actual contact with native armor/crit/gear/hooks before comparing endgame output. Do not change Boss HP to disguise a weapon balance problem.
+Holding the button chains A → B → C → A; the next stroke starts on the tick after the last one ends. If no stroke starts within 45 ticks of a stroke's end, and after every grasp, the next one is A.
 
-The native128x128 RGBA inventory icon is composed from the existing original P3 hand and palm atlas, not cropped from the concept board and not32-color quantized. The original atlas remains unchanged; runtime limbs keep the native source detail. Its exact derivative record is in `Assets/ATTRIBUTION.md`.
+| Step | Motion | Base ticks | Live (base ticks) | Hit shape | × base |
+|---|---|---|---|---|---|
+| A · Down-rake | The right hand coils up and back (0–8), then rakes down through the aim | 26 | 9–16 | Right-hand capsule from 12 to 160 px along the hand axis, radius 44; the wrist rides a 104 px orbit, −1.76 → +1.27 rad about the aim | 0.85 |
+| B · Up-rake | The left hand coils low behind during A, then rakes up through the aim | 24 | 7–13 | Left-hand capsule, same size; +1.80 → −0.86 rad | 0.85 |
+| C · Clap | Both hands fling out wide (0–14), drive together flat along the aim and meet on the aim line at 22, then rebound to rest | 34 | 18–22 | One capsule per hand from the wrist to 196 px, radius 52; the wrists close from (80, ±150) to (84, ±50) px | 1.30 |
 
-Design references: the user's annotated P3-arm sketch and approved dual-claw board; Calamity [Earth's growing true-melee silhouette](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Melee/EarthHoldout.cs), [Ark's staged release](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Melee/ArkOfTheCosmos_BlastAttack.cs), HotOG [Parasanguine's articulated cadence](https://github.com/TohruKobayashi/CalamityHunt/blob/5c2825e64c660384500decafa7702793dc4b48dc/Content/Projectiles/Weapons/Melee/ParasanguineHeld.cs), and WotG [Avatar's finger-chain rendering](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/Avatar/SecondPhaseForm/Rendering/AvatarOfEmptiness.Rendering.RightArm.cs). These are fixed source design references, not video/playback verification or permission to import their materials. The implementation and all art used are project-authored; no foreign shader, texture, audio or code is copied.
+- **Rate.** A kata lasts 84 base ticks for 3.0× base: v1's rate of 1× per 28 ticks.
+- **Attack speed.** Native true-melee attack speed shortens each stroke to `round(base / speed)` ticks, bounded A 12–90, B 11–90, C 16–90; the live window scales with it.
+- **What hits.** Only the active hand's capsule (both hands in C), swept at 9 sub-samples across the last tick so high speed cannot tunnel, with `ownerHitCheck`. A hitbox is hit when the capsule's segment comes within its radius of the box (`LacrimosaClawMotion.CapsuleHitsBox`: round ends, so a body just past the tip or one large enough to contain the whole capsule is hit). Each logical NPC root is hit once per stroke; the clapping hands share one ledger. Wind-ups, the idle hand, rebounds and light never damage. Reach is about 305 px for the rakes and 366 px for the clap; nothing reaches beyond 430 px of the owner's centre.
+- **Motion.** Each hand follows one 84-tick track (cubic Hermite through knots with Catmull-Rom tangents, the rest pose at both ends), so pose and speed carry across every stroke join without braking; the wrist's angular acceleration stays under 0.35 rad/tick² while raking. A stroke that starts away from its track (the first stroke, after a turn or a grasp) is shown blending from where the hand was during its harmless wind-up and is exactly on its track from its first live tick; hits always use the track.
 
-Native projectile ownership is unchanged. Shared pure geometry covers both fractional rendering and collision; one root ledger prevents five fingers multiplying damage on the same enemy. Draw/audio lifetime is client-only. On death, Down, item change or world unload the attack or its client resources are released. No new Encounter packet or authority rule is introduced.
+### Heart beads
+
+One meter per player, shown on both hands: 360 units, 60 per bead. Extra copies of the item cannot duplicate it.
+
+- **Hits.** A stroke that connects adds 12 units (a rake) or 24 (the clap), once per stroke however many NPCs it hits; critters and town NPCs do not count, target dummies do. The amount is multiplied by the streak's tempo (×1 for its first two connecting strokes, ×1.25 for the 3rd–5th, ×1.5 from the 6th) and by (stroke ticks / base ticks), so attack speed does not change the fill per second. A streak ends 75 ticks after its last connecting stroke and restarts after every grasp.
+- **Trickle.** While the claws are held and usable and no grasp is active, the meter also gains 1 unit every 4 ticks: empty to full in 24 s without a hit.
+- **Pace.** With every stroke landing from a cold press at attack speed 1 the meter is full at tick 344 (v1 charged in 360 ticks of holding).
+- **Freezing and loss.** Frozen while unequipped, Down, crowd-controlled or grasping; death and entering a world empty it.
+- **Feedback.** Each bead lights with a ping and its own music-box note; the sixth adds a cadence and full beads beat like a heart (lub-dub every 48 ticks). Peers see the lit count: the controller carries it.
+
+### Right click — Grasp
+
+Grasping needs all six beads and spends them; a fresh right click during a stroke cancels only the owner's own stroke. Ages are real ticks from the click (age 1); attack speed never compresses them.
+
+| Age | Beat |
+|---|---|
+| 1–2 | The beads go dark, the hands snap flat and draw back 20 px. The target point is the cursor, clamped to 1120 px. The nearest hostile NPC (one that can be chased, or a target dummy) whose hitbox lies within 160 px of that point is grasped, ties going to the lower slot; if there is none, the grasp is empty and stays at the point. The crush ellipse is forecast as a one-dot pearl-violet hairline with travelling heads until the crush. |
+| 3–13 | Both hands fly to the target on mirrored bowed curves, fast start and braked arrival, leaving violet-pearl wakes. Harmless. |
+| 14–15 | The hands open on either side of the target along a −0.30 rad diagonal and clench into fists. |
+| 16–17 | **Contact: 0.3× to the grasped NPC root only**, no knockback. An empty grasp has no contact hit. |
+| 18–37 | Hold: the fists press on both sides and follow the grasped NPC, which is never moved, slowed or stunned. Squeezes at 22, 28, 33 and 36 jolt the fists inward and relight the beads two by two; a dark core grows between the fists. |
+| 38–39 | Brace: the fists part 14 px and the core swells. |
+| 40–43 | **Crush: 4.0× to every NPC whose hitbox touches the axis-aligned ellipse of radii 166 × 132 px at the grasp centre** (v1's ellipse), once per logical root, knockback 1.4 × the item's. |
+| 44–53 | The fists burst open, a black lacuna opens inside a violet ring with a vertical pearl flare and porcelain shatters; the hands fly home. |
+| 54 | Strokes and the meter resume; the residue cools to plum by 64. |
+
+- **Damage class.** Contact and crush are ordinary melee; only the raking and clapping hands take true-melee bonuses. Native defenses, immunities and hooks apply. No instant kill, invulnerability bypass or forced movement.
+- **Lost target.** If the grasped NPC dies, despawns, changes type or jumps more than 64 px (plus its own speed) in one tick, the hands keep its last centre and still crush there.
+- **Too early.** A right click with fewer than six beads only plays a dull brass tick and flickers the dark beads (owner only).
+- **Aiming aid.** While all six beads are lit, brass corner brackets mark the NPC a grasp would take (owner only, harmless).
+
+### Budget
+
+Nominal raw numbers before defense, no crit, one target, every hit landing on its first live tick (`LacrimosaClawScore`, checked by the domain tests against the [shared baseline](#reward-refresh-2026-10--shared-rules)). Not measured DPS.
+
+- **Per hit at 7700:** rake 6,545; clap 10,010; grasp contact 2,310; crush 30,800.
+- **Kata:** 3.0× per 84 ticks = 16,500/s, as v1's swipes.
+- **Steady cycle:** the 345-tick fill (13 strokes, 12.85×) plus contact 0.3× and crush 4.0× = 17.15× = 132,055 per 399 ticks against v1's 131,340 per 402 (+0.5%); **19,858/s against 19,603/s (+1.3%)**.
+- **Best 600-tick window from a cold press** (grasping when full is best): 191,345 against 194,040 (−1.4%).
+- **Attack speed:** 23,390/s at 1.25 and 27,008/s at 1.5 (v1 at the same speeds: 23,633 and 26,602).
+- **Holding without hitting:** a grasp every 1,494 ticks = 1,330/s (v1: 4,827/s).
+
+### Presentation
+
+- **Pixel art.** One texel is one dot (2 world px), never scaled. Two integer rungs of the DW01 art: k=2 (`ClawOpen`, `ClawRake`, `ClawClench`, `ClawThrust`, the open hand about 94 px) while parked, winding up, returning and flying; k=1 (the `_L` sprites, 146–200 px) while raking, clapping and grasping. Rungs swap only on the fastest frames, under a two-tick pearl flash that steps the art's light tones to pearl and its dark ones to pearl grey (a two-tone hand, never a white silhouette); a pose change on the same rung, such as the fists closing at contact, does not flash. The raking and thrusting hands are turned by a fixed offset so their longest (rake) or middle front (thrust) talon lies on the capsule axis; the art-fit test keeps those tips and the fist's front within one dot of `RakeTip` 160, `ClapTip` 196 and `FistReach` 140. The left hand is the right-hand art mirrored about its own axis. The clench and thrust poses show four talon tips, as delivered.
+- **Beads.** The six bead anchors the exporter found on every pose: lit beads are pearl-violet dots over the dark glass, the newest pings, and full beads flash white on each heartbeat.
+- **Damaging phases** use the claw's own Luminance material, `DollClawEnergy.fx`, never a flat colour (four or more ramp tones, flowing noise, sparkle, a white-hot spine; pearl, bone and white at least 40% of lit dots, checked offline):
+  - rakes leave three parallel claw-scratch ribbons beside the longest talon's path, exactly over the path the hits swept (white spine and pearl core, violet body, torn plum rim, brass glints at the head), lingering 10 ticks and cooling to plum;
+  - the clap streaks the palms' approach, then opens a pearl slit, a violet ring growing to about 90 px and three organ-pipe breaths that rise from the slit's upper side, tallest in the middle, leaning a little outward and lifting off as they cool;
+  - the crush rings out to about 150 px with a 330 px vertical pearl flare, then opens a black lacuna with a one-dot pearl lip among porcelain, spark and pearl debris; hot for 6 ticks, it cools to plum and its debris ends by grasp age 64, the grasp's last tick (by 52 with Reduced Effects);
+  - hits show a small violet contact star and porcelain chips.
+- **Other players** draw their claws' light at 65% and the lacuna at 60%; the hands stay opaque.
+- **Reduced Effects** keeps the hands, beads, forecasts and live bodies; it halves debris and residue time, shows the clap and crush bursts at 80% without the pipe breaths and the heartbeat ring, and drops the glow. Screen shake (owner only, through `RitualWeaponFeedback.Kick`, off with Reduced Effects or Screen Shake off): clap 2.5, grasp contact 2, crush 7.
+- **Removed:** the painted 0.2.x atlas hands, the parked-hand loop, the charge pips above the player and the world item's glow. No hit-stop, fullscreen flash, zoom, slow motion or HUD meter.
+- **Icon:** `NullRefrainIcon` (DW01I, stored at 2×), drawn natively in the inventory and the world.
+
+### Audio
+
+All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns their levels. Warning → firing pairs: `ClawRakeDownWarn` → `ClawRakeDownFire` (A), `ClawRakeUpWarn` → `ClawRakeUpFire` (B), `ClawClapWarn` → `ClawClapFire` (C), `ClawGraspWarn` → `ClawGraspFire`, or `ClawGraspMiss` on air, and `ClawCrushWarn` (which carries the four squeezes) → `ClawCrushFire`. `ClawHit` sounds on contact. The owner alone hears `ClawBead` (one F5 note moved up the ladder for beads 1–6), `ClawBeadsFull` and `ClawBeadDry`. Firing cues start a fixed lead before their event so the transient lands on it. Another player's claw cues go through `DollWeaponAudio.PlayFor` (the shared owner priority).
+
+### Ownership and lifecycle
+
+- **Ownership.** The owner client reads input, owns the meter and the combo and processes its hits. `LacrimosaClawKata` (one held controller, netImportant) carries the stroke, aim and age in `ai` and the stroke length, lit beads, stroke serial and the stroke's first impact in ExtraAI; `LacrimosaClawGrasp` (a child) carries the grasped NPC slot, its type and age in `ai` and the anchor and approach side in ExtraAI. Peers draw only from these. Raid outcomes stay authoritative on the server or in Single Player.
+- **Ending.** An item change (at once on the owner, after 6 ticks on peers), death, Down, crowd control, `noItems` or leaving the world ends the controller and the grasp; spent beads are not refunded. Releasing the button only lets the current stroke finish.
+- **Cleanup.** World unload drops the layer sources, arm poses and voices; Mod unload drops the material resolver; a Dedicated Server never loads art, shaders or audio.
+- **Legacy.** `NullCantorClawSwipe`, `NullCantorClawCrush`, `NullCantorClawMotion` (and its charge), the swipe/crush presentation and their tests stay as unused legacy until the weapon cleanup; the item no longer reaches them. Only code keyed on the held claws was detached, as the shared rules allow: the parked-hand and charge-pip drawing, the world item's glow and `NullCantorClawPlayer` (the v1 charge and right-click crush, which fired whenever `NullRefrain` was held and would otherwise still launch the old crush from the old charge). `LacrimosaClawPlayer` owns the beads, the combo and the grasp instead.
+
+### What changes for players
+
+- **Left click:** alternating swipes (1.0× every 28 ticks, hands growing 0.68 → 2.30×, reach up to about 560 px) → a three-step kata (A 0.85×, B 0.85×, C 1.30× over 26/24/34 ticks: the same 1× per 28 ticks), rake reach about 305 px and clap about 366 px (cap 560 → 430).
+- **Charge:** one charge after 360 ticks of holding → six heart beads filled mostly by hits (full after about 5.7 s of continuous hits, or 24 s of holding without hits).
+- **Right click:** a 4.2× crush at the clicked point (impact at tick 16, 42 ticks without strokes) → a grasp of the NPC nearest the cursor (within 160 px): 0.3× contact at tick 16, 4.0× crush at tick 40 on the same 166 × 132 ellipse, the hands following the target; strokes resume at 54.
+- **Holding without attacking:** 4,827/s → 1,330/s.
+- **Totals:** sustained 19,603 → 19,858/s (+1.3%); best cold 10 s 194,040 → 191,345 (−1.4%).
+- **Look and sound:** the painted P3 atlas hands and crescent sheets → the DW01 pixel hands with beads and the claw's own material, in front of the player; the charge pips are gone; a new inventory icon; 15 new cues replace ClawSwipe, ClawGrip, ClawCrush and ClawHit.
+
+### Acceptance (owner; not_run until played)
+
+- A → B → C flow at normal and high attack speed, and the reach (305 / 366 px against v1's 460–560).
+- The parked hands' size (k=2, about 94 px, over the shoulders) and the k=1 swaps.
+- Bead readability on bright and dark ground at zoom 1, and the full heartbeat.
+- Grasp on a moving target, a boss, a worm and empty air; the aiming brackets.
+- Reduced Effects; a second peer seeing the hands, beads and grasp; FPS with eight players.
+- The cue pairs at unchanged sliders over each phase's music in game (the owner approved all fifteen cues on the audition page on 2026-10-03).
 
 ## Scope and acquisition
 
@@ -200,19 +425,13 @@ Superseded by [Pale Meridian — refreshed ranged (2026-10)](#pale-meridian--ref
 
 ### Summon — Choir of the Unmade
 
-Each use summons one persistent,1-slot chorister. The oldest stable native identity conducts one shared target/score; adding voices does not restart it. Normal minion targeting, sacrifice and changing held weapons remain supported.
+Replaced by the [2026-10 refresh](#choir-of-the-unmade-2026-10); the 0.2.34 concert is kept in [history](../../history/2026-10-03-choir-of-the-unmade-0234.md).
 
-An11-second concert: independent seeking notes and progressive organ tiers for276 ticks;48-tick assembly;48-tick pressure/charge; **one shared three-second chorus beam** during372–552; disassembly/rest to660. Every living voice contributes its current damage to that one beam; individual notes stop during the chorus. No extra beam per slot. The chorus binds to its conductor's owner+identity, not a reusable projectile slot. Removing the conductor cancels that beam; a remaining voice takes over the next concert. Losing a valid target or becoming Downed/incapacitated cancels the score. Down does not delete the summoned slots.
-
-The beam turns toward the native selected target at0.045rad/tick, reaches2000px, has92px full width and12-tick root immunity. The crown is physical moving art; all ornamental seal/pipe counts remain bounded independently of minion count.
-
-### Rogue — Last Witness
-
-Hold to load one suspended execution relic with six small pressure/cut beats at29-tick intervals. Each still emits one small seeking shard from the real central apparatus, rather than another full weapon on an orbit. At174–194 its edge loads inward;24 ticks of braking/compression precede a single amplified returning blade at218. Flight keeps the physical blade legible with a narrow textured wake instead of a broad spinning light sheet. Recovery completes at282 (4.7s total). Releasing before commitment cancels; holding can begin another full score after recovery. Native Calamity RogueWeapon hooks determine initial damage/stealth once; the final blade inherits the stored stealth flag. A stealth final blade retains the target-locking triangular verdict. The early fragments do not each receive another stealth execution.
+Last Witness's 0.2.34 score is replaced by its [2026-10 refresh](#rogue--last-witness); the old text is kept in [history](../../history/2026-10-03-last-witness-v1.md).
 
 ## Presentation and native ownership
 
-This section describes the 0.2.x set; a refreshed weapon's own section (so far the [Lacuna Testament](#magic--lacuna-testament)) supersedes it for that weapon.
+This section describes the 0.2.x set; a refreshed weapon's own section (so far the [Lacuna Testament](#magic--lacuna-testament) and [Lacrimosa's Claws](#lacrimosas-claws--refresh-2026-10), which no longer use the shared legacy materials) supersedes it for that weapon.
 
 Four new **text-only image generations** replace the non-melee icons and supply512px runtime apparatus artwork; no previous image was passed as input. The owner approved the built-in generator despite its unexposed backend model: do not label the results GPT Image2.5.128px inventory exports fit a116px maximum opaque envelope, inspected at40px as well. Original generated PNGs and all predecessor assets are preserved. Exact prompts, export procedure and provenance are in [Attribution](../../../Assets/ATTRIBUTION.md#ritual-grand-apparatus-v3--2026-09-09).
 
@@ -228,7 +447,7 @@ The [2026-09-14 recording/source analysis](../../research/2026-09-14-doll-playte
 
 ## Initial power budget — not measured DPS
 
-The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; that blade splits0.70/0.30 outbound/return.
+The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). The Choir's numbers moved to [its 2026-10 section](#choir-of-the-unmade-2026-10). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; since the 2026-10 refresh that blade splits 0.25 strike / 4 × 0.125 Axiom bites / 0.25 return ([Last Witness](#rogue--last-witness)).
 
 These are arithmetic bounds before defense, crits, armor/accessories, misses, movement and class hooks—not claims of endgame balance or measured DPS. The goal of a modest improvement over selected same-class final equipment needs matched in-game measurements. Do not change Boss HP to hide weapon imbalance.
 

@@ -130,6 +130,8 @@ public sealed class LacunaTestament : RitualArmament
 public sealed class ChoirOfTheUnmade : RitualArmament
 {
     public override RitualArmamentKind Kind => RitualArmamentKind.Summon;
+    // The 2026-10 pixel icon (stored at 2x); the legacy V3 item visuals no longer apply to this item.
+    public override string Texture => "Convergence/Assets/Textures/Items/DollWeapons/ChoirOfTheUnmadeIcon";
     public override void SetStaticDefaults()
     {
         ItemID.Sets.StaffMinionSlotsRequired[Type] = 1;
@@ -141,7 +143,7 @@ public sealed class ChoirOfTheUnmade : RitualArmament
         RitualArmamentItems.Defaults(Item, Kind);
         Item.mana = 10; Item.shootSpeed = 1;
         Item.buffType = ModContent.BuffType<ChoirOfTheUnmadeBuff>();
-        Item.shoot = ModContent.ProjectileType<ChoirSentinel>();
+        Item.shoot = ModContent.ProjectileType<ChoirChorister>();
     }
     public override bool CanUseItem(Player player) => base.CanUseItem(player) && player.maxMinions >= 1;
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
@@ -149,30 +151,33 @@ public sealed class ChoirOfTheUnmade : RitualArmament
     {
         if (player.whoAmI != Main.myPlayer) return false;
         player.AddBuff(Item.buffType, 2);
-        // Spawn near the owner, not at an unchecked distant cursor coordinate.
-        float clock = 0;
+        // The new voice appears at the raised baton tip beside the owner (never at a distant cursor) and joins
+        // the running concert clock and target without restarting them (it may become the lead: a peer must see
+        // its target from the spawn packet on).
+        float clock = 0, target = -1;
         foreach (Projectile existing in Main.ActiveProjectiles)
-            if (existing.owner == player.whoAmI && existing.ModProjectile is ChoirSentinel)
-            { clock = existing.ai[0]; break; }
-        int index = Projectile.NewProjectile(source, player.MountedCenter - new Vector2(0, 80),
-            Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, -1, 0);
+            if (existing.owner == player.whoAmI && existing.ModProjectile is ChoirChorister)
+            { clock = existing.ai[0]; target = existing.ai[1]; break; }
+        Vector2 at = player.MountedCenter + new Vector2(ChoirConcertRules.SpawnOffset.X * player.direction, ChoirConcertRules.SpawnOffset.Y);
+        int index = Projectile.NewProjectile(source, at, Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, target, 0);
         if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].originalDamage = Item.damage;
-        RitualArmamentItems.Pose(player, source, Kind, RitualArmamentItems.Aim(velocity, player.direction), player.itemAnimationMax, 1);
         return false;
     }
 }
 
+// Last Witness v2: one use is one held WitnessHang score (WEAPONS.md "Rogue — Last Witness"); Calamity's stealth is
+// read once per score and inherited by the thrown blade.
 public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
 {
     public RitualArmamentKind Kind => RitualArmamentKind.Rogue;
-    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/V3/" + Name;
+    public override string Texture => WitnessArt.Root + "LastWitnessIcon";
     public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Name");
     public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Tooltip");
     public override void SetDefaults()
     {
         RitualArmamentItems.Defaults(Item, Kind);
         Item.DamageType = RogueClass;
-        Item.shootSpeed = 14; Item.shoot = ModContent.ProjectileType<WitnessLitany>();
+        Item.shootSpeed = 14; Item.shoot = ModContent.ProjectileType<WitnessHang>();
         Item.channel = true; Item.autoReuse = true;
     }
     public override bool CanUseItem(Player player) => RitualArmamentItems.Usable(player) && player.ownedProjectileCounts[Item.shoot] == 0;
@@ -183,7 +188,7 @@ public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
         bool stealth = HasStealthStrike(player);
         Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
         int index = Projectile.NewProjectile(source, player.MountedCenter, aim * 14, Item.shoot,
-            damage, knockback, player.whoAmI, 0, -1, stealth ? 1 : 0);
+            damage, knockback, player.whoAmI, 0, 0, stealth ? 1 : 0);
         MarkStealthStrike(index, stealth);
         return false;
     }
