@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-10-03
+last_reviewed: 2026-10-04
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -16,6 +16,10 @@ related_docs:
 ---
 
 # Playtest feedback ledger
+
+## Sable Scythe crescent sounds — 2026-10-04 / 0.3.87 → 0.3.91
+
+Owner, 2026-10-04: auditioned two takes each of the two sounds the crescents were missing (the volley's tear and a crescent's break) on the local page and chose B for both, after hearing them in context at the level they play in the game (as played, the break 2.8 dB over the Staff Reap stand-in it replaces and the volley 1.4 dB under it). Decision: ship take B of each as the audition masters at the one-shots' unchanged in-play offset; the volley is dry and thin (a knife slice, five rising whisks, a small wet tail), the break is dry grains (a bite, a low sink, a bone-click stand-in and seven falling grains). [Evidence](../evidence/2026-10-04-scarlet-crescent-sfx.json); hearing them in the Raid and in a crowd remains not_run.
 
 ## Sable Scythe as ordinary Melee with homing crescents — 2026-10-03 / 0.3.78 → 0.3.87
 

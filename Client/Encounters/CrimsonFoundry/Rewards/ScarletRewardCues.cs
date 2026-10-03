@@ -27,17 +27,13 @@ internal enum ScarletCueRole : byte
 }
 
 // One shipped cue (REWARDS.md#art-and-audio): its files in Assets/Sounds/Weapons/ScarletRewards/, the take the owner
-// chose on the 2026-10-03 audition, who hears it, its level role, how many voices it may hold (MaxInstances, replace
-// oldest), the file's length, and Lead: the ticks from the trigger to the moment the file was built to meet (the first
-// live tick of a swing, the downbeat of a windup); 0 when the attack sits at the head of the file. A wanted cue that has
-// no recording yet names the shipped cue standing in for it (StandIn) and how much lower it plays (StandInDecibels).
-internal readonly record struct ScarletCue(string Name, char Take, ScarletCueAudience Audience, ScarletCueRole Role, int Voices, int Lead, float Seconds,
-    int Files = 1, string? StandIn = null, float StandInDecibels = 0)
+// chose on the audition (2026-10-03; the two crescent cues 2026-10-04), who hears it, its level role, how many voices it
+// may hold (MaxInstances, replace oldest), the file's length, and Lead: the ticks from the trigger to the moment the file
+// was built to meet (the first live tick of a swing, the downbeat of a windup); 0 when the attack sits at the head of the
+// file.
+internal readonly record struct ScarletCue(string Name, char Take, ScarletCueAudience Audience, ScarletCueRole Role, int Voices, int Lead, float Seconds, int Files = 1)
 {
-    // The file the cue plays: its own, or the stand-in's while its own recording is wanted.
-    internal string File(int variant = 0) => StandIn ?? Voice(variant);
-    // Its voice pool (MaxInstances) is its own name, so a stand-in never takes the voices of the cue whose file it borrows.
-    internal string Voice(int variant = 0) => Files == 1 ? Name : Name + (Math.Clamp(variant, 0, Files - 1) + 1);
+    internal string File(int variant = 0) => Files == 1 ? Name : Name + (Math.Clamp(variant, 0, Files - 1) + 1);
     internal int Ticks => (int)MathF.Ceiling(Seconds * 60);
 
     // Other players' voices of this file, all of them together, in a pool apart from the local player's (Voices), so
@@ -48,14 +44,15 @@ internal readonly record struct ScarletCue(string Name, char Take, ScarletCueAud
     internal bool PeerReplacesOldest => Audience == ScarletCueAudience.Shot;
 }
 
-// The 35 cues and when they fire. Pure (no Terraria references): linked into the domain tests, which check every Lead
+// The 37 cues and when they fire. Pure (no Terraria references): linked into the domain tests, which check every Lead
 // against the rules' own moments. The recipe and the measurements are recorded in Assets/ATTRIBUTION.md ("Scarlet
-// Invocation reward weapon audio - 2026-10-03").
+// Invocation reward weapon audio - 2026-10-03"; the two crescent cues are its 2026-10-04 addition).
 internal static class ScarletRewardCues
 {
     internal const string Root = "Convergence/Assets/Sounds/Weapons/ScarletRewards/";
 
-    // The files are the owner's picks. Each role plays at Gain times its offset (RoleDecibels), staged against Graceful
+    // The files are the owner's picks (the crescent cues' B takes, auditioned and chosen on 2026-10-04, ship at the level the
+    // owner heard them in play). Each role plays at Gain times its offset (RoleDecibels), staged against Graceful
     // Ordeal and the Raid's own sound set (ScarletSounds, gain 1) by BS.1770 maximum 400 ms momentary loudness
     // (REWARDS.md#levels-against-the-raid; a tool test holds the relations and renders a four-player fight). The cues
     // that sound in play (tolls, one-shots, windups, cascade parts) share InPlayDecibels: 5 dB over 0.3.78, and no louder,
@@ -75,7 +72,8 @@ internal static class ScarletRewardCues
     internal const int Tolls = 8; // Toll0..Toll7: the E-flat sus2 ladder Eb3 F3 Bb3 Eb4 F4 Bb4 Eb5 F5
     // Scythe
     internal const string ScytheSwingHigh = nameof(ScytheSwingHigh), ScytheSwingLow = nameof(ScytheSwingLow), ScytheWhipBrace = nameof(ScytheWhipBrace),
-        ScytheWhip = nameof(ScytheWhip), StaffWindup = nameof(StaffWindup), StaffCut = nameof(StaffCut), StaffBarline = nameof(StaffBarline);
+        ScytheWhip = nameof(ScytheWhip), ScytheVolley = nameof(ScytheVolley), CrescentBreak = nameof(CrescentBreak), StaffWindup = nameof(StaffWindup),
+        StaffCut = nameof(StaffCut), StaffBarline = nameof(StaffBarline);
     // Organ
     internal const string OrganShot = nameof(OrganShot), HymnInhale = nameof(HymnInhale), HandSlam = nameof(HandSlam), ChoirClasp = nameof(ChoirClasp);
     // Baton
@@ -117,6 +115,8 @@ internal static class ScarletRewardCues
         new(ScytheSwingLow, 'A', Shot, OneShot, 2, 5, .423f),
         new(ScytheWhipBrace, 'A', Shot, Windup, 2, 7, .263f),
         new(ScytheWhip, 'B', Shot, OneShot, 2, 2, .553f),
+        new(ScytheVolley, 'B', Shot, OneShot, 2, 0, .503f), // the lash arc sheds its five crescents (Whip 20): knife bite, five rising whisks
+        new(CrescentBreak, 'B', Shot, OneShot, 3, 0, .303f), // a crescent breaks on its last target: knife bite, sink, bone click, grains
         new(StaffWindup, 'B', Everyone, Windup, 2, 16, .623f),
         new(StaffCut, 'A', Everyone, Release, 4, 2, .323f),
         new(StaffBarline, 'B', Everyone, Finale, 2, 2, 2.103f),
@@ -140,24 +140,13 @@ internal static class ScarletRewardCues
         new(ScoreChord, 'A', Everyone, Finale, 2, 0, 2.303f),
     };
 
-    // Wanted cues (REWARDS.md, "Melee - Sable Scythe", Audio: "New cues wanted"), not part of the 35 shipped above: they
-    // have no recording yet, so each plays a shipped file in a voice pool of its own until the owner auditions its A/B
-    // takes. ScytheVolley: the lash arc tearing into five (2 voices, about 0.5 s). CrescentBreak: a crescent breaking on
-    // its last target (3 voices, about 0.3 s); the presentation rings it at most once per CrescentBreakSpacing per owner.
-    internal const string ScytheVolley = nameof(ScytheVolley), CrescentBreak = nameof(CrescentBreak);
-    internal const float CrescentBreakStandInDecibels = -6;
+    // A crescent's break rings at most once per CrescentBreakSpacing ticks per owner, so a volley breaking together rings once
+    // or twice, not five times (ScytheInk.BreakCue).
     internal const int CrescentBreakSpacing = 6;
-    internal static readonly ScarletCue[] Wanted =
-    {
-        new(ScytheVolley, '-', Shot, OneShot, 2, 0, .5f, StandIn: StaffCut),
-        new(CrescentBreak, '-', Shot, OneShot, 3, 0, .3f, StandIn: StaffCut, StandInDecibels: CrescentBreakStandInDecibels),
-    };
 
     internal static ScarletCue Get(string name)
     {
         foreach (ScarletCue cue in All)
-            if (cue.Name == name) return cue;
-        foreach (ScarletCue cue in Wanted)
             if (cue.Name == name) return cue;
         throw new ArgumentOutOfRangeException(nameof(name), name, "not a Scarlet reward cue");
     }
