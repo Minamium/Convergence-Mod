@@ -17,7 +17,8 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // stream, because the capsule's round ends stuck out past the seals' narrow ellipses. The
 // band covers the capsule's whole span and its half-width is the capsule's radius, so its body lies
 // inside the forecast band (only the glow reaches past it, across the band, never past a cut end), and the capsule (the collision)
-// is not touched; only the four corners the round ends cut off are inked without hurting. The seals are drawn over a live
+// is not touched; only the four corners the round ends cut off are inked without hurting. The glow outside that body narrows toward
+// each cut (ScarletInkCutGlow, drawn by Band as a mesh), so it does not end in a straight vertical line above the seal's ring. The seals are drawn over a live
 // stream (CrimsonGestureVisuals.DrawTrackingBeams), so each flat cut, which falls inside its seal's
 // ring, sinks into it; at a wall the held seal lies over the stream, which runs on under it to the wall.
 //
@@ -32,6 +33,13 @@ internal sealed class ScarletInkStroke
 {
     internal const int CloseTicks = 8, ResidueTicks = 24;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
+    // The crossflow band: the body is one cell; the glow beyond it, on each side, is a grid of PinchRows rows by PinchColumns columns
+    // from each cut over the pinch's reach (ScarletInkCutGlow) and one wide column between them.
+    private const int PinchColumns = 20, PinchRows = 10;
+    private const int ColumnEdges = 2 * (PinchColumns + 1);
+    private readonly VertexPositionColorTexture[] bandMesh = new VertexPositionColorTexture[4 + 2 * (PinchRows + 1) * ColumnEdges];
+    private readonly short[] bandIndices = new short[6 + 2 * 6 * PinchRows * (ColumnEdges - 1)];
+    private readonly float[] columns = new float[ColumnEdges];
     private readonly CrimsonStroke[] buffer = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
     private readonly CrimsonStroke[] successor = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
 
@@ -116,22 +124,66 @@ internal sealed class ScarletInkStroke
             {
                 // The stream is horizontal: its band runs from the right end (hi) leftward to its front (lo), the extent of the
                 // capsule with its round ends. The shader's own segment is the whole band (its x = 0 on the right end, which
-                // holds still, so the flow does not slide while the stream opens), the quad stops at both ends and no round
-                // end is drawn: the ink is cut square exactly on the two stream ends, where the seals are.
+                // holds still, so the flow does not slide while the stream opens), the mesh stops at both ends and no round
+                // end is drawn: the ink is cut square exactly on the two stream ends, where the seals are (see Band for the glow).
                 float hi = MathF.Max(s.A.X, s.B.X) + s.Radius, lo = MathF.Min(s.A.X, s.B.X) - s.Radius, cut = hi - lo;
                 if (cut < .5f) continue;
-                along = -Vector2.UnitX; normal = new(0, -1);
                 shader.Set("shape", new Vector4(cut, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, margin));
                 shader.Apply(pass);
-                float span = cut + extent * 2;
-                Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);
-                device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+                Band(hi, lo, s.A.Y, s.Radius, extent, age < plan.End ? age - plan.Fire : 99, out int vertices, out int indices);
+                device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, bandMesh, 0, vertices, bandIndices, 0, indices / 3);
                 continue;
             }
             shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, margin));
             shader.Apply(pass);
             Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));
             device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+        }
+    }
+
+    // The crossflow's band as a mesh, cut exactly on the two stream ends (x = lo and x = hi, the mesh never reaches past them) and
+    // extent px either side of the axis. u runs along the band from x = hi (the shader's x = 0, which holds still) through the cut and
+    // v across it, so the shader's local position is the screen's, except beyond the body: there the position it is asked about is pushed
+    // away from the axis by ScarletInkCutGlow.Factor, growing toward each cut, so the glow fades out over a fraction of its distance
+    // as it nears a seal instead of ending in a straight vertical step above the seal's apex (ScarletInkCutGlow). The body, the cut
+    // lines and the quad's outline are unchanged. The pushed rows are a grid fine enough that the shader's derivatives (anti-aliasing
+    // width, noise filtering) are the same on both triangles of a cell to a few per cent; the body is two triangles.
+    private void Band(float hi, float lo, float y, float radius, float extent, float ticks, out int vertices, out int indices)
+    {
+        float cut = hi - lo, span = cut + extent * 2, solid = MathF.Min(ScarletInkCutGlow.Solid(radius, ticks), extent);
+        // Column edges, nearest the cuts first: PinchColumns equal steps from each cut over the pinch's reach (or half the band, when it is shorter).
+        float reach = MathF.Min(ScarletInkCutGlow.Reach, cut * .5f);
+        int columnCount = 0;
+        for (int k = 0; k <= PinchColumns; k++) columns[columnCount++] = lo + reach * k / PinchColumns;
+        for (int k = PinchColumns; k >= 0; k--) columns[columnCount++] = hi - reach * k / PinchColumns;
+        int v = 0, n = 0;
+        // The body and its first pixels past it: 1:1.
+        int body = v;
+        bandMesh[v++] = Vertex(lo, -solid, 1); bandMesh[v++] = Vertex(hi, -solid, 1); bandMesh[v++] = Vertex(lo, solid, 1); bandMesh[v++] = Vertex(hi, solid, 1);
+        Triangles(body, body + 1, body + 2); Triangles(body + 1, body + 3, body + 2);
+        // The glow beyond it, above and below: PinchRows rows from the body's edge to the quad's (closest together at the body, where the pinch builds up), the factor following the column's distance from its cut.
+        for (int side = -1; side <= 1; side += 2)
+        {
+            int first = v;
+            for (int row = 0; row <= PinchRows; row++)
+                for (int c = 0; c < columnCount; c++)
+                    bandMesh[v++] = Vertex(columns[c], side * (solid + (extent - solid) * row * row / (PinchRows * PinchRows)), ScarletInkCutGlow.Factor(MathF.Min(columns[c] - lo, hi - columns[c])));
+            for (int row = 0; row < PinchRows; row++)
+                for (int c = 0; c + 1 < columnCount; c++)
+                {
+                    if (columns[c + 1] - columns[c] < .01f) continue;
+                    int a = first + row * columnCount + c, b = a + 1, d = a + columnCount, e = d + 1;
+                    Triangles(a, b, d); Triangles(b, e, d);
+                }
+        }
+        vertices = v; indices = n;
+
+        void Triangles(int i, int j, int k) { bandIndices[n++] = (short)i; bandIndices[n++] = (short)j; bandIndices[n++] = (short)k; }
+        // The shader's v = 0 is at y + extent (below the axis) and its local y = y - screen y.
+        VertexPositionColorTexture Vertex(float x, float offset, float factor)
+        {
+            float asked = MathF.Sign(offset) * ScarletInkCutGlow.Sampled(MathF.Abs(offset), solid, factor);
+            return new(new Vector3(x, y + offset, 0), Color.White, new((hi - x + extent) / span, (1 - asked / extent) * .5f));
         }
     }
 

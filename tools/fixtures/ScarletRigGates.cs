@@ -906,12 +906,13 @@ internal sealed class RigGates
             new { hashes, framesChecked = checkedFrames, frames, crossflow },
             "Pinned shader hashes, and every live-strike and residue frame of the Act I basic phrases' tracking beams (cells A and B) "
             + "drawn by the production ScarletInkStroke and by ScarletInkStrokeReference (tools/fixtures/ScarletInkReference.cs, a copy of main's class before "
-            + "the signature moves that carries the quad-margin rule, max(10, ceil(.4 R + 9)) px, as its one edit; the rule is copied there, not shared) must be pixel for pixel identical, so the signature moves' "
+            + "the signature moves that carries the quad-margin rule, max(10, ceil(.6 R + 9)) px, as its one edit; the rule is copied there, not shared) must be pixel for pixel identical, so the signature moves' "
             + "changes to the class cannot reach a basic strike. "
             + "The seal crossflow (the pickup's and the closing one, in the open and with a stream end on each wall) is drawn as a band cut square on its two "
             + "ends and on its growing front, not as main's capsule with round ends: no ink beyond the capsule's span along the stream or beyond its radius + the quad's margin across it, "
-            + "and a live column 2.5 px inside either cut as full as the middle of the stream (a round end would be a sliver); the last pixel rows inside the quad's edge across the band carry "
-            + "at most " + EdgeLimit + "/255 of glow (the glow fades out before the quad's edge instead of being cut into a lighter box; live, half-width >= 20 px, away from the cut ends); and every pixel more than 1 px inside the collision "
+            + "and a live column 2.5 px inside either cut as full of body (alpha) as the middle of the stream (a round end would be a sliver); the last pixel rows inside the quad's edge across the band carry "
+            + "at most " + EdgeLimit + "/255 of glow (the glow fades out before the quad's edge instead of being cut into a lighter box; live, half-width >= 20 px, away from the cut ends); the glow stays under "
+            + CutGlowLimit + "/255 in the pixel column just inside either cut above the seals' rings (|y| > " + SealTop + " px from the stream's axis; the unpinched glow stood there in a vertical line, ScarletInkCutGlow); and every pixel more than 1 px inside the collision "
             + "capsule (CrimsonTechniqueGeometry.Write at that tick) carries ink, so the picture covers what hurts. sha256 is recorded per frame, not gated.");
     }
 
@@ -919,6 +920,12 @@ internal sealed class RigGates
     // margin leaves ~60 there (a lighter box), a margin fitted to the halo at R = r (.32 r + 7 or .4 r + 9) 19-22 at F+3, where the
     // shader's body overshoots its capsule by 14%; the shipped .6 r + 9 leaves 7 at most (F+3) and 1 from F+7 on. The limit is set between.
     private const int EdgeLimit = 10;
+
+    // The glow at a cut: the seals' rings reach 165 px above the stream's axis at full charge (measured on the harness frames), so above
+    // SealTop the cut stands in the open. The unpinched glow left 25/255 there at most in a vertical line (this measurement; 11-22 on the
+    // reviewer's night frames, F+9 to F+44); the pinch (ScarletInkCutGlow) leaves 4 at most (3 in the steady state). The limit is set between.
+    private const float SealTop = 170;
+    private const int CutGlowLimit = 6;
 
     // The seal crossflow's ink at real size (zoom 1, centred on the stream), 1:1 over transparent black.
     private List<object> Crossflow(out bool ok)
@@ -940,7 +947,7 @@ internal sealed class RigGates
                 {
                     var (right, left) = CrimsonChoreography.Reach(p);
                     var centre = new Vector2((right.X + left.X) * .5f, right.Y);
-                    foreach (int rel in new[] { 1, 2, 3, 7, 12, 30, 44, 48, 50, 53, p.End - p.Fire + 5 })
+                    foreach (int rel in new[] { 1, 2, 3, 4, 5, 6, 7, 9, 12, 20, 30, 44, 48, 50, 53, p.End - p.Fire + 5 })
                     {
                         int tick = p.Fire + rel;
                         bool live = tick < p.End;
@@ -953,11 +960,11 @@ internal sealed class RigGates
                         // The quad's edge across the band: the last pixel rows inside it, away from the cut ends, must carry (almost) no glow, or the
                         // edge shows as a lighter box (the 10 px margin left up to a quarter of the glow's peak there). Live frames of a stream at least 20 px wide.
                         bool edgeFrame = live && stroke.Radius >= 20;
-                        int edgeMax = 0, edgeCount = 0; long edgeSum = 0;
+                        int edgeMax = 0, edgeCount = 0, cutGlowMax = 0; long edgeSum = 0;
                         var pixels = InkOnly(s, view, p, r.Frame(width, height));
                         int lit = 0, outsideAlong = 0, outsideAcross = 0, hurts = 0, bare = 0;
                         float bareDepth = 0;
-                        var column = new Dictionary<int, int>();
+                        var bodyColumn = new Dictionary<int, int>(); // pixels of the body (alpha) per screen column: the glow is not part of the cut's shape
                         for (int py = 0; py < height; py++)
                             for (int px = 0; px < width; px++)
                             {
@@ -981,27 +988,33 @@ internal sealed class RigGates
                                     int level = Math.Max(Math.Max(e.R, e.G), Math.Max(e.B, e.A));
                                     edgeMax = Math.Max(edgeMax, level); edgeSum += level; edgeCount++;
                                 }
+                                if (live && MathF.Abs(wy - y) > SealTop && MathF.Abs(wy - y) <= extent - 1.5f && (wx >= lo && wx < lo + 1 || wx <= hi && wx > hi - 1))
+                                {
+                                    var g = pixels[py * width + px];
+                                    cutGlowMax = Math.Max(cutGlowMax, Math.Max(Math.Max(g.R, g.G), Math.Max(g.B, g.A)));
+                                }
                                 if (!Lit(pixels[py * width + px], 3)) continue;
                                 lit++;
+                                if (pixels[py * width + px].A > 3) { int bc = (int)MathF.Floor(wx); bodyColumn[bc] = bodyColumn.TryGetValue(bc, out var bn) ? bn + 1 : 1; }
                                 if (wx < lo - 1.5f || wx > hi + 1.5f) outsideAlong++;
                                 if (MathF.Abs(wy - y) > reach) outsideAcross++;
-                                int c = (int)MathF.Floor(wx); column[c] = column.TryGetValue(c, out var n) ? n + 1 : 1;
                             }
-                        int Column(float wx) => column.TryGetValue((int)MathF.Floor(wx), out var n) ? n : 0;
-                        // Square ends: the columns 2.5 px inside the cuts are as full as the middle of the stream (live only: a scar is uneven).
+                        int Column(float wx) => bodyColumn.TryGetValue((int)MathF.Floor(wx), out var n) ? n : 0;
+                        // Square ends: the body's columns 2.5 px inside the cuts are as full as the middle of the stream (live only: a scar is uneven).
                         float middle = Math.Max(1, Column((hi + lo) * .5f));
                         float atRight = Column(hi - 2.5f) / middle, atLeft = hi - lo > 12 ? Column(lo + 2.5f) / middle : 1;
                         // (A sliver under 10 px of half-width, the first tick of the opening, has too few lit pixels per column for the ratio.)
                         bool square = !live || stroke.Radius < 10 || atRight >= .85f && atLeft >= .85f;
                         bool softEdge = !edgeFrame || edgeMax <= EdgeLimit;
-                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square && bare == 0 && softEdge;
+                        bool softCut = cutGlowMax <= CutGlowLimit;
+                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square && bare == 0 && softEdge && softCut;
                         ok &= good;
                         using var sha = SHA256.Create();
                         var bytes = new byte[pixels.Length * 4];
                         for (int i = 0; i < pixels.Length; i++) { bytes[i * 4] = pixels[i].R; bytes[i * 4 + 1] = pixels[i].G; bytes[i * 4 + 2] = pixels[i].B; bytes[i * 4 + 3] = pixels[i].A; }
                         rows.Add(new { scene = name, where, pulse = p.Pulse, rel, live, span = new[] { lo, hi }, radius = stroke.Radius, lit, outsideAlong, outsideAcross, collisionPixels = hurts, collisionPixelsWithoutInk = bare, bareDepth,
                             columnAtRightCut = atRight, columnAtLeftCut = atLeft,
-                            quadEdgeMax = edgeFrame ? edgeMax : (int?)null, quadEdgeMean = edgeFrame && edgeCount > 0 ? (double)edgeSum / edgeCount : (double?)null, ok = good, sha256 = Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() });
+                            quadEdgeMax = edgeFrame ? edgeMax : (int?)null, quadEdgeMean = edgeFrame && edgeCount > 0 ? (double)edgeSum / edgeCount : (double?)null, cutGlowMax = live ? cutGlowMax : (int?)null, ok = good, sha256 = Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() });
                     }
                 }
         }

@@ -92,7 +92,8 @@ internal static class PreviewContract
 
     // Residue yield of the signature moves, drawn by the production ScarletInkStroke alone, 1:1 over transparent black.
     // Yield on: one tick after End every residue stroke still shows (it dries, it does not vanish); YieldTicks after End
-    // every lit pixel lies inside a stroke the move's next note covers (radius + the ink's quad margin), and each such
+    // every lit pixel lies inside a stroke the move's next note covers (radius + the original 10 px margin: the residue pass draws nothing beyond its
+    // radius, so the wider quad margin of the live pass, ScarletInkMargin.Of, is no tolerance here), and each such
     // holding stroke still shows. Yield off: every stroke still shows YieldTicks after End (the full residue).
     internal static YieldResult ResidueYield(GraphicsDevice device, ScarletInkStroke ink, IScarletAssets assets, PreviewPhrase phrase)
     {
@@ -125,7 +126,7 @@ internal static class PreviewContract
                     var p = new Vector2(field.Left + x + .5f, field.Top + y + .5f);
                     bool inside = false;
                     for (int i = 0; i < count && !inside; i++)
-                        inside = holds[i] && Distance(p, residue[i]) <= ScarletInkMargin.Of(residue[i].Radius) + 1;
+                        inside = holds[i] && Distance(p, residue[i]) <= ScarletInkMargin.Floor + 1;
                     if (!inside) wrong++;
                 }
             if (wrong > 0) Report(plan, -1, $"{wrong} lit pixels outside the held strokes at End+{ScarletResidueYield.YieldTicks}");

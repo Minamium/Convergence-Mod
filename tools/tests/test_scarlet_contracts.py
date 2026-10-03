@@ -423,13 +423,14 @@ class ScarletContracts(unittest.TestCase):
         # better. Only the picture changes: ScarletInk draws the band over the capsule's whole span and the capsule (Side,
         # CrimsonTechniqueGeometry) is the collision, untouched.
         stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
-        draw=stroke[stroke.index('internal void Draw('):stroke.index('private void Quad(')]
+        draw=stroke[stroke.index('internal void Draw('):stroke.index('private void Band(')]
         self.assertIn('bool band = plan.Technique == CrimsonTechnique.SideBeams;',draw)
         self.assertIn('CrimsonPoint? anchor = band ? CrimsonChoreography.Reach(plan).Right : null;',draw)
         self.assertIn('float hi = MathF.Max(s.A.X, s.B.X) + s.Radius, lo = MathF.Min(s.A.X, s.B.X) - s.Radius, cut = hi - lo;',draw)
         # The shader's own segment is the whole band and the quad stops at its two ends: no round end is drawn.
         self.assertIn('shader.Set("shape", new Vector4(cut, s.Radius,',draw)
-        self.assertIn('Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);',draw)
+        self.assertIn('Band(hi, lo, s.A.Y, s.Radius, extent, age < plan.End ? age - plan.Fire : 99, out int vertices, out int indices);',draw)
+        self.assertIn('device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, bandMesh, 0, vertices, bandIndices, 0, indices / 3);',draw)
         # Every other stroke (tracking beams, signature moves) is drawn exactly as before.
         self.assertIn('Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));',draw)
         self.assertIn('private void Quad(Vector2 start, Vector2 across, Vector2 along, float u0 = 0, float u1 = 1)',stroke)
@@ -517,9 +518,13 @@ class ScarletContracts(unittest.TestCase):
         self.assertEqual(2, stroke.count(', margin));'), 'both draws pass the same margin to the shader')
         self.assertNotIn(' Margin)', stroke)
         # The flat cut's horizontal extent stays exactly on the cut lines: the margin only grows the band's height (extent = radius + margin
-        # across; along the band the quad is the cut and u runs [extent, cut + extent] of cut + 2 extent, so x = 0 stays on the right end).
-        self.assertIn('float span = cut + extent * 2;', stroke)
-        self.assertIn('Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);', stroke)
+        # across; along the band the mesh spans [lo, hi] and u runs (hi - x + extent) / (cut + 2 extent), so x = 0 stays on the right end).
+        band = stroke[stroke.index('private void Band('):stroke.index('private void Quad(')]
+        self.assertIn('float cut = hi - lo, span = cut + extent * 2,', band)
+        self.assertIn('new((hi - x + extent) / span, (1 - asked / extent) * .5f)', band)
+        self.assertIn('Vertex(lo, -solid, 1); bandMesh[v++] = Vertex(hi, -solid, 1); bandMesh[v++] = Vertex(lo, solid, 1); bandMesh[v++] = Vertex(hi, solid, 1);', band)
+        self.assertIn('columns[columnCount++] = lo + reach * k / PinchColumns', band)
+        self.assertIn('columns[columnCount++] = hi - reach * k / PinchColumns', band)
         # G11's reference carries the same rule on purpose (a copy, not a shared call), so production drifting from it fails the gate.
         reference = read_text(ROOT/'tools/fixtures/ScarletInkReference.cs')
         self.assertIn(f'MathF.Max(10, MathF.Ceiling({rule.group(1)}f * radius + {rule.group(2)}))', reference)
@@ -534,7 +539,16 @@ class ScarletContracts(unittest.TestCase):
         for token in ('quadEdgeMax', 'edgeMax <= EdgeLimit', 'bool softEdge'):
             self.assertIn(token, g11)
         self.assertIn('private const int EdgeLimit = 10;', gates)
-        self.assertIn('ScarletInkMargin.Of(residue[i].Radius) + 1', read_text(ROOT/'tools/fixtures/ScarletPreviewContract.cs'))
+        contract = read_text(ROOT/'tools/fixtures/ScarletPreviewContract.cs')
+        # The residue pass draws nothing beyond its radius (scar, ember and rim are all 0 at q = 1), so the contract keeps the original 10 px + 1
+        # tolerance and does not loosen with the live pass's wider quad margin.
+        self.assertIn('Distance(p, residue[i]) <= ScarletInkMargin.Floor + 1', contract)
+        self.assertNotIn('ScarletInkMargin.Of(', contract)
+        residue = shader[shader.index('float4 Residue(VO i)'):shader.index('// ---- Reward paths')]
+        self.assertIn('float q=saturate(d/max(r,1));', residue)
+        self.assertIn('float scar=(1-smoothstep(.1,.38+.3*n,q+(1-fade)*.3))*(.5+.5*n);', residue)
+        self.assertIn('float ember=flavor.x*pow(saturate(e*1.9-1.05),3)*(1-q)*(1-signal.w*.7);', residue)
+        self.assertIn('float rim=exp2(-pow((q-.36-.25*n)/.06,2))*.35;', residue)
         # The domain suite links the rule and pins it.
         project = read_text(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj')
         self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletInkMargin.cs', project)
@@ -543,6 +557,74 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('ScarletInkMarginOfTheRealStrokes', domain)
         # Nothing here touches the compiled shader.
         self.assertIn('Vfx/*.cs', read_text(ROOT/'tools/preview-scarlet-rigs.ps1'))
+
+    def test_crossflow_glow_is_pinched_toward_its_cuts_so_no_vertical_step_stands_above_the_seals(self):
+        # Reviewer, 2026-10-04: with the margin rule the band's quad reaches 233 px above the axis, 65 px beyond a seal's ring, and the glow ScarletInk.fx
+        # keeps there ended at the cut in a vertical line (17-22/255 on the night ground). The shader cannot change (G11 pins it); ScarletInkStroke.Band
+        # asks the shader about a position pushed away from the axis near each cut (ScarletInkCutGlow), which fades the glow over a fraction of its distance.
+        shader = read_text(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx')
+        live = shader[shader.index('float4 Live(VO i)'):shader.index('float4 Residue(VO i)')]
+        offset, scale, per_pixel = (float(v) for v in re.search(r'float halo=exp2\(-pow\(max\(0,d-R\*([0-9.]+)\)/\(R\*([0-9.]+)\+([0-9.]+)\*aa\),2\)\)', live).groups())
+        self.assertIn('float2 Local(float2 u) { float e=shape.y+shape.w; return float2(u.x*(shape.x+2*e)-e,(u.y*2-1)*e); }', shader)  # u, v are the only inputs the mesh varies
+        self.assertIn('float Pixel(float2 p) { return max(.6,abs(ddx(p.y))+abs(ddy(p.y))); }', shader)  # the pinch widens aa by its slope (modelled below)
+        self.assertIn('float edge=1-smoothstep(R*.78,R*1.04+aa,d);', live)  # the body feathers out to 1.04 R (+ aa): ScarletInkCutGlow.Solid keeps it 1:1
+        glow = read_text(CLIENT/'Vfx/ScarletInkCutGlow.cs')
+        def const(name):
+            return float(re.search(r'internal const float ' + name + r' = ([0-9.]+);', glow).group(1))
+        reach, pinch, ramp = const('Reach'), const('Pinch'), const('Ramp')
+        self.assertIn('private const float FeatherScale = 1.04f;', glow)
+        self.assertIn('return 1 + .14f * MathF.Pow(2, -x * x);', glow)
+        self.assertIn('float x = (ticks - 3.2f) / 2.4f;', glow)
+        self.assertIn('MathF.Max(radius + ScarletInkMargin.Floor, FeatherScale * radius * Overshoot(ticks) + 2)', glow)
+        self.assertEqual((160, 4, 10), (reach, pinch, ramp))
+        # The grid is fine enough that the shader's derivatives (aa, texture filtering) agree on both triangles of a cell (a coarser grid ripples).
+        stroke = read_text(CLIENT/'Vfx/ScarletInkStroke.cs')
+        columns, rows = (int(v) for v in re.search(r'private const int PinchColumns = ([0-9]+), PinchRows = ([0-9]+);', stroke).groups())
+        self.assertGreaterEqual(columns, 20)
+        self.assertGreaterEqual(rows, 10)
+        self.assertIn('side * (solid + (extent - solid) * row * row / (PinchRows * PinchRows))', stroke)  # rows closest together at the body, where the ramp is
+        self.assertIn('ScarletInkCutGlow.Solid(radius, ticks)', stroke)
+        self.assertIn('ScarletInkCutGlow.Factor(MathF.Min(columns[c] - lo, hi - columns[c]))', stroke)
+        self.assertIn('ScarletInkCutGlow.Sampled(MathF.Abs(offset), solid, factor)', stroke)
+        # The model, in Python, against the shader's own halo term: the unpinched glow above the seal's apex (165 px from the axis) and the pinched one.
+        def halo(distance, radius, aa):
+            return 2 ** (-((max(0, distance - offset*radius))/(scale*radius + per_pixel*aa)) ** 2)
+        def factor(d):
+            t = min(max(d/reach, 0), 1)
+            return 1 + (pinch - 1)*(1 - t*t*(3 - 2*t))
+        def slope(a, solid, f):
+            u = min(max((a - solid)/ramp, 0), 1)
+            return 1 + (f - 1)*u*u*(3 - 2*u)
+        def sampled(a, solid, f):
+            if a <= solid: return a
+            x = a - solid; u = x/ramp
+            g = u - .5 if u >= 1 else u**3 - u**4/2
+            return solid + x + (f - 1)*ramp*g
+        radius = 140; solid = radius + 10; extent = radius + math.ceil(.6*radius + 9)
+        unpinched = halo(170, radius, 1)
+        self.assertGreater(unpinched, .3)  # the vertical line this fixes: 39% of the halo's peak at the seal's apex
+        for across in range(170, extent + 1):
+            pinched = halo(sampled(across, solid, pinch), radius, slope(across, solid, pinch))
+            self.assertLessEqual(pinched, .12, f'the cut keeps {pinched:.1%} of the halo at {across} px')
+        self.assertEqual(1, factor(reach)); self.assertEqual(pinch, factor(0))
+        # The model is the closed form's integral (a hand check of the domain test's finite difference).
+        self.assertAlmostEqual(sampled(solid + 25, solid, pinch) - sampled(solid + 24, solid, pinch), slope(solid + 24.5, solid, pinch), places=2)
+        # G11 measures the rendered pixels at the cut above the seals' rings and gates them; the body's square ends are counted on alpha, not on the glow.
+        gates = read_text(ROOT/'tools/fixtures/ScarletRigGates.cs')
+        g11 = gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
+        for token in ('cutGlowMax', 'bool softCut = cutGlowMax <= CutGlowLimit;', 'MathF.Abs(wy - y) > SealTop', 'pixels[py * width + px].A > 3', 'bodyColumn.TryGetValue'):
+            self.assertIn(token, g11)
+        self.assertIn('private const float SealTop = 170;', gates)
+        self.assertIn('private const int CutGlowLimit = 6;', gates)
+        self.assertIn('max(10, ceil(.6 R + 9))', gates)
+        self.assertNotIn('.4 R + 9))', gates)  # the description names the shipped rule
+        project = read_text(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj')
+        self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletInkCutGlow.cs', project)
+        domain = read_text(ROOT/'Tests/Convergence.DomainTests/ScarletInkCutGlowTests.cs')
+        self.assertIn('ScarletInkCutGlowIsSmoothAndLeavesTheBodyAlone', domain)
+        self.assertIn('ScarletInkCutGlowPinchesOnlyTheGlow', domain)
+        # Nothing here touches the compiled shader, and the Vfx foundation stays XNA-free for the domain suite.
+        self.assertNotIn('Microsoft.Xna', glow)
 
     def test_peer_bodies_answer_a_note_only_once_its_aim_is_known(self):
         # A peer holds an aimed plan's issue-time Target until the lock sample (tick >= Born) arrives; a note built from it turns the
