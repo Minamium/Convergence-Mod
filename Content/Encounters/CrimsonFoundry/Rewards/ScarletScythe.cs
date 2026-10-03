@@ -375,7 +375,7 @@ public sealed class SableStroke : ModProjectile
 // it has none; a hit on its target chains to the nearest unhit NPC within 320 px or breaks it), deals the damage (x0.4,
 // the volley's x0.2, of the live weapon damage at the throw; once per root, at most 3 roots) and engraves its stroke's
 // line once. Every client steers with SableCrescentFlight toward the replicated slot (a slot empty on a peer: straight),
-// so the owner's netUpdate (throw, target change, break, every 12 ticks) only corrects drift. Thrown, it flies through
+// so the owner's updates (target change, break, every 12 ticks) only correct drift. Thrown, it flies through
 // its owner's death, Down and item swaps (commitment); leaving the world ends it. Drawn in the shared reward ink layer
 // (Client/Encounters/CrimsonFoundry/Rewards/ScytheVisuals.cs); the client keeps its scar after it ends.
 public sealed class SableCrescent : ModProjectile
@@ -383,6 +383,10 @@ public sealed class SableCrescent : ModProjectile
     private readonly CrimsonRootLedger roots = new();
     private readonly NVector[] body = new NVector[CrimsonRewardRules.CrescentSamples];
     private readonly float[] radius = new float[CrimsonRewardRules.CrescentSamples];
+    // The throw's target and the cap's break are set inside the throwing stroke's update, and Projectile.Update clears
+    // netUpdate before this crescent's own AI, so every change is published from the crescent's next AI instead (as
+    // SableStaff does); the spawn packet itself goes out from NewProjectile with no target yet.
+    private bool resync;
     private NVector heading;
     private ulong incarnation;
     private int stroke = -1;
@@ -460,7 +464,7 @@ public sealed class SableCrescent : ModProjectile
         Projectile.velocity = SableScytheFrame.X(velocity) / updates;
         Projectile.rotation = MathF.Atan2(Heading.Y, Heading.X);
         Projectile.direction = Projectile.spriteDirection = Projectile.velocity.X < 0 ? -1 : 1;
-        if (mine && age == MathF.Floor(age) && (int)age % CrimsonRewardRules.CrescentSync == 0) Projectile.netUpdate = true;
+        if (mine && (resync || age == MathF.Floor(age) && (int)age % CrimsonRewardRules.CrescentSync == 0)) { resync = false; Projectile.netUpdate = true; }
     }
 
     // Owner: a target is kept until it is hit (OnHitNPC), dies, stops being chaseable, moves beyond 1,400 px or its slot
@@ -512,7 +516,7 @@ public sealed class SableCrescent : ModProjectile
         if (Target == slot) return;
         Projectile.ai[0] = slot;
         incarnation = slot >= 0 && slot < Main.maxNPCs ? CrimsonRewardItems.Incarnation(Main.npc[slot]) : 0;
-        Projectile.netUpdate = true;
+        resync = true;
     }
 
     // The crescent's live window ends 6 ticks from here, through the material's close, while it slows into the wound.
@@ -520,7 +524,7 @@ public sealed class SableCrescent : ModProjectile
     {
         if (Broken) return;
         Projectile.ai[1] = SableCrescentFlight.State(Kind, SableCrescentFlight.BreakAgeAt(Age));
-        Projectile.netUpdate = true;
+        resync = true;
     }
 
     // Owner only, from a live stroke. A ninth crescent in flight breaks the oldest one still flying.
@@ -547,7 +551,6 @@ public sealed class SableCrescent : ModProjectile
         crescent.stroke = stroke;
         crescent.heading = f;
         crescent.SetTarget(crescent.Find(owner, false));
-        Main.projectile[index].netUpdate = true;
     }
 
     // The body as it collides now (the drawn arc, opened over 3 ticks since the throw).

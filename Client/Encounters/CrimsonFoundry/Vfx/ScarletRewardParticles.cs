@@ -7,8 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 
 // The reward particles (REWARDS.md#black-blood-material): embers (soft additive sparks), smoke (alpha, broken up by
-// noise), bone chips and wax flakes (pixel-dot fragments of the sprites; the only pixel effects allowed).
-internal enum ScarletParticleKind : byte { Ember, Smoke, BoneChip, WaxFlake }
+// noise), bone chips and wax flakes (pixel-dot fragments of the sprites; the only pixel effects allowed) and cinders
+// (sparks that cover what lies behind them instead of adding light, so they stay crimson on bright ground; they move
+// as embers do).
+internal enum ScarletParticleKind : byte { Ember, Smoke, BoneChip, WaxFlake, Cinder }
 
 // One fixed pool for every reward weapon: at most 200 particles per owner and 600 in total, halved by Reduced
 // Effects. Reduced Effects also halves what is spawned, here at the one choke point every emitter goes through: each
@@ -71,6 +73,7 @@ internal sealed class ScarletRewardParticles : IDisposable
             switch (p.Kind)
             {
                 case ScarletParticleKind.Ember:
+                case ScarletParticleKind.Cinder:
                     // Sparks rise on the heat, drift and slow; a little sideways wander from noise, not a period.
                     p.Velocity = p.Velocity * .955f + new Vector2((Hash(p.Seed, (int)p.Age >> 2) - .5f) * .12f, -.035f);
                     break;
@@ -99,7 +102,10 @@ internal sealed class ScarletRewardParticles : IDisposable
         pool[i] = pool[--count];
     }
 
-    // Draws through the given SpriteBatch (not begun): smoke, chips and flakes alpha-blended, then embers additive.
+    // Draws through the given SpriteBatch (not begun): smoke, chips and flakes alpha-blended, then embers additive. A
+    // cinder is drawn in two of those passes: the darkening pass takes out what lies behind it by its cover, and the
+    // additive pass puts its colour back in by the same cover, which together blend it over the ground (the soft circle
+    // carries no alpha of its own); its hot centre adds a little light while it is young.
     internal void Draw(SpriteBatch batch, in ScarletView view, IScarletAssets assets)
     {
         if (count == 0) return;
@@ -116,6 +122,13 @@ internal sealed class ScarletRewardParticles : IDisposable
         for (int i = 0; i < count; i++)
         {
             ref readonly var p = ref pool[i];
+            if (p.Kind == ScarletParticleKind.Cinder)
+            {
+                float u = (p.Age + fraction) / p.Life;
+                batch.Draw(soft, p.Position + p.Velocity * fraction, null, Color.White * CinderCover(p, u), 0, softOrigin,
+                    CinderScale(p, u, soft.Width), SpriteEffects.None, 0);
+                continue;
+            }
             if (p.Kind != ScarletParticleKind.Smoke) continue;
             float t = (p.Age + fraction) / p.Life, opacity = p.Local ? 1 : CrimsonRewardRules.RemoteLiveOpacity;
             Vector2 at = p.Position + p.Velocity * fraction;
@@ -134,7 +147,7 @@ internal sealed class ScarletRewardParticles : IDisposable
         for (int i = 0; i < count; i++)
         {
             ref readonly var p = ref pool[i];
-            if (p.Kind is ScarletParticleKind.Ember or ScarletParticleKind.Smoke) continue;
+            if (p.Kind is ScarletParticleKind.Ember or ScarletParticleKind.Smoke or ScarletParticleKind.Cinder) continue;
             float t = (p.Age + fraction) / p.Life, opacity = p.Local ? 1 : CrimsonRewardRules.RemoteLiveOpacity;
             Vector2 at = p.Position + p.Velocity * fraction;
             // A crisp fragment of the sprite at the 2 px dot.
@@ -147,6 +160,14 @@ internal sealed class ScarletRewardParticles : IDisposable
         for (int i = 0; i < count; i++)
         {
             ref readonly var p = ref pool[i];
+            if (p.Kind == ScarletParticleKind.Cinder)
+            {
+                float u = (p.Age + fraction) / p.Life, hot = (1 - u) * (1 - u), cover = CinderCover(p, u);
+                Vector2 c = p.Position + p.Velocity * fraction;
+                batch.Draw(soft, c, null, new Color(CinderColor(u)) * cover, 0, softOrigin, CinderScale(p, u, soft.Width), SpriteEffects.None, 0);
+                batch.Draw(soft, c, null, new Color(1f, .8f, .55f) * (hot * .35f * cover), 0, softOrigin, p.Size * .3f / soft.Width * 2, SpriteEffects.None, 0);
+                continue;
+            }
             if (p.Kind != ScarletParticleKind.Ember) continue;
             float t = (p.Age + fraction) / p.Life, opacity = p.Local ? 1 : CrimsonRewardRules.RemoteLiveOpacity;
             float flicker = .7f + .3f * Hash(p.Seed, (int)p.Age);
@@ -158,6 +179,13 @@ internal sealed class ScarletRewardParticles : IDisposable
         }
         batch.End();
     }
+
+    // A cinder `u` (0..1) through its life: how much of the ground it covers, its colour (hot orange-red cooling into
+    // crimson) and its drawn scale.
+    private static float CinderCover(in Particle p, float u)
+        => .9f * (1 - u * u) * (.85f + .15f * Hash(p.Seed, (int)p.Age)) * (p.Local ? 1 : CrimsonRewardRules.RemoteLiveOpacity);
+    internal static Vector3 CinderColor(float u) => Vector3.Lerp(new Vector3(.62f, .05f, .05f), new Vector3(1f, .4f, .12f), 1 - u);
+    private static float CinderScale(in Particle p, float u, int width) => p.Size * (1 - .3f * u) / width * 2;
 
     // Reduced Effects keeps about half of all spawns.
     internal static bool Keep(float seed, uint ticket) => Hash(seed, unchecked(97 + (int)ticket)) < .5f;

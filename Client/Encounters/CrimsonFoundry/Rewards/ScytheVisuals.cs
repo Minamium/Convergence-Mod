@@ -14,7 +14,7 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 
 // The Sable Scythe's client presentation (REWARDS.md, "Melee - Sable Scythe", Presentation and Audio). Everything here
 // reads accepted projectile state only: the held scythe drawn from the same SablePose that collides, the swing wake,
-// edge embers and the Whip's lash arc, the crescents (body, smear, bead, drips, embers, light, break spatter and scar),
+// edge embers and the Whip's lash arc, the crescents (body, bead, cinder wake, drips, droplets, light, break spatter and scar),
 // the hanging staff, Staff Reap's lines and barline, droplets, glints, cues, the arm pose and the barline's shake.
 // Nothing here writes positions, input, hits or packets; a dedicated server never loads it. Ink goes through
 // ScarletRewardInk (ScytheInk is an emitter), beneath the Raid's forecasts; nothing moves on a beat.
@@ -26,7 +26,7 @@ internal static class ScytheLook
     // Edge embers: one a tick off the hook tip through a live window, drifting back along the swing.
     internal const int EdgeEmberLife = 10; internal const float EdgeEmberSize = 6, EdgeEmberDrift = 1.6f;
     // Crescents: the throw's flare (three embers for an Over or Under, one per volley crescent), a droplet every 4 ticks
-    // from alternating tips and an ember every 3 from the apex lip in flight, 3 droplets and 2 embers per hit (owner),
+    // from alternating tips and a cinder every 3 from the apex lip in flight, 3 droplets and 2 embers per hit (owner),
     // the apex's crimson light (fading over the 6-tick close after a break).
     internal const int FlareLife = 8, DripEvery = 4, EmberEvery = 3, EmberLife = 14, HitDroplets = 3, HitEmbers = 2;
     internal static readonly float[] FlareSizes = { 16, 9, 6 };
@@ -236,17 +236,18 @@ internal sealed class ScytheCrescentVisuals : GlobalProjectile
             }
         }
 
-        // In flight: its wake (an ember a tick left across the arc's back), a droplet every 4 ticks from alternating tips
-        // (they fall) and an ember every 3 from the apex lip.
+        // In flight: its wake (a cinder every 2 ticks left across the arc's back), a droplet every 4 ticks from
+        // alternating tips (they fall) and a cinder every 3 from the apex lip.
         int whole = (int)age;
         if (whole != lastWhole && !crescent.Broken)
         {
             lastWhole = whole;
             Vector2 normal = new(-heading.Y, heading.X), velocity = projectile.velocity * projectile.MaxUpdates;
-            float across = ScarletRewardParticles.Hash(seed, whole + 101);
-            ScarletRewardFx.Particle(ScarletParticleKind.Ember, owner, ScarletCrescentInk.WakeFrom(projectile.Center, heading, kind, across),
-                ScarletCrescentInk.WakeVelocity(heading), ScarletCrescentInk.WakeLife, ScarletCrescentInk.WakeSize(ScarletRewardParticles.Hash(seed, whole + 211)),
-                seed + whole * .53f);
+            if (whole % ScarletCrescentInk.WakeEvery == 0)
+                ScarletRewardFx.Particle(ScarletParticleKind.Cinder, owner,
+                    ScarletCrescentInk.WakeFrom(projectile.Center, heading, kind, ScarletRewardParticles.Hash(seed, whole + 101)),
+                    ScarletCrescentInk.WakeVelocity(heading), ScarletCrescentInk.WakeLife, ScarletCrescentInk.WakeSize(ScarletRewardParticles.Hash(seed, whole + 211)),
+                    seed + whole * .53f);
             // Reduced Effects halves droplets: a drip every 8 ticks instead of 4, still from alternating tips.
             int every = ScytheLook.DripEvery * (ScarletRewardFx.Reduced ? 2 : 1);
             if (whole % every == 0)
@@ -256,7 +257,7 @@ internal sealed class ScytheCrescentVisuals : GlobalProjectile
                     ScarletCrescentInk.DripVelocity(velocity, heading, tipSide), seed + whole, ScarletCrescentInk.DripRadius, ScarletCrescentInk.DripLife);
             }
             if (whole % ScytheLook.EmberEvery == 0)
-                ScarletRewardFx.Particle(ScarletParticleKind.Ember, owner, apex,
+                ScarletRewardFx.Particle(ScarletParticleKind.Cinder, owner, apex,
                     -heading * 1.4f + normal * ((ScarletRewardParticles.Hash(seed, whole) - .5f) * 1.2f) + new Vector2(0, -.4f),
                     ScytheLook.EmberLife, ScytheLook.EmberSize, seed + whole * .37f);
         }
@@ -435,7 +436,7 @@ internal sealed class ScytheClientPlayer : ModPlayer
 
 // The Sable Scythe's black blood, emitted into ScarletRewardInk once per frame: swing wakes, the Whip's lash arc (live,
 // then its 20-tick scar, which outlives the stroke), the crescents (live bodies with the bead on the apex, drips and hit
-// droplets, a break's spatter, and the 20-tick scar a body leaves), the hanging staff (dormant, half opacity for other
+// droplets, a break's spatter blots, and the 10-tick scar a body leaves), the hanging staff (dormant, half opacity for other
 // players, warm lips when full), and Staff Reap's lines and barline (live with their ignition blaze, then scars; a full
 // staff holds its scars until the barline has dried). Fixed arrays only; Emit allocates nothing and changes no state.
 // Reduced Effects drops the crescents' spatters (ScarletCrescentInk) and halves droplets and particles.
@@ -449,7 +450,7 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
         internal ulong From;   // the tick its residue started
         internal float Radius;
     }
-    // A crescent's body where it ended, drying for 20 ticks from `From`; a break also leaves its spatter stroke.
+    // A crescent's body where it ended, drying for 10 ticks from `From`; a break also leaves its spatter blots.
     private struct CrescentScar
     {
         internal int Owner, Kind, Seed;
@@ -503,7 +504,7 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
         };
     }
 
-    // A crescent ended: its body dries where it stopped for 20 ticks, with its break's spatter beside it.
+    // A crescent ended: its body dries where it stopped for 10 ticks, with its break's spatter blots beside it.
     internal static void KeepCrescent(int owner, int identity, Vector2 center, Vector2 heading, int kind, ScytheCrescentVisuals visuals)
     {
         int slot = nextCrescentScar++ % MaxCrescentScars;
@@ -591,9 +592,7 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
             ref readonly Drop drop = ref drops[i];
             if (drop.Born == 0) continue;
             float t = MathHelper.Max(0, Main.GameUpdateCount - drop.Born - 1 + fraction);
-            if (t < 1.5f || t > drop.Life) continue;
-            canvas.Droplet(ScarletRewardFx.Ink(drop.Owner, ScarletInkLook.Live, drop.Seed),
-                ScytheStrokeVisuals.Droplet(drop.From, drop.Velocity, t - 1.5f), ScytheStrokeVisuals.Droplet(drop.From, drop.Velocity, t), drop.Radius, t);
+            ScarletCrescentInk.Drop(canvas, ScarletRewardFx.Ink(drop.Owner, ScarletInkLook.Live, drop.Seed), drop.From, drop.Velocity, t, drop.Radius, drop.Life);
         }
     }
 

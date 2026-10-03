@@ -109,10 +109,10 @@ internal static class CrimsonRewardRules
     internal const float CrescentLeadMax = 8, CrescentBreakSlow = .3f;
     internal const float CrescentMultiplier = .4f, VolleyMultiplier = .2f, CrescentKnockback = .5f;
     internal const int CrescentRoots = 3, CrescentLife = 70, CrescentClose = 6, MaxCrescents = 8, CrescentAcquireInterval = 4;
-    internal const int CrescentSync = 12, CrescentScar = 20, CrescentSamples = 7, CrescentSerials = 1024, CrescentKeptStrokes = 16;
+    internal const int CrescentSync = 12, CrescentScar = 10, CrescentSamples = 7, CrescentSerials = 1024, CrescentKeptStrokes = 16;
     internal const float CrescentCursorRange = 960, CrescentCursorSnap = 240, CrescentConeRange = 400, CrescentConeDegrees = 75;
-    internal const float CrescentKeepRange = 1400, CrescentChainRange = 320, CrescentTipRadius = .35f;
-    internal const float CrescentWidth = 60, CrescentDepth = 16, CrescentRadius = 9, VolleyWidth = 44, VolleyDepth = 12, VolleyRadius = 7;
+    internal const float CrescentKeepRange = 1400, CrescentChainRange = 320, CrescentTipRadius = .45f;
+    internal const float CrescentWidth = 72, CrescentDepth = 26, CrescentRadius = 16, VolleyWidth = 54, VolleyDepth = 20, VolleyRadius = 14;
     internal const float CrescentMaxStep = 16; // px per update: the validation bound on a replicated velocity
     // A measure: Over/Under blade 4 x 0.6, their crescents 4 x 0.4, the Whip's blade 1.0, its lash arc 0.4 and the volley 5 x 0.2.
     // The close parts (blade and lash arc) are 3.8 and the crescents 2.6: 53% blade, 6% lash arc, 41% crescents.

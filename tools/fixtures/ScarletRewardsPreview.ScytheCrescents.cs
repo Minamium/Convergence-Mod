@@ -12,7 +12,7 @@
 //   on it (nothing to chain to).
 // scythe-crescents-contract: the crowd scene with each live crescent's collision capsules outlined (draw equals collide).
 // The simulation is SableCrescent's owner logic on the pure rules (throw, acquisition, steering, collision, chaining,
-// breaking, the live cap) and ScytheCrescentVisuals' client events (flares, drips, embers, hit droplets).
+// breaking, the live cap) and ScytheCrescentVisuals' client events (flares, drips, cinders, embers, hit droplets).
 #nullable enable
 using System;
 using System.Collections.Generic;
@@ -38,7 +38,8 @@ internal sealed class CrescentSimulation
         internal bool Broken => BreakAge > 0;
     }
     internal readonly record struct Drop(Vector2 From, Vector2 Velocity, int Born, float Seed, float Radius, int Life);
-    internal readonly record struct Spark(int Tick, Vector2 At, Vector2 Velocity, float Life, float Size, float Seed);
+    internal readonly record struct Spark(int Tick, Vector2 At, Vector2 Velocity, float Life, float Size, float Seed,
+        ScarletParticleKind Kind = ScarletParticleKind.Ember);
 
     private readonly Vector2 center;
     private readonly Vector2[] dummyCenter, dummyHalf;
@@ -162,13 +163,15 @@ internal sealed class CrescentSimulation
         Vector2 apex = X(F.Apex(c.Center, c.Heading, c.Kind)), heading = X(c.Heading), normal = new(-heading.Y, heading.X);
         float seed = c.Index * 31 + c.Kind;
 
-        // In flight (ScytheCrescentVisuals): the wake's ember every tick, a drip every 4 ticks from alternating tips, an
-        // ember every 3 off the apex.
+        // In flight (ScytheCrescentVisuals): the wake's cinder every 2 ticks, a drip every 4 ticks from alternating tips,
+        // a cinder every 3 off the apex.
         if (c.Age == MathF.Floor(c.Age) && !c.Broken)
         {
             int whole = (int)c.Age;
-            Sparks.Add(new Spark(t, ScarletCrescentInk.WakeFrom(X(c.Center), heading, c.Kind, ScarletRewardParticles.Hash(seed, whole + 101)),
-                ScarletCrescentInk.WakeVelocity(heading), ScarletCrescentInk.WakeLife, ScarletCrescentInk.WakeSize(ScarletRewardParticles.Hash(seed, whole + 211)), seed + whole * .53f));
+            if (whole % ScarletCrescentInk.WakeEvery == 0)
+                Sparks.Add(new Spark(t, ScarletCrescentInk.WakeFrom(X(c.Center), heading, c.Kind, ScarletRewardParticles.Hash(seed, whole + 101)),
+                    ScarletCrescentInk.WakeVelocity(heading), ScarletCrescentInk.WakeLife, ScarletCrescentInk.WakeSize(ScarletRewardParticles.Hash(seed, whole + 211)),
+                    seed + whole * .53f, ScarletParticleKind.Cinder));
             if (whole % 4 == 0)
             {
                 float side = (whole / 4 & 1) == 0 ? 1 : -1;
@@ -176,7 +179,8 @@ internal sealed class CrescentSimulation
                     ScarletCrescentInk.DripRadius, ScarletCrescentInk.DripLife));
             }
             if (whole % 3 == 0)
-                Sparks.Add(new Spark(t, apex, -heading * 1.4f + normal * ((ScarletRewardParticles.Hash(seed, whole) - .5f) * 1.2f) + new Vector2(0, -.4f), 14, 5, seed + whole * .37f));
+                Sparks.Add(new Spark(t, apex, -heading * 1.4f + normal * ((ScarletRewardParticles.Hash(seed, whole) - .5f) * 1.2f) + new Vector2(0, -.4f), 14, 5,
+                    seed + whole * .37f, ScarletParticleKind.Cinder));
         }
 
         // Collision: the body as it collides now; once per dummy, at most 3; a hit on its target (or with none) chains.
@@ -247,12 +251,7 @@ internal abstract class ScytheCrescentSceneBase : IRewardsPreviewScene
             if (c.Broken) ScarletCrescentInk.Spatter(canvas, scar, c.BreakApex, c.BreakHeading, c.Kind, c.BreakSide, fade);
         }
         foreach (var d in sim.Drops)
-        {
-            float t = tick - d.Born;
-            if (t < 1.5f || t > d.Life) continue;
-            Vector2 Drop(float u) => d.From + d.Velocity * u + new Vector2(0, .28f * u * u);
-            canvas.Droplet(new ScarletInkStyle(ScarletInkLook.Live, true, d.Seed, 1, false, 0, 0), Drop(t - 1.5f), Drop(t), d.Radius, t);
-        }
+            ScarletCrescentInk.Drop(canvas, new ScarletInkStyle(ScarletInkLook.Live, true, d.Seed, 1, false, 0, 0), d.From, d.Velocity, tick - d.Born, d.Radius, d.Life);
     }
 
     public void Particles(ScarletRewardParticles particles, Vector2 center, int tick, bool reduced)
@@ -260,7 +259,7 @@ internal abstract class ScytheCrescentSceneBase : IRewardsPreviewScene
         var sim = Sim(center);
         sim.AdvanceTo(tick);
         foreach (var s in sim.Sparks)
-            if (s.Tick == tick) particles.Spawn(ScarletParticleKind.Ember, 0, true, s.At, s.Velocity, s.Life, s.Size, reduced, s.Seed);
+            if (s.Tick == tick) particles.Spawn(s.Kind, 0, true, s.At, s.Velocity, s.Life, s.Size, reduced, s.Seed);
         if (tick > R.MeasureTicks) return;
         // The swing's edge embers and glints, as the measure scene and ScytheStrokeVisuals spawn them.
         var (stroke, age) = ScythePreview.At(tick);

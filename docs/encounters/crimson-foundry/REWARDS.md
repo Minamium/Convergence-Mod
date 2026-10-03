@@ -144,7 +144,7 @@ All reward ink uses the owner-approved black-blood river of `ScarletInk.fx`: a d
 - **Flavour:** the only material difference is fire (`flavor.x`). The `y` channel is the Raid's legacy "silk" channel and stays 0. The scythe, organ, baton and quill are told apart by shape, motion and code-drawn accents (bone chips, wax flakes, the writing bead), not by flavour values.
 - **Not used:** `ScarletRibbon` (`ScarletMaterials`) is an older Scarlet path material, not the approved black blood.
 - **Droplets** are tiny live paths (two-point strips) in the same batch, so no Metaball render target is needed.
-- **Particles** come from one fixed pool: embers (soft additive sparks), smoke (alpha, broken by noise), bone chips and wax flakes. Reduced Effects halves them where they are spawned: the pool keeps about half of all spawns, and no emitter halves its own count.
+- **Particles** come from one fixed pool: embers (soft additive sparks), smoke (alpha, broken by noise), bone chips, wax flakes and cinders. A cinder moves like an ember but covers what lies behind it instead of adding light (the smoke pass takes the ground out, the ember pass puts its colour back by the same amount), so it stays crimson on bright ground where an ember turns white. Reduced Effects halves them where they are spawned: the pool keeps about half of all spawns, and no emitter halves its own count.
 
 ### Layering
 
@@ -275,8 +275,10 @@ On 2026-10-03, after playing 0.3.78, the owner asked for ordinary Melee instead 
 
 **Crescent body** (draw equals collide).
 
-- The body is an arc of live black blood, convex side forward. In the crescent's frame (f along its heading, n across it), sample i = 0–6 at s = −1 + i/3 lies at Center + f × (h(1 − s²) − h/2) + n × s·w/2, with radius R(1 − 0.65s²) × InkOpen(age). Center sits halfway between the apex and the chord.
-- **Sizes:** an Over or Under crescent has w = 60, h = 16 and R = 9; a volley crescent has w = 44, h = 12 and R = 7.
+- The body is an arc of live black blood, convex side forward. In the crescent's frame (f along its heading, n across it), sample i = 0–6 at s = −1 + i/3 lies at Center + f × (h(1 − s²) − h/2) + n × s·w/2, with radius R(1 − 0.55s²) × InkOpen(age). Center sits halfway between the apex and the chord.
+- **Sizes:** an Over or Under crescent has w = 72, h = 26 and R = 16; a volley crescent has w = 54, h = 20 and R = 14.
+  - R 16 is the lash arc's radius: a crescent is a piece of the same river. The material's lips and halo have a fixed anti-aliased width, so at R 9 they covered the whole body and a crescent read as a flat red neon tube (pink-fringed on bright ground). From about R 14 the dark core and its filaments show between the lips once the ignition blaze has sunk, as they do on the lash arc.
+  - The depth grows with R so the arc keeps its bite (the inner edge stays concave) instead of thickening into a bean.
 - **Collision:** the six capsules between consecutive samples, each with its smaller end's radius (the rule of the staff lines). The drawn body is exactly this list plus the material's rim, and the crescent has no other damaging part.
 
 **Crescent flight.** `SableCrescentFlight` is a pure rule file, Terraria-free like `QuillFlight`. Its constants are per game tick; the crescent has one extra update and applies them with dt = ½, as Doll's `RitualArmamentRules.Steer` does.
@@ -373,13 +375,13 @@ The rules are unchanged:
 | Projectile | Role | Data |
 |---|---|---|
 | `SableStroke` | Held stroke | `ai = (stroke index, aim, age)`; `netUpdate` at age 1, at the live start and every 6 ticks. Velocity is data (`ShouldUpdatePosition` false): x = what came before (−1 nothing, 0 the previous stroke, 1–5 a Staff Reap of that many lines), y = the aim it was cast along, so every client eases the windup from the previous pose. It writes the lash arc, and the owner spawns its crescents from it |
-| `SableCrescent` | Owner projectile, thrown by a stroke (≤ 8 per owner) | `ai = (target slot or −1, kind + 8 × break age, age)`: kind 0 Over, 1 Under, 2–6 volley crescent 0–4; break age 0 while flying. Position and velocity are native, with one extra update. `netImportant`; `netUpdate` at the throw, on each target change, at the break and every 12 ticks |
+| `SableCrescent` | Owner projectile, thrown by a stroke (≤ 8 per owner) | `ai = (target slot or −1, kind + 8 × break age, age)`: kind 0 Over, 1 Under, 2–6 volley crescent 0–4; break age 0 while flying. Position and velocity are native, with one extra update. `netImportant`. The owner publishes each target change, the break and every 12th tick from the crescent's own update: a throw's target and the cap's break are set inside the throwing stroke's update, where `Projectile.Update` clears `netUpdate` before the crescent's AI, so the crescent republishes them on its next update (as `SableStaff` does). The spawn packet carries no target |
 | `SableStaff` | Harmless carrier while lines > 0, drawn on the owner | `ai = (lines, ticks since last engraving, —)`; `netUpdate` on each change |
 | `SableRelease` | Held release pose, harmless | `ai = (aim, lines, age)`; velocity is data: x = the interrupted stroke as index × 32 + age (−1 when cast from rest), y = that stroke's aim |
 | `StaffCut` | Owner child, spawned at the cast (≤ 6 per cast) | position = the starting end; `ai = (signed length, index (5 = barline) + 8 × lines spent, age)`; a negative age is the wait |
 
-- **Crescent peers:** other clients steer with the same `SableCrescentFlight` toward the replicated target slot, so the owner's periodic update only corrects drift. A slot that is empty on a peer flies straight until the next update.
-- **Crescent owner state:** the hit ledger, hit count, target incarnation and the throwing stroke's serial stay on the owner (`localAI` and `SableScythePlayer`). The owner keeps the last 16 stroke serials with an engraved bit, so a late crescent engraves once for its stroke.
+- **Crescent peers:** other clients steer with the same `SableCrescentFlight` toward the replicated target slot, so the owner's periodic update only corrects drift. The throw's target follows the spawn packet within a tick, inside the 6-tick hold, so a peer turns the crescent when its owner does. A slot that is empty on a peer flies straight until the next update.
+- **Crescent owner state:** the hit ledger, hit count, target incarnation and the throwing stroke's serial stay on the owner (the crescent's own fields and `SableScythePlayer`). The owner keeps the last 16 stroke serials with an engraved bit, so a late crescent engraves once for its stroke.
 - **Crescent cost:** steering is constant work per update. Acquisition scans the NPCs at most once per 4 ticks while untargeted, and once per chain; line of sight is tested only on the best candidate left, until one passes. Collision tests the six capsules only after a disc broadphase of radius w/2 + R + 8. The body adds 7 ink samples.
 - **Crescent validation:** `ai[0]` is an integer in −1–199; `ai[1]` is an integer in 0–566 whose kind (`ai[1] % 8`) is at most 6 and whose break age is at most 70; `ai[2]` lies in 0–71; velocity is finite and at most 16 px per update. Anything else kills it.
 
@@ -393,16 +395,19 @@ The rules are unchanged:
 - **Crescent in flight:**
   - The live body burns with crimson lips and red filaments streaming along it.
   - The ember-gold writing bead sits on the body's apex (the canvas places a path's bead on a chosen sample), marking friendly black blood at the crescent's leading point.
-  - Its **wake** is embers, not ink: each tick one ember is left at a hashed point across the arc's back edge, 3 px behind it, nearly still (life 12, 3–5 px). They never join into a line. A residue smear (a path through the apex's or the centre's last ticks, R or ¾ of the arc wide) was rendered and rejected: on bright ground it read as a grey comet line and on dark ground as a pair of faint rim lines, both of them thread.
-  - It sheds a droplet every 4 ticks from alternating tips (carrying 6% of its speed, so it drips and falls under gravity) and an ember every 3 ticks from the apex lip. It lights its apex crimson (0.7, 0.1, 0.06), as other reward ink does.
+  - Its **wake** is cinders, not ink: every 2 ticks one cinder is left at a hashed point across the arc's back edge, 3 px behind it, nearly still (life 12, 3–5 px), cooling from orange-red to crimson. They never join into a line. A residue smear (a path through the apex's or the centre's last ticks, R or ¾ of the arc wide) was rendered and rejected: on bright ground it read as a grey comet line and on dark ground as a pair of faint rim lines, both of them thread. An additive ember wake was rejected too: on the day sky it summed to white and read as snow.
+  - It sheds a droplet every 4 ticks from alternating tips (carrying 6% of its speed, so it drips and falls under gravity; life 8) and a cinder every 3 ticks from the apex lip. It lights its apex crimson (0.7, 0.1, 0.06), as other reward ink does.
+  - A crescent's drops draw as beads: the tail follows the drop's path for at most one radius. Drawn over the last 1.5 ticks of a fall, a drop stretched with gravity into a red streak, and the drips read as red rain.
 - **Volley:** the lash arc gives up its fire. It cools from live to scar over ticks 20–26 (its close) while the five crescents fan out of it, each born with one ember.
-- **Hits:** every crescent hit throws 3 droplets along the travel (±0.6 rad, 4–7 px/tick) and 2 embers.
-- **Break:** the body slows into the wound as it closes, then leaves its scar there for 20 ticks, drawn by the client after the projectile ends. One spatter stroke (a residue curve 28 px along the travel, radius 6 to 1) dries beside it, and a crimson light fades over 6 ticks.
+- **Hits:** every crescent hit throws 3 droplets along the travel (±0.6 rad, 4–7 px/tick, life 14) and 2 embers.
+- **Break:** the body slows into the wound as it closes, then leaves its scar there for 10 ticks, drawn by the client after the projectile ends. Three spatter blots (residue discs of radius 7, 5 and 4, 10–29 px ahead of the apex along the travel, on one side) dry beside it, and a crimson light fades over 6 ticks.
+  - The scar is the body's arc as residue, as thick as the lash arc's scar. A crescent that ends without a hit (its lifetime, or the cap) leaves the same scar, because its close has already dried it into that scar and dropping it would make the dried arc vanish in one frame.
+  - A spatter stroke (a residue curve, radius 6 to 1) was dropped: its opaque band was 1–3 px, so it read as a grey hairline on bright ground and a pair of rim lines on dark ground, the rejected thread again.
 - **Staff Reap:** the staff, lines and barline are live paths with their ignition blaze, then scars, as before.
 - **Opacity:** other players' crescents draw at 0.85, like all their live ink.
 - **Restraint:** there are no glyphs, rings, script, translucent bands, bloom halos or flat fills (the rejected red-sorcery look), and nothing moves on a beat. The red-magic feel comes only from the material: its burning lips, its ignition blaze and the ember-gold bead.
 - **Layering:** all of the scythe's ink, crescents included, draws once per frame through `ScarletRewardInk.DrawWorld`, beneath NPCs, players and every Raid's forecasts. The held scythe draws above, as an ordinary projectile.
-- **Reduced Effects:** particles and droplets are halved as everywhere (the ember wake through the particle pool; drips every 8 ticks instead of 4; one hit droplet instead of three). The crescents' spatter strokes are removed, because they are decorative. The bodies, scars and the swing wake stay, because a body is a damage footprint. The only shake is the barline's, which Reduced Effects turns off.
+- **Reduced Effects:** particles and droplets are halved as everywhere (the cinder wake through the particle pool; drips every 8 ticks instead of 4; one hit droplet instead of three). The crescents' spatter blots are removed, because they are decorative. The bodies, scars and the swing wake stay, because a body is a damage footprint. The only shake is the barline's, which Reduced Effects turns off.
 
 **Audio.**
 
@@ -716,7 +721,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 
 | Weapon | Carrier projectiles per owner | Longest life | Ink paths per owner |
 |---|---|---|---|
-| Sable Scythe | 1 stroke, 1 staff carrier, 1 release pose, ≤ 6 cuts per cast, ≤ 8 crescents in flight (a breaking one closes within 6 ticks) | lines 360 + up to 150 drain; cuts ≤ 90 from the cast; crescent 70, its scar 20 more (drawn by the client) | ≤ 44: 20 for the swing, the staff and the cuts, 8 for live crescent bodies, 16 for breaking and ended crescents (scar and spatter); the crescents' ember wake is ≤ 96 particles of the owner's 200 |
+| Sable Scythe | 1 stroke, 1 staff carrier, 1 release pose, ≤ 6 cuts per cast, ≤ 8 crescents in flight (a breaking one closes within 6 ticks) | lines 360 + up to 150 drain; cuts ≤ 90 from the cast; crescent 70, its scar 10 more (drawn by the client) | ≤ 56: 20 for the swing, the staff and the cuts, and ≤ 4 per crescent (its body or scar, and a break's three spatter blots) for the ≤ 9 a held loop has in the air or drying at once; the crescents' cinders (wake and apex) are ≤ 88 particles of the owner's 200 |
 | Canticle Organ | ≤ 3 shards in flight, ≤ 16 hands per hymn | hand ≤ 145 from the cast | ≤ 56 (8 of them owner-only mark arcs) |
 | Scarlet Baton | 1 swing, ≤ 9 strokes (8 + 1 drying), 1 river; while a tutti burns, the next score's ≤ 9 strokes add to its ≤ 8 | stroke 480; river ≤ 135 from the cast | ≤ 11 outside a tutti (the river ≤ 600 sample points); a tutti overlapping the next score adds that score's strokes |
 | Ember Censer | 1 per slot | minion | 2 per censer |
@@ -983,7 +988,7 @@ The first implementation fixed these points, which the sections above left open 
 
 **Open for the owner.**
 
-- **Crescent feel:** the turn rate (0.16 rad/tick), cruise speed (20 px/tick), the 3-root limit and the 41% crescent share are starting values for play.
+- **Crescent feel:** the turn rate (0.16 rad/tick), cruise speed (20 px/tick), the 3-root limit and the 41% crescent share are starting values for play. So is the body size (R 16 and 14), chosen for the material; draw equals collide, so the hit footprint grew with it.
 - **Crescent cues:** `ScytheVolley` and `CrescentBreak` need recordings and an A/B audition; `StaffCut` stands in for both until then.
 - **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±28 px swing (34 px at 55°), the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
 

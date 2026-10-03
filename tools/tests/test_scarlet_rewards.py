@@ -119,6 +119,16 @@ class ScarletRewardWiring(unittest.TestCase):
         throw = crescent[crescent.index('internal static void Throw('):]
         self.assertIn('if (owner.whoAmI != Main.myPlayer) return;', throw[:200], 'only the owner throws')
         self.assertIn('SableCrescentFlight.MustBreakOldest(flying)', throw)
+        # Throw (its target) and the cap's Break run inside the stroke's update, where Projectile.Update clears netUpdate
+        # before the crescent's own AI: every change is republished from the crescent's next AI instead.
+        throw_body = throw[:throw.index('private void Body()')]
+        self.assertNotIn('netUpdate', throw_body, 'a flag set from the stroke would be cleared before it is sent')
+        set_target = crescent[crescent.index('private void SetTarget('):crescent.index('internal void Break()')]
+        brk = crescent[crescent.index('internal void Break()'):crescent.index('internal static void Throw(')]
+        for name, body in (('SetTarget', set_target), ('Break', brk)):
+            self.assertIn('resync = true;', body, f"{name} republishes from the crescent's own AI")
+            self.assertNotIn('netUpdate', body, f"{name} leaves the send to the crescent's own AI")
+        self.assertIn('resync = false; Projectile.netUpdate = true;', ai, "the crescent's AI sends what changed")
         hit = crescent[crescent.index('public override void OnHitNPC'):]
         self.assertLess(hit.index('if (Projectile.owner != Main.myPlayer) return;'), hit.index('TryEngrave(stroke)'))
         stroke = scythe[scythe.index('public sealed class SableStroke'):scythe.index('public sealed class SableCrescent')]
@@ -136,6 +146,19 @@ class ScarletRewardWiring(unittest.TestCase):
             body = ink[ink.index(f'internal static void {name}('):]
             self.assertIn('if (canvas.Reduced', body[:300], f'Reduced Effects removes the {name.lower()}')
         self.assertNotIn('Smear', ink, 'no ink trails a crescent (a residue smear read as a hairline)')
+        # Nothing a crescent leaves is a line: the spatter is blots, drops keep a tail of at most one radius, and its
+        # wake is cinders (they cover rather than add, so they stay crimson on bright ground instead of turning white).
+        spatter = ink[ink.index('internal static void Spatter('):ink.index('internal static void Scar(')]
+        self.assertIn('canvas.Disc(', spatter)
+        self.assertNotIn('Quadratic', spatter)
+        drop = ink[ink.index('internal static bool Drop('):]
+        self.assertIn('if (length > most) tail = head - along * (most / length);', drop)
+        drops = visuals[visuals.index('private static void EmitDrops('):visuals.index('private static void EmitStroke(')]
+        self.assertIn('ScarletCrescentInk.Drop(canvas,', drops)
+        self.assertNotIn('canvas.Droplet(', drops, 'crescent drops draw through ScarletCrescentInk.Drop')
+        crescent_visuals = visuals[visuals.index('internal sealed class ScytheCrescentVisuals'):visuals.index('internal sealed class ScytheReleaseVisuals')]
+        wake = crescent_visuals[crescent_visuals.index('if (whole % ScarletCrescentInk.WakeEvery == 0)'):crescent_visuals.index('ScarletCrescentInk.WakeVelocity(')]
+        self.assertIn('ScarletParticleKind.Cinder', wake)
         for forbidden in ('using Terraria', 'Luminance'):
             self.assertNotIn(forbidden, ink)
 
