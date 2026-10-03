@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-10-02
+last_reviewed: 2026-10-03
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -158,7 +158,9 @@ The owner auditioned sixteen scenes in three variants each on 2026-10-02 and cho
 | A member goes Down / is revived | `ScarletDown`, `ScarletRevive` | a member's replicated recovery state changing during the performance |
 | A member votes Ready | `ScarletReady` | a member's Ready flag turning on |
 
-Notes released on the same tick (Final's paired families) share one voice. The set carries its designed relative levels, so every cue plays at one gain (1.0) with no runtime pitch change; its loudest cue stays about 2 dB under the loudest Doll cues it replaces. A voice's lease covers its whole file. A Fight end fades the remaining voices over eight ticks instead of cutting them, a phase change lets the previous notes ring out, and only world or mod unload stops them outright. The opening and Final titles, the summoning rupture, the victory flash and Defeat keep Doll's existing cues, and the companion keeps its own. The crossflow release sweeps left to right while the stream flows right to left. In-game mix and hearing remain owner checks.
+Notes released on the same tick (Final's paired families) share one voice. The files carry their levels, so every cue plays at one gain (1.0) with no runtime pitch change. A voice's lease covers its whole file. A Fight end fades the remaining voices over eight ticks instead of cutting them, a phase change lets the previous notes ring out, and only world or mod unload stops them outright. The opening and Final titles, the summoning rupture, the victory flash and Defeat keep Doll's existing cues, and the companion keeps its own. The crossflow release sweeps left to right while the stream flows right to left. In-game mix and hearing remain owner checks.
+
+**Levels against the score (2026-10-03).** Graceful Ordeal streams through its own voice at `MusicGain` (0.39 at full fade) times tModLoader's music-slider curve (31 v − 36.94 dB, normalised at v = 1 and silent at 0), the curve tML gives every other track; through 0.3.80 the slider was applied linearly, which left the score 6.5 dB louder against the cues at the owner's 0.685 than the curve gives (a full slider is unchanged). The cues are placed against the score at the owner's sliders (music 0.685, sound 0.161), on ITU-R BS.1770-4: a cue's maximum 400 ms momentary loudness against the score's median 3 s short-term loudness over its four stages. Group medians sit at about −1 dB for the impact, −5 for the foretell, +2 for the big cues (crossflow release, act change, sacrifice, Victory), −2 for the chorus calls and verdicts and −4 for Down, revive and Ready; the crossflow charge keeps its auditioned step under its release. Each group was lifted once from the owner's picks (impact +4.9 dB, foretell +6.4, the big cues and the charge +1.5, chorus +1.5, status +2.1), so the balance inside a group is the audition's; only the impact (2.6 dB) and the sacrifice (1.9 dB) needed peak limiting, and [asset provenance](../../../Assets/ATTRIBUTION.md#scarlet-invocation-recorded-audio--2026-10-02) records each file's processing. Ready is a lobby vote, usually heard before the score starts. The reward roles are placed against these cues in the [rewards spec](REWARDS.md#levels-against-the-raid). In-game listening at these levels is an owner check.
 
 ## Stack and Spread chorus
 

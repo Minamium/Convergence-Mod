@@ -12,16 +12,17 @@ internal enum ScarletCueAudience : byte
     Everyone, // windups, releases, finales, the quill's playback tolls and the reliquary: positional for everyone
 }
 
-// How loud a cue plays against the Raid's own sound set (REWARDS.md#art-and-audio, "Levels against the Raid"). Every cue
-// of one role plays at that role's offset, so the balance the owner auditioned inside a role is kept.
+// How loud a cue plays against the Raid's own sound set (REWARDS.md#levels-against-the-raid; medians of BS.1770 maximum
+// momentary loudness, as played). Every cue of one role plays at that role's offset, so the balance the owner auditioned
+// inside a role is kept.
 internal enum ScarletCueRole : byte
 {
     Build,   // the build tolls: under every one-shot
-    Shot,    // one-shot weapon cues (swings, shots, sticks, strokes, the censer's summon and swing): at least 3 dB under ScarletImpact
-    Windup,  // windups and braces: no louder than ScarletForetell + 2 dB
-    Release, // the parts of a release cascade: under ScarletImpact
-    Finale,  // the finales and the shared Cadence: no louder than ScarletCrossflowRelease
-    Show,    // the reliquary's opening show: no louder than ScarletVictory
+    Shot,    // one-shot weapon cues (swings, shots, sticks, strokes, the censer's summon and swing): about 2 dB under ScarletImpact, none over it
+    Windup,  // windups and braces: about ScarletForetell's level
+    Release, // the parts of a release cascade: about 1 dB under ScarletImpact
+    Finale,  // the finales and the shared Cadence: about 1 dB under ScarletCrossflowRelease
+    Show,    // the reliquary's opening show: about 2 dB under ScarletVictory
 }
 
 // One shipped cue (REWARDS.md#art-and-audio): its files in Assets/Sounds/Weapons/ScarletRewards/, the take the owner
@@ -48,15 +49,15 @@ internal static class ScarletRewardCues
 {
     internal const string Root = "Convergence/Assets/Sounds/Weapons/ScarletRewards/";
 
-    // The files are the owner's picks byte for byte and are never re-rendered for level. They play at Gain times their
-    // role's offset (RoleDecibels), staged against the Raid's own sound set as the Raid plays it (ScarletSounds, gain 1),
-    // by maximum 400 ms momentary loudness on the recipe's meter and on BS.1770 (REWARDS.md#art-and-audio has both
-    // tables; a tool test holds the relations on both): every cue that sounds in play (tolls, one-shots, windups,
-    // cascade parts) plays 8.5 dB under its file, so their auditioned balance is kept, and the finales, the Cadence and
-    // the reliquary's show 3 dB under theirs.
+    // The files are the owner's picks. Each role plays at Gain times its offset (RoleDecibels), staged against Graceful
+    // Ordeal and the Raid's own sound set (ScarletSounds, gain 1) by BS.1770 maximum 400 ms momentary loudness
+    // (REWARDS.md#levels-against-the-raid; a tool test holds the relations). A role that had to rise above its file
+    // (tolls, one-shots, cascade parts, the reliquary's show) was re-rendered from its picked take with that lift baked
+    // in (2026-10-03) and plays at 0 dB; the windups and the finales keep their files and play a little under them. One
+    // offset per role keeps the balance the owner auditioned inside it.
     internal const float Gain = 1f;
-    internal const float BuildDecibels = -8.5f, ShotDecibels = -8.5f, WindupDecibels = -8.5f, ReleaseDecibels = -8.5f;
-    internal const float FinaleDecibels = -3f, ShowDecibels = -3f;
+    internal const float BuildDecibels = 0f, ShotDecibels = 0f, WindupDecibels = -1.53f, ReleaseDecibels = 0f;
+    internal const float FinaleDecibels = -.45f, ShowDecibels = 0f;
     internal const float ScoreThrowDecibels = -2;   // the rolled score leaves the hand a little softer than a quill
     internal const float PartialScoreDecibels = -2; // a score burst without the Full Melody: the smaller burst
 

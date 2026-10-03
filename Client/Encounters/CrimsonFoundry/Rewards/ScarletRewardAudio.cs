@@ -13,8 +13,8 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // - SoundStyle is built only on a client outside the main menu, so a Dedicated Server never touches audio.
 // - Voices are bounded per cue file (MaxInstances, replace oldest), stop while the game is paused and start only with
 //   focus, like the Ebon reward audio. Tuned files play at their recorded pitch (no pitch variance).
-// - Every cue plays at its role's offset against the Raid's sound set (ScarletRewardCues.RoleDecibels); the files are
-//   never re-rendered for level.
+// - Every cue plays at its role's offset against Graceful Ordeal and the Raid's sound set (ScarletRewardCues.RoleDecibels);
+//   the call sites never pass a literal volume.
 // - Build tolls are heard by their owner only. A per-swing or per-shot cue plays for its owner at its role's level and
 //   for other players RemoteShotDecibels lower. Everything else is positional for everyone at its role's level.
 // - Every call names the cue's owner, and other players' voices are a pool of their own (a ":peer" Identifier), so
