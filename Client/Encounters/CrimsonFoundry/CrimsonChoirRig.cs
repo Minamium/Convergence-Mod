@@ -19,9 +19,10 @@ namespace Convergence.Client.Encounters.CrimsonFoundry;
 // Its attacks (design §2.3) answer only the plans' Born/Fire/End. Motion, for every viewer of an Act body: the
 // torso heaves down with the slam (`heave`, effigy only), each wing opens with the stronger of its own side's
 // arms, the flame fingers turn and reach with the striking hand, and the afterimage follows the hand's speed
-// inside its strike windows. Light, for a local participant (`material`): the heart sends a blood front down the
-// striking arm that reaches the fingertips exactly on Fire, the fingertips ignite, the sleeves shrink and warm,
-// then tear open, the heart beats the slam (its surge) and the blood returns. With no cue and no material every
+// inside its strike windows. Light (`material`): the heart sends a blood front down the striking arm, inside the
+// painted limb, that reaches the fingertips exactly on Fire, the fingertips ignite, the sleeves shrink and warm, then
+// tear open, the heart's core beats the slam (its surge) over the painted torso and the blood returns. Reduced
+// Effects keeps every vertex and the light's timing (ScarletChoir.fx quiets it). With no cue and no material every
 // pass draws the accepted picture; armsOnly (the Final avatar) keeps it too.
 internal static class CrimsonChoirRig
 {
@@ -37,7 +38,6 @@ internal static class CrimsonChoirRig
     // arm's heart -> shoulder -> elbow -> wrist -> fingertip path it lies (0..1). Measured once on Load.
     private static readonly float[] along = new float[(Columns + 1) * (Rows + 1)];
     private static readonly byte[] armOf = new byte[(Columns + 1) * (Rows + 1)];
-    private static readonly float[] wristAlong = new float[4];
     private static Texture2D? body;
 
     internal static void Load()
@@ -66,13 +66,18 @@ internal static class CrimsonChoirRig
             power = Math.Max(power, arms[i].Power); burst = Math.Max(burst, arms[i].Burst);
         }
         Vector2 root = center - (screenOrigin ?? Main.screenPosition) + new Vector2(0, MathF.Sin(age * .027f) * 3 + melt * 150 * scale + heave * burst);
-        // Motion the cues drive (every viewer); light only for a local participant's notes.
+        // Motion the cues drive; light from the body's own notes (`material`).
         bool attacking = !armsOnly && !cues.IsEmpty;
         bool lit = material.Active && !armsOnly;
-        for (int i = 0; i < 4; i++) blood[i] = lit ? ScarletChoirBlood.Of(cues, i, age, material.Heat, reduced) : default;
-        float free = MathF.Pow(.5f + .5f * MathF.Sin(age * .105f), 5), pulse = free;
-        // The free heartbeat is handed to the attack clock inside a strike window (no pop at its edges).
+        for (int i = 0; i < 4; i++) blood[i] = lit ? ScarletChoirBlood.Of(cues, i, age, material.Heat) : default;
+        float free = MathF.Pow(.5f + .5f * MathF.Sin(age * .105f), 5), pulse = free, throb = free;
+        // The free heartbeat is handed to the attack clock inside a strike window (no pop at its edges). The heart's
+        // light takes the strike as the material gives it (halved under Reduced Effects). The mesh's throb is motion:
+        // it follows the attack clock whenever the notes give one (even with the light off, Active false) and takes the
+        // full strike in both modes, so Reduced Effects never moves a vertex.
         if (lit) pulse = Math.Max(free * (1 - material.Engaged), material.Ignite);
+        if (!armsOnly && (material.Engaged > 0 || material.Ignite > 0))
+            throb = Math.Max(free * (1 - material.Engaged), material.Ignite / (reduced ? ScarletBodyMaterial.ReducedIgnite : 1));
         Vector2 heart = CrimsonChoirMotion.Heart + new Vector2(MathF.Sin(age * .022f) * 9, MathF.Sin(age * .034f) * 8);
         var shader = ShaderManager.GetShader("Convergence.ScarletChoir");
         using var scope = new WorldGraphicsScope(batch);
@@ -143,7 +148,7 @@ internal static class CrimsonChoirRig
                 Vector2 deform = new(MathF.Sin(age * .026f - uv.Y * 12 + uv.X * 7) * 43 * cloth,
                     MathF.Sin(age * .038f + uv.X * 14) * 15 * cloth);
                 float heartWeight = MathF.Exp(-Vector2.DistanceSquared(p, CrimsonChoirMotion.Heart) / 4800);
-                deform += (p - CrimsonChoirMotion.Heart) * heartWeight * (.09f * pulse + .13f * power);
+                deform += (p - CrimsonChoirMotion.Heart) * heartWeight * (.09f * throb + .13f * power);
                 deform.X *= 1 - melt * .65f;
                 Vector2 position = Map(p + delta + deform);
                 int index = y * (Columns + 1) + x;
@@ -168,11 +173,10 @@ internal static class CrimsonChoirRig
             var pose = arms[arm];
             Vector2 elbow = CrimsonChoirMotion.Elbow(arm, pose), wrist = CrimsonChoirMotion.Wrist(arm, pose), tip = CrimsonChoirMotion.Tip(arm, pose);
             Vector2 shoulder = CrimsonChoirMotion.Shoulders[arm];
-            // Flow follows the actual joint chain, from the heart to the hand; the
-            // sent blood rides it as a knot that leaves the flow at the wrist.
-            float knot = lit && blood[arm].Send > 0 ? 1 + blood[arm].Send / wristAlong[arm] : 0;
+            // Flow follows the actual joint chain, from the heart to the hand. It stays the accepted flow: the sent
+            // blood runs inside the painted limb (vertex alpha), never as a bead along this thin line.
             Ribbon(heart, shoulder, elbow, wrist, 9 + pose.Power * 13 + pose.Burst * 18,
-                arm * 2.31f, (.30f + pose.Power * .48f + pose.Burst * .45f) * exposure * (1 - dissolve), 1, knot);
+                arm * 2.31f, (.30f + pose.Power * .48f + pose.Burst * .45f) * exposure * (1 - dissolve), 1);
             if (!reduced)
             {
                 var past = CrimsonChoirMotion.Arm(arm, age - 6, charge, recoil, cues);
@@ -217,9 +221,9 @@ internal static class CrimsonChoirRig
         if (!armsOnly)
         {
             // The heart's core draws in through the warning, beats on the attack clock and throbs with each slam
-            // (both arms' discharge, its surge); its outer glow keeps the accepted values. Slams on the two inner
-            // quarters (the lower arms alone) neither swell nor contract it: it sits over the central gap between
-            // their claws, so it only lights.
+            // (both arms' discharge, its surge), over the painted torso only (heartArea); the outer glow and the patch
+            // keep their accepted values. Slams on the two inner quarters (the lower arms alone) neither swell nor
+            // contract the core (`sized`): it sits over the central gap between their claws, so it only lights.
             float sized = 1, lift = 0;
             if (lit)
             {
@@ -233,12 +237,14 @@ internal static class CrimsonChoirRig
                 }
                 sized = outer >= inner ? 1 : outer / inner;
             }
-            shader.TrySetParameter("shape", new Vector4(free, power, burst * sized, 0));
+            shader.TrySetParameter("shape", new Vector4(free, power, burst, 0));
             // The core draws in by up to 8% through the warning and swells with the slam, more for a pair of arms
             // (the surge): a throb in size, never a brighter flash than the accepted one.
             float swell = sized * Math.Min(1, material.Surge / ScarletBodyMaterial.SurgeLimit);
             shader.TrySetParameter("heart", lit ? new Vector4(1, pulse, burst * sized, .08f * sized * lift - .05f * swell) : Vector4.Zero);
-            Patch(heart, new(235 + power * 60 + sized * burst * 90, 260 + power * 70), "HeartPass");
+            Vector2 halfSize = new(235 + power * 60 + burst * 90, 260 + power * 70);
+            shader.TrySetParameter("heartArea", new Vector4(heart.X, heart.Y, halfSize.X, halfSize.Y) / CrimsonChoirMotion.Canvas);
+            Patch(heart, halfSize, "HeartPass");
             if (!reduced)
             {
                 // Free sparks run heart -> wrist in one draw; a participant's strike window hands them to the attack.
@@ -277,7 +283,7 @@ internal static class CrimsonChoirRig
             if (flipped) p.X = -p.X;
             return root + CrimsonChoirMotion.Rotate(p, bodyAngle) * scale;
         }
-        // w: a filament's blood knot at x = w - 1, a sleeve's tear w - 1 (0 = neither).
+        // w: a sleeve's tear w - 1 (0 = none).
         void Ribbon(Vector2 a, Vector2 b, Vector2 c, Vector2 d, float radius, float seed, float opacity, float filament, float w = 0)
         {
             if (opacity <= .001f) return;
@@ -344,11 +350,6 @@ internal static class CrimsonChoirRig
                 armOf[index] = (byte)best;
                 along[index] = at / length[4];
             }
-        for (int arm = 0; arm < 4; arm++)
-        {
-            Chain(arm, chain, length);
-            wristAlong[arm] = length[3] / length[4];
-        }
 
         static void Chain(int arm, Span<Vector2> chain, Span<float> length)
         {

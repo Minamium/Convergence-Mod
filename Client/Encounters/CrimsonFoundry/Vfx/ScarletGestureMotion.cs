@@ -138,7 +138,9 @@ internal static class ScarletGestureMotion
     }
 
     // Vespera commands her Act's body: she draws the orb back against where the note will strike while it is
-    // announced and releases it toward the strike on Fire; the crossflow lifts it for two beats and spends it.
+    // announced and releases it toward the strike on Fire; the crossflow lifts it for two beats and spends it. The
+    // release shows in the orb's push, its radius (+10 Snap) and its rim heat; the reactor keeps today's impulse (the
+    // accepted recoil), so no new flare or cross lights on Fire.
     // `charge`/`recoil` are the existing signal; with no note the result is exactly today's held orb (offset 0,
     // radius 53 + 24 charge + 18 recoil, Cast = Ease(charge * 2), base rim). facing: +1 orb on her right.
     internal static ScarletCommand Command(float age, ReadOnlySpan<ScarletNote> notes, float charge, float recoil, int facing, bool reduced)
@@ -183,7 +185,7 @@ internal static class ScarletGestureMotion
         float radius = baseRadius + amplitude * (-baseRadius * .10f * draw + 10 * snap + 16 * lift);
         float idleCast = ScarletEnvelope.Ease(charge * 2);
         float tilt = Math.Clamp(amplitude * facing * (-.03f * draw + .05f * snap), -.09f, .09f);
-        return new(x, y, radius, core, recoil + .6f * ignite, 1 - .30f * spend,
+        return new(x, y, radius, core, recoil, 1 - .30f * spend,
             1 - (1 - idleCast) * (1 - window), tilt,
             (int)MathF.Round(amplitude * facing * 2 * snap), (int)MathF.Round(amplitude * snap),
             .26f + amplitude * (.14f * heat + .20f * ignite), ignite, draw, snap, lift, spend, heat, ignite);

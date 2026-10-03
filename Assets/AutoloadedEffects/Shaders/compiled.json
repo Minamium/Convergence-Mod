@@ -91,8 +91,8 @@
       "output_sha256": "4a92d0c5f055470ab24f08979a2e4f894690ace9595423849c20626f14256e7e"
     },
     "ScarletApparitions.fx": {
-      "source_sha256": "f8dda6abfc512075df0e548ac62289e2074b8a0e29cc136de2b9a3a02c053555",
-      "output_sha256": "394b5aa69ab9f9f5a6d1de196e9dfded602d373ca9c9f09188644b16651ccd8d"
+      "source_sha256": "a7a2537837de08ddd46f6ca4401739f4a553ca08efaebca83484c74a9bc3e6fe",
+      "output_sha256": "d2b63c57103b42ea1ee975ccfe47307bb459dea80372ff19b1279eb539e53a48"
     },
     "ScarletAvatarAnatomy.fx": {
       "source_sha256": "8f4cb8a21342b81ceda507d75b0c2913107cfbac2dc7902d2264c82f8220c89c",
@@ -107,8 +107,8 @@
       "output_sha256": "8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323"
     },
     "ScarletChoir.fx": {
-      "source_sha256": "f4ab292a443992e6a917a681578cd7e614722042ddb17395fd530df39a1862a9",
-      "output_sha256": "6f776199d4fbb685dc4324bdceca1807a63d1e97935b05aafc43993012ad6736"
+      "source_sha256": "a29be722ca36312ed735f1198007af731c980add797f3d2cdd4595315ab03fa9",
+      "output_sha256": "1d10e127671bc35a9efc5f7668ad61e802efc1f234536a00978f8a90d713a40d"
     },
     "ScarletCluster.fx": {
       "source_sha256": "4f02e9b86d7bf77fdbf65431ce1d3e1ec949751552b5f067c6688db80edf5bdc",

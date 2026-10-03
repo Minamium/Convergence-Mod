@@ -90,10 +90,10 @@ internal static class ScarletApparitionRig
         float nominal = species == 0 ? 350 : 430, scale = height / nominal;
         var now = PoseAt(species, flip, age, age, anchor, rotation, scale, charge, recoil, gesture, replay, notes);
         var rest = now with { Flare = 0, Kick = 0, Turn = 0, Sweep = 0, Row = 0, LagX = 0, LagY = 0 };
-        float pulse = MathF.Pow(.5f+.5f*MathF.Sin(age*.12f), 5);
-        // Inside a note's window the heart's free pulse hands over to the strike (Reduced Effects keeps the free pulse
-        // and only adds the halved strike).
-        if (body.Active) pulse = MathF.Max(reduced ? pulse : pulse*(1-body.Engaged), body.Ignite);
+        float free = MathF.Pow(.5f+.5f*MathF.Sin(age*.12f), 5), pulse = free;
+        // Inside a note's window the heart's free pulse hands over to the strike over the painted body (Reduced Effects
+        // keeps the free pulse and only adds the halved strike); the glow around the body keeps the free pulse.
+        if (body.Active) pulse = MathF.Max(reduced ? free : free*(1-body.Engaged), body.Ignite);
         var shader = ShaderManager.GetShader("Convergence.ScarletApparitions");
         using var scope = new WorldGraphicsScope(batch);
         shader.TrySetParameter("uWorldViewProjection", projection ?? ScarletMaterials.WorldMatrix);
@@ -105,7 +105,7 @@ internal static class ScarletApparitionRig
         // Rest values reproduce today's picture exactly (the effect is shared: always set them).
         shader.TrySetParameter("attack", body.Active ? new Vector4(body.Heat, body.Ignite, body.Front, body.Drain) : new Vector4(0, 0, -1, 0));
         shader.TrySetParameter("attack2", body.Active ? new Vector4(body.Lean, body.PourLimit, body.Run, body.Row) : new Vector4(0, 1, -1, 0));
-        shader.TrySetParameter("attack3", body.Active ? new Vector2(body.Return, body.Swing) : Vector2.Zero);
+        shader.TrySetParameter("attack3", body.Active ? new Vector4(body.Return, body.Swing, pulse, 0) : new Vector4(0, 0, free, 0));
         shader.SetTexture(texture,0,SamplerState.LinearClamp);
         shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
         shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,2,SamplerState.LinearWrap);
@@ -183,9 +183,10 @@ internal static class ScarletApparitionRig
         Vector2 heart=species==0?new(.5f,.30f):new(.527f,.428f);
         if(cut<.5f)
         {
-            // The heart flares with the strike; the Crown's patch draws in with its wind-up.
-            shader.TrySetParameter("shape",new Vector4(pulse,charge,recoil,body.Active?body.Ignite:0));
+            // The heart beats with the strike over the painted body (attack3.z); the Crown's patch draws in with its wind-up.
+            shader.TrySetParameter("shape",new Vector4(free,charge,recoil,body.Active?body.Ignite:0));
             float size=species==0?.24f*(1-.10f*(body.Active?body.Wind:0)):.17f;
+            shader.TrySetParameter("heartArea",new Vector4(heart.X,heart.Y,size,size));
             Patch(Skin(heart,now,age),new Vector2(size),"HeartPass");
         }
         for(int k=0;k<4;k++)
