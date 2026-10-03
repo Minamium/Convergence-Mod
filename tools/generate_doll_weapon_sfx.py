@@ -39,7 +39,7 @@ from scipy import signal
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_ebon_sfx as base  # noqa: E402  (shared helpers; its CLI only runs as __main__)
 from generate_ebon_sfx import RATE, fades, hp, lp, pan, place, seconds, sha256, speed, trim  # noqa: E402
-from generate_ebon_reward_sfx import loudness, master, room, true_peak_db  # noqa: E402
+from generate_ebon_reward_sfx import loudness, master, room, soft, true_peak_db  # noqa: E402
 import doll_sfx_dsp as dsp  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -146,16 +146,17 @@ class Cue:
     volume: float        # SoundStyle volume at the call site (the audition plays it at this level)
     description: str     # owner audition text (Japanese)
     glue: float = 1.6    # tanh bus drive before the loudness match (generate_ebon_reward_sfx.soft)
+    loop: bool = False   # a sample-exact PCM16 WAV loop of exactly max_seconds (render_loop), not an Ogg one-shot
 
 
 CUES = {}
 
 
-def cue(name, target_lufs, group, max_seconds, volume, description, glue=1.6):
+def cue(name, target_lufs, group, max_seconds, volume, description, glue=1.6, loop=False):
     def register(build):
         if name in CUES:
             raise ValueError(f"duplicate cue {name}")
-        CUES[name] = Cue(build, target_lufs, group, max_seconds, volume, description, glue)
+        CUES[name] = Cue(build, target_lufs, group, max_seconds, volume, description, glue, loop)
         return build
     return register
 
@@ -208,6 +209,361 @@ def companion_summon(s, rng):
     return room(mix, 0.14, SUMMON_LENGTH, 0.3)
 
 
+# ---------------------------------------------------------------- Lacuna Testament
+# The score mirrors Content/Encounters/FirstSeverance/Rewards/LacunaTestamentScore.cs (pinned by
+# tools/tests/test_doll_weapon_audio.py): ticks of the held controller's age, 60 per second. Cues fire on these
+# ticks through DollCueClock; the composite cues below bake their inner beats against them.
+LACUNA = {
+    "births": (0, 108, 183, 233, 269, 296, 316),
+    "shot_delay": 15, "shot_period": 38, "shot_tell": 4, "frame_parting": 8, "frame_half": 11,
+    "merge": 340, "formed": 362, "fire": 410,
+    "docked": tuple(350 + 2 * i for i in range(7)),
+    "clicks": (368, 378, 386, 392, 397, 401, 404),
+    "widen": (530, 650, 770),
+    "pulse_period": 30,
+}
+# The single-pitch cues (LacunaIrisTine, LacunaPelletFire: every pitched layer is a C) are recorded at ladder step 3
+# (C6) and played at the iris's step through DollWeaponAudio.Note: F5 Ab5 Bb5 C6 Eb6 F6 Ab6 as the seven irises join.
+# Every other Lacuna cue is a composite and plays as rendered (tools tests check both).
+LACUNA_NOTE_ROOT = 3
+# The beam's loop: eight visual pulse periods (8 x 30 ticks = 4.0 s), exactly 176,400 frames.
+LACUNA_LOOP_SECONDS = 8 * LACUNA["pulse_period"] / 60
+
+
+def _ticks(t):
+    return t / 60
+
+
+def _sweep(dur, f_from, f_to, rng, bands=12, width=0.35):
+    """Noise drawn through a band that glides from f_from to f_to (crossfaded fixed bands; geometric glide)."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    out = np.zeros((n, 2))
+    centres = np.geomspace(f_from, f_to, bands)
+    for k, c in enumerate(centres):
+        lo, hi = c * (1 - width / 2), min(c * (1 + width / 2), RATE * 0.45)
+        band = base.bp(base.noise(n, rng), lo, hi)
+        centre = (k + 0.5) / bands * dur
+        out += band * np.clip(1 - np.abs(t - centre) / (dur / bands * 1.5), 0, 1)[:, None]
+    return out / max(1e-9, np.abs(out).max())
+
+
+def _inhale(dur, rng, low=300, high=5000):
+    """A reversed-air intake: band noise rising exponentially into its end."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    x = base.bp(base.noise(n, rng), low, high) * (np.exp((t - dur) / (dur * 0.28)))[:, None]
+    return x / max(1e-9, np.abs(x).max())
+
+
+def _puff(dur, rng, cutoff=520):
+    """A soft low void 'puh': low-passed noise with a quick decay."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    x = lp(base.noise(n, rng), cutoff) * (np.exp(-t / (dur * 0.3)) * np.clip(t / 0.004, 0, 1))[:, None]
+    return x / max(1e-9, np.abs(x).max())
+
+
+# A gong-like plate tuned into the key: inharmonic in spirit (every partial slightly off its ratio, each a pair a
+# fraction of a hertz apart so it beats and shimmers), but its strong partials sit on F minor pentatonic intervals
+# above the root (1 F, 1.5 C, 2 F, 2.38 Ab, 3 C, 3.56 Eb, 4 F) so the long tail never clashes with the music.
+GONG_PARTIALS = ((1.0, 1.0, 1.0), (1.498, 0.55, 0.8), (2.004, 0.45, 0.7), (2.381, 0.28, 0.55), (2.993, 0.22, 0.45),
+                 (3.566, 0.14, 0.35), (4.011, 0.1, 0.3))
+
+
+def _gong(freq, dur, rng, tau=1.5, softness=0.012, beat=0.35, glide_cents=-12):
+    """A soft mallet on a tuned gong: partials (ratio, gain, decay share) with long decays (the root rings for `tau`
+    s, higher partials shorter), a raised-cosine onset of `softness` s (no click), a slow downward pitch settle and a
+    low felt thud. Original additive synthesis; returns stereo, peak 1."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    settle = 2 ** (glide_cents * (1 - np.exp(-t / 0.6)) / 1200)
+    out = np.zeros((n, 2))
+    for k, (ratio, gain, share) in enumerate(GONG_PARTIALS):
+        f = freq * ratio
+        if f * 1.01 >= dsp.CEILING_HZ:
+            break
+        env = np.exp(-t / (tau * share))
+        for side, offset in ((-1, -beat * (1 + 0.3 * k)), (1, beat * (1 + 0.3 * k))):
+            phase = 2 * np.pi * np.cumsum((f + offset) * settle) / RATE + rng.uniform(0, 2 * np.pi)
+            y = np.sin(phase) * env * gain
+            out += pan(y[:, None].repeat(2, axis=1) * 0.5, 0.25 * side * min(1, k / 3))
+    onset = np.clip(t / softness, 0, 1)
+    out *= (0.5 - 0.5 * np.cos(np.pi * onset))[:, None]
+    k = round(0.09 * RATE)
+    felt = lp(base.noise(k, rng), 260) * (np.exp(-np.arange(k) / RATE / 0.025))[:, None]
+    out[:k] += felt / max(1e-9, np.abs(felt).max()) * 0.25
+    return out / max(1e-9, np.abs(out).max())
+
+
+@cue("LacunaIrisWarn", -17, "Lacuna", 0.45, 0.7,
+     "虹彩が一つ生まれる（第1〜7の虹彩それぞれの誕生の瞬間）。遺言書の穴から磁器の花弁が滑り出す細いこすれ音に、"
+     "+8tick（0.13秒）で真鍮の留め金が一段、+11tickでもう半段かかる。開く準備の予告音で、開く瞬間は LacunaIrisFire。")
+def lacuna_iris_warn(s, rng):
+    mix = seconds(0.5)
+    place(mix, pan(_sweep(0.12, 2200, 5200, rng, bands=8) * np.linspace(0.3, 1, round(0.12 * RATE))[:, None], -0.15), 0.0, -14)
+    for k, (at, note) in enumerate(((0.012, "Bb7"), (0.05, "C8"), (0.088, "Eb8"))):
+        place(mix, dsp.porcelain_ring(dsp.hz(note), 0.05, rng, decay=0.008, side=-0.3 + 0.25 * k), at, -16 - 2 * k)
+    place(mix, pan(dsp.brass_click(rng, 2350, decay=0.005, thud=0.45), -0.1), _ticks(LACUNA["frame_parting"]), -4)
+    place(mix, dsp.porcelain_ring(dsp.hz("C8"), 0.06, rng, decay=0.01, side=0.1), _ticks(LACUNA["frame_parting"]) + 0.002, -13)
+    place(mix, pan(dsp.brass_click(rng, 2600, decay=0.004, thud=0.25), 0.05), _ticks(LACUNA["frame_half"]), -9)
+    return room(mix, 0.1, 0.42, 0.08)
+
+
+@cue("LacunaIrisFire", -20, "Lacuna", 0.4, 0.8,
+     "虹彩が開ききって最初の弾を撃つ（誕生から15tick）。磁器の開放音「カッ」（C7 と F7 の短い響き）と真鍮の留め金、"
+     "下に虚無の小さな「ぽっ」。どの虹彩でもこの高さのまま鳴らす（複数の音を重ねた音なので移調しない）。"
+     "同じ瞬間に、虹彩ごとに一段ずつ上がるオルゴールの一音 LacunaIrisTine が重なる。")
+def lacuna_iris_fire(s, rng):
+    mix = seconds(0.45)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.12, rng, decay=0.018, side=-0.1), 0.0, -4)
+    place(mix, dsp.porcelain_ring(dsp.hz("F7"), 0.1, rng, decay=0.012, side=0.15), 0.003, -8)
+    place(mix, pan(dsp.brass_click(rng, 1900, decay=0.006, thud=0.7), 0.0), 0.0, -6)
+    place(mix, _puff(0.14, rng, 420), 0.004, -12)
+    return room(mix, 0.1, 0.36, 0.08)
+
+
+@cue("LacunaIrisTine", -20, "Lacuna", 0.75, 0.9,
+     "虹彩が開く瞬間のオルゴールの爪一音（C6 で録った単音）。ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 と"
+     "一段ずつ上げて鳴らす（一つの音だけなので移調してよい）。開放音 LacunaIrisFire と同時に鳴る。")
+def lacuna_iris_tine(s, rng):
+    mix = seconds(0.75)
+    place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.7, rng), 0.05), 0.0, -2)
+    return room(mix, 0.1, 0.7, 0.08)
+
+
+@cue("LacunaPelletWarn", -20, "Lacuna", 0.2, 0.55,
+     "次の弾の4tick前、花弁が半分閉じる合図。真鍮のシャッターの小さな「トッ」。直後の LacunaPelletFire とで一組。")
+def lacuna_pellet_warn(s, rng):
+    mix = seconds(0.2)
+    place(mix, pan(dsp.brass_click(rng, 2950, decay=0.0032, thud=0.2, tick=0.7), 0.1), 0.0, -2)
+    place(mix, dsp.porcelain_ring(dsp.hz("Eb8"), 0.04, rng, decay=0.006, side=-0.1), 0.004, -14)
+    return room(mix, 0.06, 0.16, 0.05)
+
+
+@cue("LacunaPelletFire", -20, "Lacuna", 0.4, 0.7,
+     "虹彩が小さな虚無の弾を撃つ（2発目以降の各弾）。明るい磁器の粒の「ピン」（オルゴールの爪、C6 で録り虹彩ごとに"
+     "音程が上がる）と、低くやわらかい虚無の「ぷっ」。")
+def lacuna_pellet_fire(s, rng):
+    mix = seconds(0.42)
+    place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.36, rng, decay=0.11, body=0.2), 0.0), 0.0, -2)
+    place(mix, dsp.porcelain_ring(dsp.hz("C8"), 0.06, rng, decay=0.008, side=0.2), 0.001, -16)
+    place(mix, _puff(0.09, rng, 360), 0.002, -10)
+    place(mix, dsp.thump(140, 70, 0.08, rng), 0.0, -18)
+    return room(mix, 0.08, 0.36, 0.08)
+
+
+@cue("LacunaPelletHit", -20, "Lacuna", 0.25, 0.6,
+     "弾が実際に当たったときだけ鳴る（時間切れや持ち主の行動不能で消えた弾は鳴らない）。くぐもった磁器の「トッ」と暗い空気の吐息。")
+def lacuna_pellet_hit(s, rng):
+    mix = seconds(0.26)
+    place(mix, dsp.porcelain_ring(dsp.hz("Bb5"), 0.12, rng, decay=0.02, side=0.0), 0.0, -3)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.06, rng, decay=0.008, side=0.2), 0.001, -12)
+    place(mix, _puff(0.07, rng, 650), 0.0, -8)
+    place(mix, dsp.porcelain_crack(0.06, rng, count=3, spread=0.012, low=2600, high=4800), 0.004, -20)
+    return room(mix, 0.06, 0.22, 0.06)
+
+
+@cue("LacunaMergeWarn", -13, "Lacuna", 0.42, 0.8,
+     "七つの虹彩が座を離れて手の前へ集まる（340tick）。真鍮の歯車が毎秒8から40打へ回り上がり、続いて350〜362tick に"
+     "虹彩が一つずつ嵌まる磁器の刻みが7つ、音程を寄せながら並ぶ。最後の刻みが LacunaMergeFire（大きな穴の完成）へつながる。")
+def lacuna_merge_warn(s, rng):
+    mix = seconds(0.45)
+    spin = _ticks(LACUNA["docked"][0] - LACUNA["merge"])
+    times, at, rate = [], 0.0, 8.0
+    while at < spin - 0.004:
+        times.append(at)
+        rate = 8 + 32 * (at / spin) ** 1.2
+        at += 1 / rate
+    place(mix, dsp.ratchet(times, rng, freq=2250, gains_db=[-10 + 8 * (k / max(1, len(times) - 1)) for k in range(len(times))], side=-0.2), 0.0, -6)
+    place(mix, pan(_sweep(spin + 0.05, 600, 3800, rng, bands=10), 0.1) * 0.8, 0.0, -16)
+    ladder = ("F7", "Eb7", "C7", "Bb6", "Ab6", "F6", "F6")
+    for k, dock in enumerate(LACUNA["docked"]):
+        when = _ticks(dock - LACUNA["merge"])
+        place(mix, dsp.porcelain_ring(dsp.hz(ladder[k]), 0.08, rng, decay=0.012, side=0.6 * np.cos(np.pi * k / 6)), when, -10 + k * 0.6)
+        place(mix, pan(dsp.brass_click(rng, 2700 - 90 * k, decay=0.0035, thud=0.3), 0.0), when, -12)
+    return room(mix, 0.12, 0.42, 0.03)
+
+
+@cue("LacunaMergeFire", -11.5, "Lacuna", 0.8, 0.85,
+     "七つが一つの大きな穴（大虹彩）になる（362tick）。重い真鍮の輪がはまる音、F6 と C7 の磁器の響き、低い一撃。")
+def lacuna_merge_fire(s, rng):
+    mix = seconds(0.85)
+    lay(mix, s, "metal_latch", 0.041, 0.24, 0.0, -6, rate=0.82, hp_=380, side=0.0, fade_in=0.0005, fade_out=0.1)
+    place(mix, pan(dsp.brass_click(rng, 1150, decay=0.03, thud=1.0, dur=0.2), 0.0), 0.0, -4)
+    place(mix, dsp.porcelain_ring(dsp.hz("F6"), 0.6, rng, decay=0.16, side=-0.25), 0.004, -8)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.45, rng, decay=0.11, side=0.3), 0.009, -12)
+    place(mix, dsp.thump(130, 48, 0.4, rng), 0.0, -5)
+    return room(mix, 0.16, 0.78, 0.18)
+
+
+@cue("LacunaBeamWarn", -13, "Lacuna", 0.75, 0.85,
+     "大きな穴の溜め（362〜404tick）。低いパイプオルガン F2・C3 が膨らみ、ノイズの吸い込みが 4 kHz から 300 Hz へ落ちていく。"
+     "輪が一段ずつ回る真鍮のラチェット7打（368・378・386・392・397・401・404tick）を焼き込み、404tick で切れて"
+     "発射までの6tickは無音（静かな溜め）。")
+def lacuna_beam_warn(s, rng):
+    length = _ticks(LACUNA["clicks"][-1] - LACUNA["formed"])
+    mix = seconds(0.76)
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "F3")], length + 0.02, rng, attack=length * 0.85, release=0.05,
+                        harmonics=12, rolloff=1.15, chiff=0.0, breath=0.3)
+    place(mix, pad, 0.0, -4)
+    suck = _sweep(length, 4000, 300, rng, bands=14) * np.linspace(0.25, 1, round(length * RATE))[:, None]
+    place(mix, pan(suck, 0.0), 0.0, -12)
+    for k, click in enumerate(LACUNA["clicks"]):
+        when = _ticks(click - LACUNA["formed"]) - 0.003
+        place(mix, pan(dsp.brass_click(rng, 2050 * 2 ** (k / 12), decay=0.004, thud=0.5), -0.15 + 0.05 * k), when, -9 + k * 0.7)
+    out = mix[:round((length + 0.012) * RATE)]
+    k = round(0.012 * RATE)
+    out[-k:] *= np.linspace(1, 0, k)[:, None]
+    return out
+
+
+@cue("LacunaBeamFire", -11.5, "Lacuna", 2.8, 0.9,
+     "黒い芯の光線が開く（410tick、溜めの静寂のあと）。60ミリ秒の吸い込みから、F に合わせた銅鑼のような低い一打"
+     "（やわらかい撥、長く減衰する余韻）と、その下で静かにふくらむオルガン Fm7（F2 C3 E♭3 A♭3 C4）、ゆっくり沈む低音、"
+     "かすかな磁器のきらめき。オルガンを強く鳴らすのではなく、控えめなオルガンと響く余韻で締める（T3、約2.6秒）。")
+def lacuna_beam_fire(s, rng):
+    mix = seconds(2.9)
+    inhale = 0.06
+    place(mix, pan(_inhale(inhale, rng), 0.0), 0.0, -14)
+    # The strike: a tuned gong-like plate on F2 an octave under F3, soft mallet, long tail.
+    place(mix, _gong(dsp.hz("F2"), 2.6, rng, tau=1.6), inhale, -3)
+    place(mix, _gong(dsp.hz("F3"), 1.9, rng, tau=0.9, beat=0.5), inhale + 0.004, -13)
+    # The organ only breathes under it: a slow swell, never a stab.
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "Eb3", "Ab3", "C4")], 2.3, rng, attack=0.18, release=1.6,
+                        harmonics=10, rolloff=1.4, chiff=0.0, breath=0.12)
+    place(mix, pad, inhale + 0.02, -13)
+    place(mix, dsp.thump(60, 38, 1.1, rng), inhale, -9)
+    place(mix, dsp.porcelain_crack(0.12, rng, count=5, spread=0.035, low=2400, high=6400), inhale, -21)
+    place(mix, dsp.shimmer(0.9, rng, count=8), inhale + 0.05, -20)
+    return room(mix, 0.24, 2.6, 0.6)
+
+
+assert LACUNA_LOOP_SECONDS == 4.0  # the registry line below spells the length out for the export tests
+
+
+@cue("LacunaBeamLoop", -14, "Lacuna", 4.0, 0.7,
+     "光線が出ている間ずっと鳴るループ（4.0秒、ちょうど脈の8周期、サンプル単位で継ぎ目なし）。暗いオルガンの持続音 F2・C3"
+     "（0.5 Hz のうなり）、200〜600 Hz の吸い込みの帯、脈と同じ毎秒2回のゆるいトレモロ、ときどき遠くで鳴る磁器の小さな響き。",
+     loop=True)
+def lacuna_beam_loop(s, rng):
+    """Periodic by construction: every partial and modulation completes whole cycles in the loop (0.25 Hz grid),
+    the noise band is FFT-synthesised on the loop's own bins, and the tings are placed circularly."""
+    n = round(LACUNA_LOOP_SECONDS * RATE)
+    t = np.arange(n) / RATE
+    grid = 1 / LACUNA_LOOP_SECONDS
+
+    def snap(f):
+        return round(f / grid) * grid
+
+    out = np.zeros((n, 2))
+    voices = ((snap(dsp.hz("F2")), 1.0, -0.35), (snap(dsp.hz("F2")) + 2 * grid, 0.6, 0.35),
+              (snap(dsp.hz("C3")), 0.55, 0.15), (snap(dsp.hz("F3")), 0.3, -0.2))
+    for f0, gain, side in voices:
+        y = np.zeros(n)
+        for h in range(1, 10):
+            f = f0 * h
+            if f >= dsp.CEILING_HZ:
+                break
+            y += np.sin(2 * np.pi * f * t + rng.uniform(0, 2 * np.pi)) / h ** 1.25
+        out += pan(y / np.abs(y).max() * gain, side)
+    tremolo = 1 + 0.15 * np.sin(2 * np.pi * 2.0 * t)
+    out *= tremolo[:, None]
+    # the suction band: random-phase bins 200-600 Hz, swelling twice per loop
+    spectrum = np.zeros((n // 2 + 1, 2), dtype=complex)
+    freqs = np.fft.rfftfreq(n, 1 / RATE)
+    band = (freqs >= 200) & (freqs <= 600)
+    spectrum[band] = np.exp(1j * rng.uniform(0, 2 * np.pi, (band.sum(), 2)))
+    hiss = np.fft.irfft(spectrum, n=n, axis=0)
+    hiss *= (0.6 + 0.4 * np.sin(2 * np.pi * 0.5 * t))[:, None]
+    out += hiss / np.abs(hiss).max() * 0.35
+    # sparse porcelain tings, placed circularly so the seam stays exact
+    for k, note in enumerate(("F7", "C7", "Ab6", "Eb7", "Bb6", "F7")):
+        ring = dsp.porcelain_ring(dsp.hz(note), 0.35, rng, decay=0.07, side=rng.uniform(-0.7, 0.7))
+        start = round((0.31 + k * 0.67) * RATE) % n
+        idx = (start + np.arange(len(ring))) % n
+        out[idx] += ring * 10 ** (-24 / 20) * 3
+    return out
+
+
+def _widen(rng, note_names, length, extra=-14):
+    mix = seconds(length + 0.1)
+    place(mix, pan(dsp.brass_click(rng, 1700, decay=0.012, thud=0.8), 0.0), 0.0, -4)
+    place(mix, dsp.ratchet((0.0, 0.035), rng, freq=2300, gains_db=(-6, -10), side=0.2), 0.0, -8)
+    pad = dsp.organ_pad([dsp.hz(n) for n in note_names], length * 0.95, rng, attack=0.09, release=length * 0.6,
+                        harmonics=10, rolloff=1.3, chiff=0.05, breath=0.12)
+    place(mix, pad, 0.02, extra)
+    return mix
+
+
+@cue("LacunaWiden1", -17, "Lacuna", 0.62, 0.75,
+     "光線が太くなる一段目（発射から2秒）。輪がもう一段回る真鍮の音に、オルガンの声が一つ（A♭3）加わる。")
+def lacuna_widen_1(s, rng):
+    return room(_widen(rng, ("Ab3",), 0.5), 0.14, 0.58, 0.14)
+
+
+@cue("LacunaWiden2", -17, "Lacuna", 0.62, 0.75,
+     "太くなる二段目（発射から4秒）。同じ真鍮の音に、オルガンの声 C4 が加わる。")
+def lacuna_widen_2(s, rng):
+    return room(_widen(rng, ("C4",), 0.5), 0.14, 0.58, 0.14)
+
+
+@cue("LacunaWiden3", -13, "Lacuna", 1.0, 0.75,
+     "最大の太さに達する（発射から6秒）。輪が落ち着く真鍮の響きと、F マイナーの和音（F3 A♭3 C4 E♭4）がふくらむ。")
+def lacuna_widen_3(s, rng):
+    mix = _widen(rng, ("F3", "Ab3", "C4", "Eb4"), 0.85, extra=-8)
+    place(mix, dsp.porcelain_ring(dsp.hz("F6"), 0.5, rng, decay=0.12, side=0.25), 0.004, -14)
+    return room(mix, 0.16, 0.95, 0.25)
+
+
+@cue("LacunaBeamHit", -20, "Lacuna", 0.28, 0.6,
+     "光線が敵に当たっている間、20tickに1回まで。低い磁器の共鳴と、虚無のやわらかなパチパチ。")
+def lacuna_beam_hit(s, rng):
+    mix = seconds(0.3)
+    place(mix, dsp.porcelain_ring(dsp.hz("Ab4"), 0.2, rng, decay=0.05, side=0.0), 0.0, -3)
+    place(mix, dsp.porcelain_ring(dsp.hz("Eb6"), 0.1, rng, decay=0.02, side=0.15), 0.002, -11)
+    place(mix, lp(dsp.porcelain_crack(0.1, rng, count=4, spread=0.04, low=1800, high=4200), 3500), 0.006, -12)
+    place(mix, _puff(0.08, rng, 300), 0.0, -12)
+    return room(mix, 0.08, 0.26, 0.07)
+
+
+@cue("LacunaBeamEnd", -13, "Lacuna", 0.75, 0.8,
+     "手を放す（光線中・溜め中）。光線が穴へ吸い戻され、七つの虹彩がパタパタと閉じる磁器の音（C7 から F5 へ下がる7打）と"
+     "真鍮の輪、最後に逆回しの吸気。光線の前に放したとき（開いた虹彩が閉じるだけ）は、同じ音を小さく鳴らす。")
+def lacuna_beam_end(s, rng):
+    mix = seconds(0.8)
+    place(mix, pan(_sweep(0.3, 2200, 220, rng, bands=10) * np.linspace(1, 0.2, round(0.3 * RATE))[:, None], 0.0), 0.0, -10)
+    ladder = ("C7", "Bb6", "Ab6", "F6", "Eb6", "C6", "F5")
+    for k, note in enumerate(ladder):
+        when = 0.035 + k * 0.022 * (1 - 0.04 * k)
+        place(mix, dsp.porcelain_ring(dsp.hz(note), 0.09, rng, decay=0.014, side=0.55 * np.cos(np.pi * k / 6)), when, -7 - 0.4 * k)
+        place(mix, pan(dsp.brass_click(rng, 2500 - 120 * k, decay=0.003, thud=0.2), 0.0), when, -14)
+    place(mix, pan(dsp.brass_click(rng, 1250, decay=0.02, thud=0.7, dur=0.15), 0.0), 0.2, -8)
+    place(mix, pan(_inhale(0.22, rng, 400, 3200), 0.0), 0.22, -15)
+    return room(mix, 0.14, 0.7, 0.18)
+
+
+@cue("LacunaBeamMiss", -13, "Lacuna", 0.9, 0.8,
+     "マナが尽きて儀式が崩れる（失敗）。オルガンが F・E♭・C と下がりながら途切れ途切れに3回つまずき、磁器がひび割れ、音程が F3 から C3 へ"
+     "沈みながら消える。放したときの LacunaBeamEnd より低く暗い。")
+def lacuna_beam_miss(s, rng):
+    mix = seconds(0.95)
+    for k, (at, dur, low, high) in enumerate(((0.0, 0.07, "F3", "C4"), (0.1, 0.06, "Eb3", "Bb3"), (0.19, 0.09, "C3", "F3"))):
+        blip = dsp.organ_pad([dsp.hz(low), dsp.hz(high)], dur, rng, attack=0.006,
+                             release=0.02, harmonics=10, rolloff=1.2, chiff=0.0, breath=0.4)
+        place(mix, blip, at, -6 - 2 * k)
+        place(mix, pan(_puff(0.05, rng, 700), 0.2 * (k - 1)), at, -14)
+    place(mix, dsp.porcelain_crack(0.2, rng, count=9, spread=0.08, low=1500, high=5200), 0.27, -8)
+    n = round(0.6 * RATE)
+    tt = np.arange(n) / RATE
+    glide = dsp.hz("F3") * 2 ** (-7 * np.clip(tt / 0.5, 0, 1) / 12)
+    phase = 2 * np.pi * np.cumsum(glide) / RATE
+    y = sum(np.sin(h * phase) / h ** 1.3 for h in range(1, 8)) * np.exp(-tt / 0.22) * np.clip(tt / 0.01, 0, 1)
+    place(mix, pan(lp(y[:, None].repeat(2, axis=1), 1800) / np.abs(y).max(), 0.0), 0.3, -6)
+    place(mix, dsp.thump(90, 40, 0.4, rng), 0.3, -10)
+    return room(mix, 0.12, 0.9, 0.3)
+
+
 # ---------------------------------------------------------------- render
 def seed(name):
     return int.from_bytes(hashlib.sha256((SEED_PREFIX + name).encode("utf-8")).digest()[:8], "little")
@@ -221,8 +577,59 @@ def render(name, store):
     return x
 
 
+def render_loop(name, store):
+    """A loop cue: exactly max_seconds of stereo, periodic by construction; the shared 28 Hz high-pass runs over three
+    periods and the middle one is kept, so the seam stays sample-exact."""
+    spec = CUES[name]
+    n = round(spec.max_seconds * RATE)
+    x = spec.build(store, np.random.default_rng(seed(name)))
+    if x.shape != (n, 2) or not np.isfinite(x).all():
+        raise RuntimeError(f"{name}: a loop must be exactly {n} stereo frames, got {x.shape}")
+    return hp(np.concatenate((x, x, x)), 28)[n:2 * n]
+
+
+def loop_peak_db(x):
+    """True peak of a loop played round: oversampled over three periods, the middle one measured."""
+    n = len(x)
+    return 20 * np.log10(np.abs(signal.resample_poly(np.concatenate((x, x, x)), 4, 1, axis=0)[4 * n:8 * n]).max())
+
+
+def seam(x):
+    """Wrap step against the largest inner step (both channels) and the head/tail 20 ms RMS ratio in dB."""
+    inner = np.abs(np.diff(x, axis=0)).max()
+    wrap = np.abs(x[0] - x[-1]).max()
+    k = round(0.02 * RATE)
+    rms = lambda y: np.sqrt(np.mean(y ** 2) + 1e-18)  # noqa: E731
+    return {"wrap_step": round(float(wrap), 6), "max_inner_step": round(float(inner), 6),
+            "head_tail_rms_db": round(float(20 * np.log10(rms(x[:k]) / rms(x[-k:]))), 2)}
+
+
+def render_loop_cue(name, store, output):
+    """Master a loop to its target over a round trip, write PCM16 WAV and back off if the quantized loop overshoots."""
+    store.used = set()
+    spec = CUES[name]
+    path = output / f"{name}.wav"
+    x = soft(render_loop(name, store), spec.glue)
+    x = x * 10 ** ((spec.target_lufs - loudness(np.concatenate((x, x)))) / 20)
+    peak = loop_peak_db(x)
+    if peak > -1.3:
+        x = x * 10 ** ((-1.3 - peak) / 20)
+    for _ in range(8):
+        sf.write(str(path), x, RATE, subtype="PCM_16")
+        decoded, rate = sf.read(str(path), always_2d=True, dtype="float64")
+        if rate != RATE or decoded.shape != x.shape:
+            raise ValueError(f"Unexpected WAV decode: {path}")
+        peak = loop_peak_db(decoded)
+        if peak <= -1.0:
+            return decoded, sorted(store.used)
+        x = x * 10 ** (-(peak + 1.1) / 20)
+    raise RuntimeError(f"{name}: true peak {peak:.2f} dBTP after retries")
+
+
 def render_cue(name, store, output):
     """Master to the cue's target, write the Ogg and, if the Vorbis round trip overshoots -1 dBTP, back the gain off."""
+    if CUES[name].loop:
+        return render_loop_cue(name, store, output)
     store.used = set()
     spec = CUES[name]
     path = output / f"{name}.ogg"
@@ -282,16 +689,19 @@ def measure(x):
 def analyse(name, decoded, path, sources_used):
     data = path.read_bytes()
     spec = CUES[name]
+    looped = np.concatenate((decoded, decoded)) if spec.loop else decoded
     info = measure(decoded) | {
+        "short_term_lufs": round(loudness(looped), 2),
+        "true_peak_dbfs": round(loop_peak_db(decoded) if spec.loop else true_peak_db(decoded), 2),
         "target_lufs": spec.target_lufs,
         "max_seconds": spec.max_seconds,
         "volume": spec.volume,
-        "effective_lufs": round(loudness(decoded) + 20 * np.log10(spec.volume), 2),
+        "effective_lufs": round(loudness(looped) + 20 * np.log10(spec.volume), 2),
         "sources": sources_used,
         "bytes": len(data),
-        "ogg_serial": ogg_serial(data),
+        "ogg_serial": None if spec.loop else ogg_serial(data),
         "ogg_sha256": sha256(data),
-    }
+    } | ({"loop_frames": len(decoded)} | seam(decoded) if spec.loop else {})
     if info["seconds"] > spec.max_seconds + 1e-6:
         raise RuntimeError(f"{name}: encoded length {info['seconds']} s exceeds {spec.max_seconds} s")
     return info
@@ -416,10 +826,187 @@ BGM の行は、実際の Doll の BGM（44.1 kHz に変換し、元の速さと
 </html>""", encoding="utf-8", newline="\n")
 
 
+# ---------------------------------------------------------------- weapon audition (one group per page)
+# A weapon's page: every cue alone at its game volume, the full build-up-to-release combo on the weapon's own tick
+# schedule (cues placed where DollCueClock fires them, tonal cues at their ladder steps, the loop leased with the
+# in-game fades), a failing variant, and the combo over beat-aligned Doll BGM excerpts.
+def ladder_shift(step, root):
+    """SoundStyle.Pitch of DollWeaponAudio.Note as a varispeed factor (pitch and time together, as in game)."""
+    semis = dsp.midi(dsp.LADDER[step]) - dsp.midi(dsp.LADDER[root])
+    return 2 ** (semis / 12)
+
+
+def lacuna_events(release, starved=False, target_ticks=14):
+    """(tick, cue, ladder step or None) of one held Lacuna channel from the press (tick 0) to `release`; pellets land
+    `target_ticks` after they leave (an enemy about 500 px away) and the beam stays on one target."""
+    L = LACUNA
+    events = []
+    for i, birth in enumerate(L["births"]):
+        events.append((birth, "LacunaIrisWarn", None))
+        first = birth + L["shot_delay"]
+        events.append((first, "LacunaIrisFire", None))
+        events.append((first, "LacunaIrisTine", i))
+        events.append((first + target_ticks, "LacunaPelletHit", None))
+        shot = first + L["shot_period"]
+        while shot < L["merge"]:
+            events.append((shot - L["shot_tell"], "LacunaPelletWarn", None))
+            events.append((shot, "LacunaPelletFire", i))
+            events.append((shot + target_ticks, "LacunaPelletHit", None))
+            shot += L["shot_period"]
+    if release > L["merge"]:
+        events.append((L["merge"], "LacunaMergeWarn", None))
+    if release > L["formed"]:
+        events += [(L["formed"], "LacunaMergeFire", None), (L["formed"], "LacunaBeamWarn", None)]
+    if release > L["fire"]:
+        events.append((L["fire"], "LacunaBeamFire", None))
+        events += [(t, "LacunaBeamHit", None) for t in range(L["fire"] + 11, release, 20)]
+        events += [(t, f"LacunaWiden{k + 1}", None) for k, t in enumerate(L["widen"]) if t < release]
+    events.append((release, "LacunaBeamMiss" if starved else "LacunaBeamEnd", None))
+    return sorted(e for e in events if e[0] <= release)
+
+
+def render_combo(samples, events, release, loop_name=None, loop_from=None):
+    """Mix the events at game volume; the loop fades in (+.25/tick) from `loop_from` and out (-.17/tick) at `release`."""
+    end = _ticks(release) + 1.6
+    mix = seconds(end)
+    for tick, name, step in events:
+        x = samples[name] * CUES[name].volume
+        if step is not None:
+            x = speed(x, ladder_shift(step, LACUNA_NOTE_ROOT))
+        place(mix, x, _ticks(tick))
+    if loop_name and loop_from is not None and release > loop_from:
+        loop = samples[loop_name] * CUES[loop_name].volume
+        n = len(mix)
+        start, stop = round(_ticks(loop_from) * RATE), round(_ticks(release) * RATE)
+        bed = np.tile(loop, (int(np.ceil(n / len(loop))) + 1, 1))[:n - start]
+        t = np.arange(n - start) / RATE * 60  # ticks since the loop started
+        gain = np.clip(t * 0.25, 0, 1)
+        after = (np.arange(n - start) + start - stop) / RATE * 60
+        gain = np.minimum(gain, np.clip(1 - np.maximum(after, 0) * 0.17, 0, 1))
+        mix[start:] += bed * gain[:, None]
+    return mix
+
+
+COMBOS = {
+    "Lacuna": (("combo", "押し続けて 800tick（13.3秒）で放す", lambda: lacuna_events(800), "LacunaBeamLoop", LACUNA["fire"] + 4, 800),
+               ("combo-miss", "光線中の 600tick でマナが尽きる（失敗）", lambda: lacuna_events(600, starved=True),
+                "LacunaBeamLoop", LACUNA["fire"] + 4, 600),
+               ("combo-cancel", "光線の前、250tick で放す（開いた虹彩が閉じるだけ）", lambda: lacuna_events(250), None, None, 250)),
+}
+GROUP_TITLES = {"Lacuna": ("欠落の遺言 — 新しい効果音", "doll-lacuna")}
+
+
+def weapon_preview(directory, group, samples, report):
+    directory.mkdir(parents=True, exist_ok=True)
+
+    def wav(name, x):
+        peak = np.abs(x).max()
+        if peak > 0.999:
+            raise RuntimeError(f"audition clip {name} clips ({peak:.3f})")
+        sf.write(str(directory / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
+        return f"{name}.wav"
+
+    clips, extra = {}, {"combos": {}, "bgm": {}}
+    for name, x in samples.items():
+        if CUES[name].loop:
+            clips[name] = wav(name, np.tile(x, (2, 1)) * CUES[name].volume)
+        else:
+            clips[name] = wav(name, x * CUES[name].volume)
+    combos = {}
+    for key, label, make, loop_name, loop_from, release in COMBOS[group]:
+        mix = render_combo(samples, make(), release, loop_name, loop_from)
+        trim_db = min(0.0, 20 * np.log10(0.97 / np.abs(mix).max()))
+        combos[key] = (label, mix, trim_db)
+        clips[key] = wav(key, mix * 10 ** (trim_db / 20))
+        extra["combos"][key] = {"label": label, "seconds": round(len(mix) / RATE, 3), "release_tick": release,
+                                "trim_db": round(trim_db, 2), "short_term_lufs": round(loudness(mix), 2)}
+    label, mix, _ = combos["combo"]
+    for bgm, bpm, origin, first, _, _, bgm_label in BGM:
+        beat = 60 / bpm
+        lead = 4 * beat                       # the combo starts on the excerpt's fifth beat
+        beats = int(np.ceil((lead + len(mix) / RATE + 0.5) / beat))
+        start, length = origin + first * beat, beats * beat
+        bed, check = load_bgm(bgm, start, length)
+        over = bed.copy()
+        place(over, mix, lead)
+        trim_db = min(0.0, 20 * np.log10(0.97 / max(np.abs(over).max(), np.abs(bed).max())))
+        g = 10 ** (trim_db / 20)
+        clips[f"combo-{bgm}"] = wav(f"combo-{bgm}", over * g)
+        clips[f"bed-{bgm}"] = wav(f"bgm-{bgm}", bed * g)
+        extra["bgm"][bgm] = check | {"label": bgm_label, "start": round(start, 4), "length": round(length, 4), "bpm": bpm,
+                                     "beats": beats, "combo_at": round(lead, 4), "mix_trim_db": round(trim_db, 2)}
+    weapon_page(directory, group, clips, report, extra)
+    return extra
+
+
+def weapon_page(directory, group, clips, report, extra):
+    def audio(src, loop=False):
+        return f"<audio controls preload='none' {'loop ' if loop else ''}src='{html.escape(src)}'></audio>"
+
+    def metrics(r):
+        return (f"{r['seconds']:.2f} 秒 ・ 短時間 {r['short_term_lufs']:.1f} LUFS（目標 {r['target_lufs']:g}）・ 実効 {r['effective_lufs']:.1f} LUFS"
+                f"（音量 {r['volume']}）・ トゥルーピーク {r['true_peak_dbfs']:.1f} dBTP ・ 重心 {r['centroid_hz']} Hz")
+
+    title, _ = GROUP_TITLES[group]
+    rows = []
+    for name, spec in CUES.items():
+        if spec.group != group or name not in report:
+            continue
+        r = report[name]
+        loop_note = "<br><small>ループ：2周つなげて再生（継ぎ目が聞こえないか確認）。ゲームでは 4tick でフェードイン、6tick でフェードアウト。</small>" if spec.loop else ""
+        rows.append(f"<tr><td><b>{html.escape(name)}</b><br><small>{html.escape(spec.description)}</small>{loop_note}</td>"
+                    f"<td>{audio(clips[name])}</td><td><small>{metrics(r)}</small></td></tr>")
+    combo_rows = []
+    for key, info in extra["combos"].items():
+        level = (f"クリップしないよう全体を {-info['trim_db']:.1f} dB 下げています（各音の比率はゲーム内の音量のまま）" if info["trim_db"] < -0.05
+                 else "ゲーム内の音量のまま")
+        combo_rows.append(f"<tr><td><b>{html.escape(info['label'])}</b><br><small>{info['seconds']:.1f} 秒。{level}。</small></td>"
+                          f"<td>{audio(clips[key])}</td></tr>")
+    bgm_rows = []
+    for bgm, e in extra["bgm"].items():
+        bgm_rows.append(f"<tr><td>{html.escape(e['label'])}<br><small>{e['start']:.1f} 秒から {e['beats']} 拍（{e['bpm']:g} BPM、"
+                        f"44.1 kHz に変換し元の速さと音程を相互相関で確認、r = {e['r']}）。コンボは5拍目の頭から。"
+                        f"クリップしないよう両方を {-e['mix_trim_db']:.1f} dB 下げています。</small></td>"
+                        f"<td>コンボ＋BGM {audio(clips[f'combo-{bgm}'])}</td><td>BGM だけ（ループ） {audio(clips[f'bed-{bgm}'], loop=True)}</td></tr>")
+    (directory / "index.html").write_text(f"""<!doctype html><html lang='ja'><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'><title>{html.escape(title)}</title>
+<style>body{{font:15px system-ui,'Yu Gothic UI',sans-serif;background:#15121a;color:#ece4dc;margin:24px;max-width:1150px}}
+td{{padding:8px 12px;vertical-align:top;border-bottom:1px solid #2c2633}}small{{color:#a99fb0}}table{{border-collapse:collapse;width:100%}}
+h1,h2{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}audio{{height:32px;width:280px}}p{{line-height:1.6}}</style>
+<h1>{html.escape(title)}</h1>
+<p>欠落の遺言（魔法武器）の新しい音です。押し続けると虹彩が7つ順に開いて小さな虚無の弾を撃ち、5.7秒で手の前の大きな穴にまとまり、
+0.8秒の溜めのあと黒い芯の光線を出し続けます。音はすべて新規で、各段階に予告（Warn）と本番（Fire）の組があります。
+マナ切れで失敗したときは別の音（LacunaBeamMiss）です。</p>
+<p><small>音量はすべてゲーム内の値（効果音と音楽の音量設定はどちらも 100%）で並べています。調は全武器共通の F マイナー・ペンタトニック
+（F A♭ B♭ C E♭）で、BGM に合わせた音程補正はしていません（0 セント）。単音の LacunaIrisTine と LacunaPelletFire は C6 で録り、
+ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 の高さで鳴ります（コンボではその高さで並べています）。複数の音を重ねたほかの音は、
+どれも録ったままの高さで鳴ります。</small></p>
+<h2>通しで（ゲームと同じタイミング）</h2><table>{''.join(combo_rows)}</table>
+<h2>BGM に重ねて</h2><table>{''.join(bgm_rows)}</table>
+<h2>一つずつ</h2><table>{''.join(rows)}</table>
+</html>""", encoding="utf-8", newline="\n")
+
+
 # ---------------------------------------------------------------- attribution
-def attribution_section(report, hashes):
+# Per group: the records' date stamp and date, their review line and the section's introduction (heading included).
+LACUNA_ATTRIBUTION = """### Lacuna Testament cues — 2026-10-03
+
+The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): sixteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump; the generator adds a gong-like plate tuned into the key, also additive synthesis), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-pitch cues (`LacunaIrisTine`, `LacunaPelletFire`, every pitched layer a C, recorded at C6 and played on the ladder step of each iris); every composite cue and the loop play as rendered. The audition page and report stay in the git-ignored `.local`.
+"""
+GROUP_ATTRIBUTION = {
+    "Lacuna": ("20261003", "2026-10-03", "Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam "
+               "checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run", LACUNA_ATTRIBUTION),
+}
+
+
+def attribution_section(report, hashes, group="Companion"):
     table = "\n".join(f"| {k} | {SOURCES[k][0].replace('repo:', '')} | {SOURCES[k][1]} | `{hashes[k]}` |" for k in sorted(hashes))
-    head = f"""### Doll weapon audio foundation and companion summon — 2026-10-02
+    stamp, date, review, intro = GROUP_ATTRIBUTION.get(group, ("20261002", "2026-10-02", None, None))
+    head = intro + f"""
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+{table}
+""" if intro else f"""### Doll weapon audio foundation and companion summon — 2026-10-02
 
 The shared audio basis of the Doll reward weapon refresh and the companion's new summon cue. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring, additive flue organ, shimmer, low thump); both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. The two Kenney recordings are the CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The project-owned `DollSummon.wav` (recorded in this register as doll-theater-0253-dollsummon; current bytes from the 0.3.7 weapon articulation revision) is layered thinly at the start so the companion keeps its arrival character. Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip. The audition page and report stay in the git-ignored `.local`.
 
@@ -436,18 +1023,27 @@ The shared audio basis of the Doll reward weapon refresh and the companion's new
         creators = "".join((f"recordings by {' and '.join(authors)}; " if authors else "",
                             f"project master{'s' if len(masters) > 1 else ''} {', '.join(masters)} by Convergence; " if masters else "",
                             "synthesis and layering by Convergence with owner-directed Claude assistance"))
-        blocks.append(f"""- Runtime file: `Assets/Sounds/Weapons/DollWeapons/{name}.ogg`
-- Asset ID: doll-weapon-sfx-{name.lower()}-20261002
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue ({r['seconds']:.2f} s)
+        loop = CUES[name].loop
+        suffix = "wav" if loop else "ogg"
+        kind = (f"stereo 44.1 kHz PCM16 WAV Doll weapon loop ({r['seconds']:.2f} s, {r.get('loop_frames')} frames)" if loop
+                else f"stereo 44.1 kHz Vorbis Doll weapon cue ({r['seconds']:.2f} s)")
+        encoding = "PCM16 WAV (sample-exact loop)" if loop else "Vorbis at compression level 0.4"
+        made = ("periodic original synthesis" if loop else "trimmed, filtered and layered recordings plus original synthesis"
+                if used or group == "Companion" else "original synthesis")
+        ending = (f"loop wrap step {r.get('wrap_step', 0):.4f} against {r.get('max_inner_step', 0):.4f} inside" if loop
+                  else "pinned Ogg serial")
+        blocks.append(f"""- Runtime file: `Assets/Sounds/Weapons/DollWeapons/{name}.{suffix}`
+- Asset ID: doll-weapon-sfx-{name.lower()}-{stamp}
+- Asset type: {kind}
 - Creator: {creators}
-- Creation/acquisition date: 2026-10-02
+- Creation/acquisition date: {date}
 - Source type: {'public-domain' if external else 'original'}
 - Source work and URL: {', '.join(used) + ' in the table above as selected by the cue recipe; remaining layers original synthesis' if used else 'none; original NumPy synthesis'}
-- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy {np.__version__}, SciPy {__import__('scipy').__version__}, soundfile {sf.__version__}/libsndfile {sf.__libsndfile_version__} Vorbis at compression level 0.4
-- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS; pinned Ogg serial
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy {np.__version__}, SciPy {__import__('scipy').__version__}, soundfile {sf.__version__}/libsndfile {sf.__libsndfile_version__} {encoding}
+- Human modifications: {made}; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS; {ending}
 - License and redistribution terms: {'CC0 1.0 recordings and project-owned masters; the layered cue follows the existing project asset terms' if external else 'original project asset under the existing project terms'}
 - Required attribution: {'none required by CC0; retain the table above as courtesy credit' if external else 'none; retain this provenance'}
-- Reviewer and review date: Claude, 2026-10-02 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the A/B audition page over the Phase I and Phase III music); in-game mix not_run
+- Reviewer and review date: {review or 'Claude, 2026-10-02 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the A/B audition page over the Phase I and Phase III music); in-game mix not_run'}
 - SHA256: `{r['ogg_sha256']}`
 """)
     return head + "\n" + "\n".join(blocks)
@@ -462,28 +1058,36 @@ def main():
     parser.add_argument("--attribution-section", type=Path, help="write the Assets/ATTRIBUTION.md section here")
     parser.add_argument("--only", help="comma-separated cue names; each cue is seeded by its own name, so the bytes "
                                        "equal a full run")
+    parser.add_argument("--group", help="render one group's cues (Companion, Lacuna); --preview and --attribution-section "
+                                        "describe one group")
     args = parser.parse_args()
-    names = [n.strip() for n in args.only.split(",")] if args.only else list(CUES)
+    names = ([n.strip() for n in args.only.split(",")] if args.only
+             else [n for n in CUES if not args.group or CUES[n].group == args.group])
     unknown = [n for n in names if n not in CUES]
-    if unknown:
-        parser.error("unknown cue(s): " + ", ".join(unknown))
+    if unknown or not names:
+        parser.error("unknown cue(s): " + ", ".join(unknown) if unknown else "no cue in that group")
+    groups = {CUES[n].group for n in names}
+    if (args.preview or args.attribution_section) and len(groups) != 1:
+        parser.error("--preview and --attribution-section describe one group: pass --group")
     store = Store(args.store or find_store(), ATTRIBUTION.read_text(encoding="utf-8"))
     args.output.mkdir(parents=True, exist_ok=True)
     samples, report = {}, {}
     for name in names:
         samples[name], used = render_cue(name, store, args.output)
-        report[name] = analyse(name, samples[name], args.output / f"{name}.ogg", used)
+        report[name] = analyse(name, samples[name], args.output / f"{name}.{'wav' if CUES[name].loop else 'ogg'}", used)
     record = {"recipe": "tools/" + Path(__file__).name, "recipe_sha256": sha256(Path(__file__).read_bytes()),
               "dsp_sha256": sha256(Path(dsp.__file__).read_bytes()),
               "libraries": {"numpy": np.__version__, "scipy": __import__("scipy").__version__,
                             "soundfile": sf.__version__, "libsndfile": sf.__libsndfile_version__},
               "sources": {k: {"path": SOURCES[k][0], "origin": SOURCES[k][1], "sha256": store.hashes[k]} for k in sorted(store.hashes)},
               "cues": report}
+    group = next(iter(groups))
     if args.preview:
-        record["audition"] = preview(args.preview, samples, report, store)
+        record["audition"] = (weapon_preview(args.preview, group, samples, report) if group in COMBOS
+                              else preview(args.preview, samples, report, store))
         (args.preview / "doll-weapon-sfx-report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
     if args.attribution_section:
-        args.attribution_section.write_text(attribution_section(report, store.hashes), encoding="utf-8", newline="\n")
+        args.attribution_section.write_text(attribution_section(report, store.hashes, group), encoding="utf-8", newline="\n")
     print(json.dumps({k: {kk: v[kk] for kk in ("seconds", "short_term_lufs", "effective_lufs", "true_peak_dbfs", "peak_ms",
                                               "centroid_hz", "bytes")} for k, v in report.items()}, indent=1))
 
