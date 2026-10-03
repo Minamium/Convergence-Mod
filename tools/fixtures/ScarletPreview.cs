@@ -248,7 +248,8 @@ internal sealed class PreviewRun
     }
 
     // The closing seal crossflow at real size (zoom 1) over the approved sanctum, drawn the production way (--look proposal):
-    // charge, release, the stream's growth and full width, the collapse and the residue, plus 2x close-ups of both seal ends.
+    // charge, release, the stream's growth and full width, the collapse and the residue, 2x close-ups of both seal ends and
+    // three consecutive ticks of the collapse.
     private void CrossflowSheet(PreviewPhrase phrase)
     {
         var x = phrase.Plans.Where(p => p.Technique == CrimsonTechnique.SideBeams).OrderBy(p => p.Fire).Last();
@@ -260,7 +261,9 @@ internal sealed class PreviewRun
             (-40, 1, centre, "charge"), (-4, 1, centre, "charged"), (0, 1, centre, "release"), (3, 1, centre, "reach"),
             (7, 1, centre, "reached"), (12, 1, centre, "full"), (30, 1, centre, "flow"), (life - 8, 1, centre, "closing"),
             (life + 6, 1, centre, "residue"),
-            (12, 2, new(right.X, right.Y), "right seal 2x"), (12, 2, new(left.X, left.Y), "left seal 2x"), (30, 2, new(left.X, left.Y), "left seal flow 2x")
+            (12, 2, new(right.X, right.Y), "right seal 2x"), (12, 2, new(left.X, left.Y), "left seal 2x"), (30, 2, new(left.X, left.Y), "left seal flow 2x"),
+            // Three consecutive ticks while the stream narrows: the black blood must flow on, not re-roll every tick.
+            (life - 12, 1, centre, "narrowing"), (life - 11, 1, centre, "narrowing +1"), (life - 10, 1, centre, "narrowing +2")
         };
         foreach (var backdrop in new[] { Backdrop.Sanctum, Backdrop.Night })
         {

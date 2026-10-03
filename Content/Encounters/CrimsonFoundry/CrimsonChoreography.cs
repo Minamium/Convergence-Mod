@@ -73,6 +73,25 @@ internal static class CrimsonChoreography
         }
         return new(At(0), At(PhraseEighths), CrimsonRhythmKind.Groove, hits.AsReadOnly());
     }
+    // When the runtime issues a booked phrase (relative to musicStart): one look-ahead before its first forecast, so
+    // replication lead and the Cinder Curtain's single column observation sit 30 ticks before that forecast.
+    internal static int IssueAt(int booked, bool pickup, int serial, int phase)
+        => Create(booked, serial, phase, pickup).FirstWarning - CrimsonRhythm.LookAheadTicks;
+    // The phrase the runtime admits at `now` (all ticks relative to musicStart). A booked phrase keeps its bar head:
+    // the previous closer (or signature finale) releases on it, so the phrase starts exactly there. With nothing booked
+    // (after an unlatched cycle boundary) it takes the first bar head after now and the unlock. A phrase whose first
+    // forecast can no longer reach every peer one look-ahead early (a stalled or all-Down runtime) moves to the next
+    // feasible bar head, and any phrase that leaves its booked bar head takes a pickup, because nothing else releases
+    // on its new downbeat (signature phrases never take one).
+    internal static CrimsonRhythmPhrase Admit(int booked, bool pickup, int now, int unlock, int serial, int phase)
+    {
+        int earliest = booked >= 0 ? Math.Max(booked, unlock) : Math.Max(Math.Max(now, unlock), 0);
+        var rhythm = Create(earliest, serial, phase, pickup);
+        if (booked >= 0 && rhythm.Start != booked && !pickup) rhythm = Create(rhythm.Start, serial, phase, true);
+        while (rhythm.FirstWarning < now + CrimsonRhythm.LookAheadTicks)
+            rhythm = Create(rhythm.Start + 1, serial, phase, true);
+        return rhythm;
+    }
     // Pickups and closers are the seal crossflow (Final: the cluster orb, CrimsonEnsemble); a signature phrase plays
     // the Act's move on its four steps. Final has its own pairs.
     internal static CrimsonTechnique Technique(int phase, int phrase, int note)
@@ -88,20 +107,33 @@ internal static class CrimsonChoreography
     internal static CrimsonPoint Direction(int phrase, int note)
         => ((phrase + note) & 3) switch {
             0 => new(0, 1), 1 => new(1, 0), 2 => new(.70710678f, .70710678f), _ => new(-.70710678f, .70710678f) };
-    // The two seals around the captured position, right then left. The pair is clamped so that a seal may sit on a
-    // field wall but never beyond it: the stream then still reaches a body pressed against that wall.
-    internal static (CrimsonPoint Right, CrimsonPoint Left) Seals(in CrimsonGesturePlan p)
+    // The stream's two ends around the captured position, right then left, SealOffset either side of a centre clamped so
+    // that an end may sit on a field wall but never beyond it: the stream then still reaches a body pressed against that
+    // wall. Forecast band, drawn stream and collision all run between these two points.
+    internal static (CrimsonPoint Right, CrimsonPoint Left) Reach(in CrimsonGesturePlan p)
     {
         float center = Math.Clamp(p.Target.X, p.Field.Left + SealOffset, p.Field.Right - SealOffset);
         float y = Math.Clamp(p.Target.Y, p.Field.Top + SideHalfWidth + 20, p.Field.Bottom - SideHalfWidth - 20);
         return (new(center + SealOffset, y), new(center - SealOffset, y));
     }
-    // Forecast: the band from seal centre to seal centre (CrimsonEnergy draws it as a capless veil). Live: one capsule that
-    // leaves the right seal and grows leftward, its round ends stopping at the seal centres, so the stream sinks into both
-    // seals instead of running past them. Drawing and collision use this capsule; it always lies inside the forecast band.
+    // The drawn seals (ScarletSorcery.CrossflowSeals): at the stream's ends, except that a seal is held SealInset inside a
+    // wall, so the whole seal (radius 185 at full charge, flattened to .28, 51.8 px either side of its centre) stays inside
+    // the field mask instead of being cut in half by it. The stream's round end then still reaches the wall, under the
+    // seal's outer half.
+    internal const float SealInset = 52;
+    internal static (CrimsonPoint Right, CrimsonPoint Left) Seals(in CrimsonGesturePlan p)
+    {
+        var (right, left) = Reach(p);
+        float low = p.Field.Left + SealInset, high = p.Field.Right - SealInset;
+        return (new(Math.Clamp(right.X, low, high), right.Y), new(Math.Clamp(left.X, low, high), left.Y));
+    }
+    // Forecast: the band from one stream end to the other, the seal centres in the open (CrimsonEnergy draws it as a capless
+    // veil). Live: one capsule that leaves the right end and grows leftward, its round ends stopping at the two ends, so the
+    // stream sinks into both seals instead of running past them. Drawing and collision use this capsule; it always lies
+    // inside the forecast band.
     internal static CrimsonStroke Side(in CrimsonGesturePlan p, float age, bool forecast)
     {
-        var (right, left) = Seals(p);
+        var (right, left) = Reach(p);
         if (forecast) return new(right, left, SideHalfWidth);
         float width = CrimsonInvocation.Ease((age - p.Fire) / 10)
             * (1 - CrimsonInvocation.Ease((age - (p.End - 15)) / 15));

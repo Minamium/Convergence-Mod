@@ -43,7 +43,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('!m.Out && !m.Recovery.Downed',helper)
     def test_runtime_owns_full_cycle_and_resolves_chorus_before_advancement(self):
         text=(CONTENT/'CrimsonRuntime.cs').read_text()
-        self.assertIn('CrimsonChoreography.Create',text)
+        self.assertIn('CrimsonChoreography.Admit(',text)
         self.assertNotIn('nextVolley',text)
         self.assertNotIn('score.Events(',text)
         self.assertLess(text.index('if (free < count)'),text.index('Projectile.NewProjectile'))
@@ -54,10 +54,16 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('if (!TryScheduleChorus()) SchedulePhrase()',text)
         self.assertLess(text.index('TickChorus();'),text.index('cycle.TryComplete('))
         self.assertIn('if (phase < 3 && thresholdLatched',text)
-        # A phrase is booked on a bar head and issued one look-ahead before its first forecast.
+        # A phrase is booked on a bar head, issued one look-ahead before its first forecast and admitted on that
+        # booked bar head (CrimsonChoreography.Admit, which the domain suite chains like the runtime).
         self.assertIn('BookPhrase(phraseEnd - musicStart, false)',text)
-        self.assertIn('.FirstWarning - CrimsonRhythm.LookAheadTicks',text)
-        self.assertIn('while (musicStart + rhythm.FirstWarning < age + CrimsonRhythm.LookAheadTicks)',text)
+        self.assertIn('nextPhrase = musicStart + CrimsonChoreography.IssueAt(start, pickup, phraseSerial + 1, phase);',text)
+        self.assertIn('CrimsonChoreography.Admit(nextStart, nextPickup, age - musicStart, unlockAt - musicStart, serial, phase)',text)
+        choreography=(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8')
+        self.assertIn('Create(booked, serial, phase, pickup).FirstWarning - CrimsonRhythm.LookAheadTicks',choreography)
+        self.assertIn('while (rhythm.FirstWarning < now + CrimsonRhythm.LookAheadTicks)',choreography)
+        chorus=(CONTENT/'CrimsonChorus.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonChorusRules.Due(phase, phrasesSinceChorus, phraseSerial + 1)',chorus)
     def test_gameplay_clock_is_the_shared_128_bpm_grid_not_a_recorded_score(self):
         self.assertFalse((ROOT/'Assets/Music/CrimsonFoundry/Score.json').exists())
         self.assertFalse((CONTENT/'CrimsonScore.cs').exists())

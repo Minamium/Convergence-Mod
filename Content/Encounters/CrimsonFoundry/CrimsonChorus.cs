@@ -151,7 +151,7 @@ internal sealed partial class CrimsonRuntime
 
     private bool TryScheduleChorus()
     {
-        if (actor is null || phase == 0 || performerDefeated || phrasesSinceChorus < CrimsonChorusRules.PhrasesBetween)
+        if (actor is null || phase == 0 || performerDefeated || !CrimsonChorusRules.Due(phase, phrasesSinceChorus, phraseSerial + 1))
             return false;
         int earliest = Math.Max(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks), cycle.FinishAt) - musicStart;
         var (born, fire, end) = CrimsonChorusRules.Schedule(earliest);

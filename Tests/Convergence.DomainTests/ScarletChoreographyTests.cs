@@ -118,15 +118,21 @@ internal static partial class Program
         }
         foreach(float x in new[]{f.Left+100,f.Left+470,f.CenterX,f.Right-300,f.Right-100}) {
             p=p with {Target=new(x,f.CenterY)};
-            var (right,left)=CrimsonChoreography.Seals(p);
+            var (right,left)=CrimsonChoreography.Reach(p);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(p);
             var band=CrimsonChoreography.Side(p,p.Fire,true);
-            AssertEqual(right,band.A,"the forecast band starts at the right seal centre");
-            AssertEqual(left,band.B,"and ends at the left seal centre");
+            AssertEqual(right,band.A,"the forecast band starts at the right stream end");
+            AssertEqual(left,band.B,"and ends at the left stream end");
             AssertEqual(p.Target.Y,right.Y,"seals beside the locked player position");
             AssertEqual(right.Y,left.Y,"horizontal stream");
-            AssertEqual(940f,right.X-left.X,"seals 940 px apart");
-            AssertEqual(true,left.X>=f.Left&&right.X<=f.Right,"both seal centres inside the field, at most on a wall");
+            AssertEqual(940f,right.X-left.X,"stream ends 940 px apart");
+            AssertEqual(true,left.X>=f.Left&&right.X<=f.Right,"both stream ends inside the field, at most on a wall");
             AssertEqual(true,p.Target.X>=left.X&&p.Target.X<=right.X,"the captured position lies between the seals");
+            // The drawn seals sit on the stream ends, except that a seal is held whole inside a wall (51.8 px half-width).
+            AssertEqual(right.Y,sealRight.Y,"drawn seals on the stream's line");AssertEqual(left.Y,sealLeft.Y,"both of them");
+            AssertEqual(Math.Min(right.X,f.Right-CrimsonChoreography.SealInset),sealRight.X,"right seal on its end unless a wall holds it in");
+            AssertEqual(Math.Max(left.X,f.Left+CrimsonChoreography.SealInset),sealLeft.X,"left seal on its end unless a wall holds it in");
+            AssertEqual(true,sealLeft.X-.28f*185>=f.Left&&sealRight.X+.28f*185<=f.Right,"each drawn seal is whole inside the field mask");
             float previousFront=right.X;
             for(float t=p.Fire;t<p.End;t+=.25f) {
                 var live=CrimsonChoreography.Side(p,t,false);
@@ -154,7 +160,8 @@ internal static partial class Program
         Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         foreach(float x in new[]{f.Left+100,f.Left+300,f.CenterX,f.Right-250,f.Right-100}) foreach(float y in new[]{f.Top+100,f.CenterY,f.Bottom-100}) {
             var plan=p with {Target=new(x,y)};
-            var (right,left)=CrimsonChoreography.Seals(plan);
+            var (right,left)=CrimsonChoreography.Reach(plan);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(plan);
             // Collision (CrimsonTechniqueGeometry.Write, what CrimsonGesture collides and ScarletInk draws) at every live tick.
             for(int tick=plan.Fire;tick<plan.End;tick++) {
                 int count=CrimsonTechniqueGeometry.Write(plan,tick,strokes);
@@ -163,18 +170,24 @@ internal static partial class Program
                     // A 1 px probe just outside the band (beyond a seal centre, above or below) is never hit.
                     foreach(var (px,py) in new[]{(right.X+.6f,right.Y),(left.X-1.6f,left.Y),(s.A.X,right.Y-CrimsonChoreography.SideHalfWidth-1.6f),(s.B.X,right.Y+CrimsonChoreography.SideHalfWidth+.6f)})
                         AssertEqual(false,CrimsonTechniqueGeometry.Intersects(s,px,py,1,1),$"nothing collides outside the forecast band tick={tick-plan.Fire}");
-                    // The capsule's extent is inside the seal-to-seal band: the drawn ink (radius + its anti-aliased margin)
-                    // ends inside the seals, whose ellipse is 52 px wide either side of the centre at full charge.
-                    AssertEqual(true,s.A.X+s.Radius<=right.X+.01f&&s.B.X-s.Radius>=left.X-.01f,"capsule between the seal centres");
-                    AssertEqual(true,s.A.X+s.Radius+10<=right.X+.28f*185&&s.B.X-s.Radius-10>=left.X-.28f*185,"ink margin stays inside the seal ellipses");
+                    // The capsule's extent is inside the end-to-end band: the drawn ink (radius + its anti-aliased margin)
+                    // ends inside the drawn seals, whose ellipse is 52 px wide either side of the centre at full charge;
+                    // against a wall the rest of the margin lies beyond the wall, under the field mask (the seal's rim sits
+                    // 0.2 px inside the wall there).
+                    AssertEqual(true,s.A.X+s.Radius<=right.X+.01f&&s.B.X-s.Radius>=left.X-.01f,"capsule between the stream ends");
+                    AssertEqual(true,Math.Min(s.A.X+s.Radius+10,f.Right)<=sealRight.X+.28f*185+.5f&&Math.Max(s.B.X-s.Radius-10,f.Left)>=sealLeft.X-.28f*185-.5f,"ink margin stays inside the seal ellipses or the wall");
                 }
             }
         }
-        // Against a wall the pair slides until a seal centre sits on the wall, so a body pressed into it is still in the stream.
+        // Against a wall the pair slides until a stream end sits on the wall, so a body pressed into it is still in the
+        // stream; the drawn seal stays whole just inside the wall, over the stream's round end.
         foreach(bool atLeft in new[]{true,false}) {
             var plan=p with {Target=new(atLeft?f.Left+100:f.Right-100,f.CenterY)};
-            var (right,left)=CrimsonChoreography.Seals(plan);
-            AssertEqual(atLeft?f.Left:f.Right,atLeft?left.X:right.X,"the wall-side seal centre is on the wall");
+            var (right,left)=CrimsonChoreography.Reach(plan);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(plan);
+            AssertEqual(atLeft?f.Left:f.Right,atLeft?left.X:right.X,"the wall-side stream end is on the wall");
+            AssertEqual(atLeft?f.Left+CrimsonChoreography.SealInset:f.Right-CrimsonChoreography.SealInset,atLeft?sealLeft.X:sealRight.X,"its seal is held whole inside the wall");
+            AssertEqual(atLeft?right.X:left.X,atLeft?sealRight.X:sealLeft.X,"the open-side seal stays on its end");
             int count=CrimsonTechniqueGeometry.Write(plan,plan.Fire+30,strokes);
             float bodyX=atLeft?f.Left:f.Right-20;
             float reach=0;

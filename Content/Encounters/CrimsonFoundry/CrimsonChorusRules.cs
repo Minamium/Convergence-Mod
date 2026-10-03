@@ -77,6 +77,15 @@ internal static class CrimsonChorusRules
         return (CrimsonMeter.BeatTick(born), CrimsonMeter.BeatTick(fire), CrimsonMeter.BeatTick(end));
     }
 
+    // A chorus takes the slot before the phrase `nextSerial` and ends in that phrase's pickup crossflow. A signature
+    // phrase never opens with a pickup, so a chorus never comes right before one: it is called after PhrasesBetween
+    // phrases, or one phrase earlier when the slot after the fifth would precede a signature phrase. Between two signature
+    // phrases (every third phrase) one of those two slots is always open, so the spacing stays four or five phrases.
+    internal static bool Due(int phase, int phrasesSince, int nextSerial)
+        => !CrimsonSignatureMoves.IsSignaturePhrase(phase, nextSerial)
+            && (phrasesSince >= PhrasesBetween
+                || phrasesSince == PhrasesBetween - 1 && CrimsonSignatureMoves.IsSignaturePhrase(phase, nextSerial + 1));
+
     internal static (bool Resolved, byte FailedMask) ReadVerdict(BinaryReader reader, byte members)
     {
         byte resolved = reader.ReadByte(), failures = reader.ReadByte();

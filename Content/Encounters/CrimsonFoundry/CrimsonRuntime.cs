@@ -40,8 +40,9 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     private int age, musicStart = -1, finalStart = -1, ending = -1;
     private int phaseStart, unlockAt = -1, target = -1, nextPhrase, phraseSerial, pendingAdvance = -1;
     private int phraseStart = -1, phraseEnd = -1, targetLife, previousDamage, previousLogAge;
-    // The bar head (relative to musicStart) booked for the next phrase, -1 for the first one that can still be issued in
-    // time, and whether it opens with a pickup crossflow (nothing else releases on its downbeat).
+    // The bar head (relative to musicStart) booked for the next phrase (every Act start, closer, chorus and cycle boundary
+    // books one before the phrase is issued) and whether it opens with a pickup crossflow (nothing else releases on its
+    // downbeat).
     private int nextStart = -1;
     private bool nextPickup = true;
     // Round robin of aimed notes: crossflows and the other aimed notes rotate through the living roster separately.
@@ -164,7 +165,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             for (int i = 0; i < 3; i++)
                 if (summons[i] is { } child && (defeated & (1 << i)) == 0
                     && (!child.NPC.active || child.NPC.ModNPC != child)) return End(EncounterEndReason.EncounterActorMissing);
-            if (stage == CrimsonStage.Countdown && age >= unlockAt) stage = CrimsonStage.Performance;
+            // Publish the unlock at once: the Act's pickup crossflow releases on this very tick.
+            if (stage == CrimsonStage.Countdown && age >= unlockAt) { stage = CrimsonStage.Performance; Project(true); }
             TickChorus();
             if (thresholdLatched && phase < 3 && summons[phase] is { } held)
                 held.NPC.life = CrimsonPhaseRules.RetreatLife(targetLife);
@@ -185,7 +187,13 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 // and the next act's downbeat land on the shared 128 BPM grid.
                 if (phase < 3 && thresholdLatched)
                     pendingAdvance = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAtOrAfter(age - musicStart));
-                else { nextStart = -1; nextPickup = true; nextPhrase = age; Project(true); }
+                // Otherwise the next cycle opens on the first bar head that can still take a pickup, issued like any
+                // booked phrase one look-ahead before that pickup's forecast.
+                else
+                {
+                    BookPhrase(CrimsonChoreography.Admit(-1, true, age - musicStart, unlockAt - musicStart, phraseSerial + 1, phase).Start, true);
+                    Project(true);
+                }
             }
             if (pendingAdvance >= 0 && age >= pendingAdvance && summons[phase] is { } retired)
             { pendingAdvance = -1; AdvancePhase(retired); }
@@ -336,17 +344,15 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     private void BookPhrase(int start, bool pickup)
     {
         nextStart = start; nextPickup = pickup;
-        nextPhrase = musicStart + CrimsonChoreography.Create(start, phraseSerial + 1, phase, pickup).FirstWarning - CrimsonRhythm.LookAheadTicks;
+        nextPhrase = musicStart + CrimsonChoreography.IssueAt(start, pickup, phraseSerial + 1, phase);
     }
     private void SchedulePhrase()
     {
         if (actor is null || cycle.Full) return;
         int serial = phraseSerial + 1;
-        // The booked bar head, or the first one whose forecasts can still reach every peer in time. A phrase that had to
-        // move takes a pickup, because no closer releases on its new downbeat.
-        var rhythm = CrimsonChoreography.Create(Math.Max(Math.Max(unlockAt, age) - musicStart, nextStart), serial, phase, nextPickup);
-        while (musicStart + rhythm.FirstWarning < age + CrimsonRhythm.LookAheadTicks)
-            rhythm = CrimsonChoreography.Create(rhythm.Start + 1, serial, phase, true);
+        // The booked bar head (issued exactly one look-ahead before its first forecast), or the first one whose forecasts
+        // can still reach every peer in time, with a pickup when it moved (CrimsonChoreography.Admit).
+        var rhythm = CrimsonChoreography.Admit(nextStart, nextPickup, age - musicStart, unlockAt - musicStart, serial, phase);
         phraseStart = musicStart + rhythm.Start; phraseEnd = musicStart + rhythm.End; phraseKind = rhythm.Kind;
         phraseSerial = serial;
         var notes = CrimsonEnsemble.Notes(rhythm, phase);
