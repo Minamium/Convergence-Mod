@@ -36,9 +36,11 @@ internal sealed class PreviewOptions
     // overlay = authoritative hit shapes, ink = ScarletInk live/residue on field beams only, portal = the PortalBeam stand-in for every plan,
     // ink+overlay = both, proposal = what production draws (portal forecast, then ScarletInk) with the overlay left out.
     internal string Look = "overlay";
+    // proposal only: the crossflow seals lie over the live stream (production since 0.3.83) or under it (before).
+    internal bool SealsOver = true;
 }
 
-internal sealed record SceneDef(string Name, int Phase, int Serial);
+internal sealed record SceneDef(string Name, int Phase, int Serial, bool Pickup = false);
 
 internal static class ScarletPreview
 {
@@ -103,6 +105,7 @@ internal static class ScarletPreview
                 case "reduced": o.ReducedModes = value switch { "on" => new[] { true }, "both" => new[] { false, true }, _ => new[] { false } }; break;
                 case "mask": o.Mask = Enum.Parse<MaskMode>(value, true); break;
                 case "look": o.Look = value; break;
+                case "seals": o.SealsOver = value != "under"; break;
                 case "no-sequences": o.Sequences = false; break;
                 case "no-matrix": o.Matrix = false; break;
                 case "no-smoke": o.Smoke = false; break;
@@ -132,11 +135,15 @@ internal sealed class PreviewRun
         this.renderer = renderer; this.options = options; this.output = output;
     }
 
-    // Real phrases: Act I..III (four aimed notes + the crossflow) and the three Final pairs (+ ClusterVolley).
+    // Real phrases (protocol80): an Act's first phrase (pickup crossflow on its downbeat, cell A, closing crossflow), the
+    // ordinary cells of Acts II/III, each Act's signature phrase (four steps, the last on the next downbeat), the three
+    // Final pair families (the drop opens with a pickup cluster) and the closing crossflow at real size.
     private static readonly SceneDef[] Scenes =
     {
-        new("act1", 0, 1), new("act2", 1, 1), new("act3", 2, 1),
-        new("final-tracking-rift", 3, 3), new("final-rift-grid", 3, 1), new("final-grid-tracking", 3, 2)
+        new("act1", 0, 1, true), new("act2", 1, 2), new("act3", 2, 1),
+        new("act1-sig", 0, 3), new("act2-sig", 1, 6), new("act3-sig", 2, 9),
+        new("final-drop", 3, 1, true), new("final-grid-tracking", 3, 2), new("final-tracking-rift", 3, 3),
+        new("crossflow", 0, 1)
     };
 
     internal int Execute()
@@ -155,11 +162,12 @@ internal sealed class PreviewRun
             {
                 string name = scene.Name + "-" + player.Name;
                 if (options.Only.Length > 0 && !name.Contains(options.Only, StringComparison.OrdinalIgnoreCase)) continue;
-                phrases.Add(PreviewPlanner.Build(name, score, scene.Phase, scene.Serial, player, options.PhraseStart));
+                phrases.Add(PreviewPlanner.Build(name, score, scene.Phase, scene.Serial, player, options.PhraseStart, pickup: scene.Pickup));
             }
         }
         foreach (var phrase in phrases)
         {
+            if (phrase.Name.StartsWith("crossflow", StringComparison.Ordinal)) { CrossflowSheet(phrase); continue; }
             Console.WriteLine($"{phrase.Name}: beats {string.Join(",", phrase.BeatTicks.Select(t => t - phrase.MusicStart))} | "
                 + string.Join(" ", phrase.Plans.Select(p => $"{p.Technique}[B{p.Born - phrase.MusicStart}/F{p.Fire - phrase.MusicStart}/E{p.End - phrase.MusicStart}]")));
             if (options.Contract) CheckContract(phrase);
@@ -186,10 +194,21 @@ internal sealed class PreviewRun
         return 0;
     }
 
+    // The phrase's first note (an ordinary note or signature step) and the note that lands on the next downbeat
+    // (the closing crossflow / cluster, or a signature move's final step).
+    private static (CrimsonGesturePlan Note, CrimsonGesturePlan Closer) KeyNotes(PreviewPhrase phrase)
+    {
+        var notes = phrase.Plans.Where(p => p.Pulse < CrimsonChoreography.BasicNotes).OrderBy(p => p.Fire).ToArray();
+        return (notes[0], phrase.Plans.OrderBy(p => p.Fire).Last());
+    }
+    private static int CloserKey(PreviewPhrase phrase, CrimsonGesturePlan closer)
+        => closer.Fire + (closer.Technique == CrimsonTechnique.ClusterVolley ? 24 : closer.IsSignature ? 4 : 14);
+
     // Warning, both live key moments and a residue moment, at 1:1 over black.
     private void CheckContract(PreviewPhrase phrase)
     {
-        int[] ticks = { phrase.Plans[1].Born + 10, phrase.Plans[1].Fire + 5, phrase.Plans[4].Fire + (phrase.Phase == 3 ? 24 : 14), phrase.Plans[3].End + 6 };
+        var (note, closer) = KeyNotes(phrase);
+        int[] ticks = { note.Born + 10, note.Fire + 5, CloserKey(phrase, closer), note.End + 6 };
         var result = new PreviewContract.Result();
         foreach (int tick in ticks) result += renderer.CheckContract(phrase, tick);
         contract += result;
@@ -228,11 +247,50 @@ internal sealed class PreviewRun
         });
     }
 
+    // The closing seal crossflow at real size (zoom 1) over the approved sanctum, drawn the production way (--look proposal):
+    // charge, release, the stream's growth and full width, the collapse and the residue, 2x close-ups of both seal ends and
+    // three consecutive ticks of the collapse.
+    private void CrossflowSheet(PreviewPhrase phrase)
+    {
+        var x = phrase.Plans.Where(p => p.Technique == CrimsonTechnique.SideBeams).OrderBy(p => p.Fire).Last();
+        var (right, left) = CrimsonChoreography.Seals(x);
+        var centre = new Vector2((right.X + left.X) * .5f, right.Y);
+        int life = x.End - x.Fire;
+        var moments = new (int Offset, float Zoom, Vector2 Focus, string Tag)[]
+        {
+            (-40, 1, centre, "charge"), (-4, 1, centre, "charged"), (0, 1, centre, "release"), (3, 1, centre, "reach"),
+            (7, 1, centre, "reached"), (12, 1, centre, "full"), (30, 1, centre, "flow"), (life - 8, 1, centre, "closing"),
+            (life + 6, 1, centre, "residue"),
+            (12, 2, new(right.X, right.Y), "right seal 2x"), (12, 2, new(left.X, left.Y), "left seal 2x"), (30, 2, new(left.X, left.Y), "left seal flow 2x"),
+            // Three consecutive ticks while the stream narrows: the black blood must flow on, not re-roll every tick.
+            (life - 12, 1, centre, "narrowing"), (life - 11, 1, centre, "narrowing +1"), (life - 10, 1, centre, "narrowing +2")
+        };
+        foreach (var backdrop in new[] { Backdrop.Sanctum, Backdrop.Night })
+        {
+            var cells = new List<SheetCell>();
+            int index = 0;
+            foreach (var (offset, zoom, focus, tag) in moments)
+            {
+                index++;
+                int tick = x.Fire + offset;
+                string label = $"F{offset:+0;-0;0} {tag}";
+                var target = renderer.Render(phrase, tick, backdrop, zoom, false, $"{phrase.Name} {label}", focus: focus);
+                if (options.Files) Save(target, Path.Combine(output, phrase.Name, $"{backdrop}-{index:00}-f{offset:+000;-000;+000}-z{zoom}.png".ToLowerInvariant()));
+                cells.Add(PreviewSheet.Cell(target, 640, 360, label, Bar(phrase, tick)));
+            }
+            PreviewSheet.Save(renderer.Device, renderer.Pixel, cells, 3, 640, 360, $"{phrase.Name} CROSSFLOW REAL SIZE {backdrop}",
+                Path.Combine(output, $"crossflow-{phrase.Name}-{backdrop}.png".ToLowerInvariant()));
+            written++;
+        }
+        Console.WriteLine($"{phrase.Name}: crossflow B{x.Born - phrase.MusicStart}/F{x.Fire - phrase.MusicStart}/E{x.End - phrase.MusicStart} seals {left.X:F0}..{right.X:F0} y {right.Y:F0}");
+    }
+
     // Two key moments per phrase: the second note's live window (warning of the next one overlaps it),
     // and the fifth note (crossflow in Acts, ClusterVolley in the Final).
     private void VariantSheets(PreviewPhrase phrase)
     {
-        var keys = new[] { phrase.Plans[1].Fire + 5, phrase.Plans[4].Fire + (phrase.Phase == 3 ? 24 : 14) };
+        var (note, closer) = KeyNotes(phrase);
+        var keys = new[] { note.Fire + 5, CloserKey(phrase, closer) };
         for (int k = 0; k < keys.Length; k++)
         {
             var cells = new List<SheetCell>();
@@ -372,14 +430,14 @@ internal sealed class PreviewRenderer : IDisposable
 
     // The returned target is reused by the next call; consume (save / downsample) it first.
     internal RenderTarget2D Render(PreviewPhrase phrase, int tick, Backdrop backdrop, float zoom, bool reduced,
-        string caption, Action<ScarletView>? underlay = null)
+        string caption, Action<ScarletView>? underlay = null, Vector2? focus = null)
     {
         int width = options.Width, height = options.Height;
         var field = PreviewPlanner.Field;
         // Like the game, the camera follows the player; when the whole field fits on screen at this
         // zoom it is centred on the field instead so the full arena can be read.
         bool fits = (field.Right - field.Left) * zoom <= width && (field.Bottom - field.Top) * zoom <= height;
-        Vector2 camera = fits ? new Vector2(field.CenterX, field.CenterY) : phrase.Player.Center;
+        Vector2 camera = focus ?? (fits ? new Vector2(field.CenterX, field.CenterY) : phrase.Player.Center);
         var view = ScarletView.Create(Device, width, height, camera - new Vector2(width, height) * .5f, zoom, tick, 0, reduced);
         var rt = Target(width, height);
         Device.SetRenderTarget(rt);
@@ -388,16 +446,25 @@ internal sealed class PreviewRenderer : IDisposable
         DrawCharacters(view, phrase);
         underlay?.Invoke(view);
         if (options.Look == "proposal")
+        {
             // The shipped decision, made per plan exactly as CrimsonGestureVisuals.DrawTrackingBeams does: a field beam
             // (TrackingBeam, SideBeams) shows the original portal forecast until Fire, then ScarletInk for the live strike and
             // its residue. Every other technique has its own production material (ScarletMaterials / ScarletSorcery /
             // ScarletClusters) that the preview does not reproduce; PortalBeam is only a stand-in silhouette for those.
-            // The seal crossflow's two seals and vapor (Terraria-bound ScarletSorcery) are not drawn either.
+            // The crossflow's two seals and vapor are ScarletSorcery.fxc drawn like ScarletSorcery.CrossflowSeals: under
+            // the forecast veil while it charges, and over the live stream (unless --seals under) so its ends sink into them.
+            var sealsOver = new List<CrimsonGesturePlan>();
             foreach (var plan in phrase.Plans)
             {
+                bool seals = plan.Technique == CrimsonTechnique.SideBeams && view.Clock >= plan.Born && view.Clock < plan.End;
+                bool over = seals && options.SealsOver && view.Clock >= plan.Fire;
+                if (seals && !over) DrawSeals(view, plan);
                 if (ScarletInkStroke.Owns(plan, view.Clock)) ink.Draw(view, assets, plan);
                 else DrawPortalBeam(view, plan);
+                if (over) sealsOver.Add(plan);
             }
+            foreach (var plan in sealsOver) DrawSeals(view, plan);
+        }
         else
         {
             if (options.Look.Contains("portal")) foreach (var plan in phrase.Plans) DrawPortalBeam(view, plan);
@@ -533,6 +600,44 @@ internal sealed class PreviewRenderer : IDisposable
         Device.BlendState = BlendState.AlphaBlend; Device.DepthStencilState = DepthStencilState.None; Device.RasterizerState = RasterizerState.CullNone;
         foreach (var (slot, texture, sampler) in textures) { Device.Textures[slot] = texture; Device.SamplerStates[slot] = sampler; }
         Device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+    }
+
+    // ScarletSorcery.CrossflowSeals on the preview device: the same seal centres, charge, alpha, radius, flattening and
+    // vapor quad, through ScarletSorcery.fxc's AutoloadPass / VaporPass with its production parameters.
+    internal void DrawSeals(in ScarletView view, CrimsonGesturePlan p)
+    {
+        float age = view.Clock;
+        var (right, left) = CrimsonChoreography.Seals(p);
+        float charge = Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1);
+        float alpha = CrimsonInvocation.Ease((age - p.Born) / 7) * (1 - CrimsonInvocation.Ease((age - (p.End - 15)) / 15));
+        float radius = 80 + charge * 105;
+        Seal(view, new(right.X, right.Y), radius, .28f, age, charge, alpha, p.Phrase);
+        Seal(view, new(left.X, left.Y), radius, .28f, age, charge, alpha, p.Phrase + .5f);
+        float smoke = CrimsonInvocation.Ease((age - p.Fire - 7) / 12) * alpha;
+        if (smoke > .001f)
+            Sorcery(view, new(left.X - 170, left.Y - 200), new(240, 0), new(0, 400), age,
+                new(charge, 1, smoke, view.Reduced ? 1 : 0), new(240, 200, p.Phrase, 0), "VaporPass");
+    }
+    // ScarletSorcery.Seal at angle pi/2: u runs down the seal's long axis, v across its flattened width.
+    private void Seal(in ScarletView view, Vector2 center, float radius, float flatten, float age, float charge, float alpha, float seed)
+    {
+        if (radius < .1f || alpha <= .001f) return;
+        Vector2 u = new(0, radius * 2), v = new(-radius * 2 * flatten, 0);
+        Sorcery(view, center - u * .5f - v * .5f, u, v, age, new(charge, 0, alpha, view.Reduced ? 1 : 0), new(radius * 2, radius, seed, 0), "AutoloadPass");
+    }
+    private void Sorcery(in ScarletView view, Vector2 origin, Vector2 u, Vector2 v, float age, Vector4 signal, Vector4 shape, string pass)
+    {
+        var fx = assets.GetEffect("ScarletSorcery");
+        Set(fx, "uWorldViewProjection", view.ScreenClip);
+        Set(fx, "clock", age / 60); Set(fx, "signal", signal); Set(fx, "shape", shape);
+        Set(fx, "hue", new Vector3(.82f, .04f, .11f));
+        Set(fx, "cutTint", new Vector3(1, .015f, .065f)); Set(fx, "cutCore", new Vector3(1, .82f, .84f));
+        Set(fx, "cutHot", new Vector3(1, .12f, .19f)); Set(fx, "cutSmoke", new Vector3(.13f, .025f, .04f));
+        Set(fx, "cutForecast", new Vector3(.9f, .83f, .9f));
+        // DrawQuad's 'along' is the u texture axis and 'across' the v axis, like ScarletSorcery's mesh.
+        DrawQuad(fx, pass, origin - view.ScreenPosition, v, u,
+            (1, assets.GetTexture("Noise/WavyBlotchNoise"), SamplerState.LinearWrap),
+            (2, assets.GetTexture("Noise/DendriticNoiseZoomedOut"), SamplerState.LinearWrap));
     }
 
     // CrimsonEnergy.Draw's per-ray work for a field beam, driven by the same strokes the overlay draws.

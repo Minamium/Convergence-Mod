@@ -102,8 +102,8 @@ internal static partial class Program
             for (int serial = 0; serial < CrimsonActCycle.PhrasesPerCycle; serial++)
             {
                 techniques.Add(CrimsonTechniqueGeometry.Select(source, serial));
-                var phrase = CrimsonChoreography.Create(earliest, serial, false);
-                AssertEqual(5, phrase.Hits.Count, "technique changes do not change the basic pulse");
+                var phrase = CrimsonChoreography.Create(earliest, serial + 1, source, false);
+                AssertEqual(4, phrase.Hits.Count, "technique changes do not change the phrase shape");
                 AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "no irregular fill within the repertoire");
                 cycle.Admit(phrase.End, phrase.End + 6); earliest = phrase.End;
                 AssertEqual(false, cycle.TryComplete(phrase.End, false), "cannot skip the current recovery");

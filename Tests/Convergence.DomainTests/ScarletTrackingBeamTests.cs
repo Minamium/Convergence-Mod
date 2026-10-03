@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Convergence.Content.Encounters.CrimsonFoundry;
 
 namespace Convergence.DomainTests;
@@ -10,8 +12,36 @@ internal static partial class Program
     private static void ScarletBeamRosterRotation()
     {
         foreach (int size in new[] { 1, 2, 3, 4, 8 })
-            for (int note = 0; note < size * 8; note++)
-                AssertEqual(note % size, CrimsonTrackingBeam.TargetIndex(note / 5 + 1, note % 5, size), "one target, fair rotation");
+            for (int ordinal = 0; ordinal < size * 8; ordinal++)
+                AssertEqual(ordinal % size, CrimsonTrackingBeam.TargetIndex(ordinal, size), "one target, fair rotation");
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonTrackingBeam.TargetIndex(-1, 2), "negative ordinal");
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonTrackingBeam.TargetIndex(0, 9), "roster bound");
+    }
+    [DomainTest("Scarlet crossflows and aimed notes are shared evenly by every living roster size over whole cycles")]
+    private static void ScarletTargetDistribution()
+    {
+        // The runtime's rule: one ordinal per aimed note identity (Final's two families of a note share it), drawn from
+        // the crossflow rotation for pickups and closers and from the note rotation otherwise.
+        for (int phase = 0; phase < 4; phase++) for (int living = 1; living <= 8; living++)
+        {
+            var crossflows = new int[living]; var aimed = new int[living];
+            int crossflowOrdinal = 0, noteOrdinal = 0, earliest = 900;
+            for (int serial = 1; serial <= 12 * living; serial++)
+            {
+                var rhythm = CrimsonChoreography.Create(earliest, serial, phase, serial % 12 == 1);
+                var assigned = new HashSet<int>();
+                foreach (var (hit, second) in CrimsonEnsemble.Notes(rhythm, phase))
+                {
+                    if (!CrimsonGesturePlan.NeedsTargetIdentity(CrimsonEnsemble.Technique(phase, serial, hit.Pulse, second)) || !assigned.Add(hit.Pulse)) continue;
+                    if (CrimsonChoreography.IsCrossflow(hit.Pulse)) crossflows[CrimsonTrackingBeam.TargetIndex(crossflowOrdinal++, living)]++;
+                    else aimed[CrimsonTrackingBeam.TargetIndex(noteOrdinal++, living)]++;
+                }
+                earliest = rhythm.End;
+            }
+            AssertEqual(true, crossflows.Max() - crossflows.Min() <= 1, $"crossflows shared evenly (phase {phase}, {living} living: {string.Join(",", crossflows)})");
+            AssertEqual(true, aimed.Max() - aimed.Min() <= 1, $"aimed notes shared evenly (phase {phase}, {living} living: {string.Join(",", aimed)})");
+            if (phase < 3) AssertEqual(true, crossflows.Min() > 0, "everyone takes crossflows in the Acts");
+        }
     }
     [DomainTest("Scarlet tracking samples reject stale duplicate outside and post-lock updates")]
     private static void ScarletTrackingSamples()

@@ -93,6 +93,9 @@ class ScarletAudioContracts(unittest.TestCase):
     def test_each_moment_is_wired_to_its_cue(self):
         gesture = ' '.join(read(CLIENT / 'CrimsonGestureVisuals.cs').split())
         self.assertIn('bool crossflow = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley;', gesture)
+        # An ordinary note sounds only its strike; a signature move is announced on its first and final steps.
+        self.assertIn('bool announced = crossflow || p.IsSignature && (p.Pulse == 0 || p.Pulse == CrimsonChoreography.SignatureClimax);', gesture)
+        self.assertIn('if (!impact && !announced) return;', gesture)
         self.assertIn('var cue = crossflow ? impact ? ScarletCue.CrossflowRelease : ScarletCue.CrossflowCharge'
                       ' : impact ? ScarletCue.Impact : ScarletCue.Foretell;', gesture)
         self.assertIn('Cue(p.Born, false); Cue(p.Fire, true);', gesture)

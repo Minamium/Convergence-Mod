@@ -84,26 +84,27 @@ internal static partial class Program
             AssertEqual(true, fire - born >= 160 && end - fire >= 24, "readable musical call and isolated recovery");
         }
     }
-    [DomainTest("Scarlet chorus schedule lands on grid beats, calls for eight beats and ends on a bar head")]
+    [DomainTest("Scarlet chorus calls and verdicts land on bar heads and the next phrase's pickup releases on its end")]
     private static void ScarletChorusScheduleGrid()
     {
-        AssertEqual((900, 1125, 1238), CrimsonChorusRules.Schedule(900), "chorus asked on bar eight: born on the head, verdict eight beats later");
-        AssertEqual((928, 1153, 1238), CrimsonChorusRules.Schedule(901), "a late tick waits for the next beat but keeps the bar-head end");
+        AssertEqual((900, 1125, 1238), CrimsonChorusRules.Schedule(900), "chorus asked on bar eight: called on the head, verdict two bars later");
+        AssertEqual((1013, 1238, 1350), CrimsonChorusRules.Schedule(901), "a late tick waits for the next bar head");
         AssertEqual((0, 225, 338), CrimsonChorusRules.Schedule(0), "the grid starts at tick zero");
         for (int age = 0; age <= 70000; age += 7)
         {
             var (born, fire, end) = CrimsonChorusRules.Schedule(age);
-            int bornBeat = CrimsonMeter.BeatAtOrAfter(born);
-            AssertEqual(born, CrimsonMeter.BeatTick(bornBeat), "born on a grid beat");
-            AssertEqual(true, born >= age && born - age <= 28, "born on the first beat at or after the request");
-            AssertEqual(CrimsonMeter.BeatTick(bornBeat + 8), fire, "verdict eight beats after the call");
+            int bornBar = CrimsonMeter.BarAtOrAfter(born);
+            AssertEqual(CrimsonMeter.BarTick(bornBar), born, "called on a bar head");
+            AssertEqual(CrimsonMeter.BarTick(ScarletFirstBarAtOrAfter(age)), born, "the first bar head at or after the request");
+            AssertEqual(CrimsonMeter.BarTick(bornBar + 2), fire, "verdict on the bar head eight beats after the call");
             AssertEqual(225, fire - born, "eight beats are exactly 225 ticks");
-            int endBar = CrimsonMeter.BarAtOrAfter(end);
-            AssertEqual(end, CrimsonMeter.BarTick(endBar), "end on a bar head");
-            AssertEqual(true, endBar * CrimsonMeter.BeatsPerBar >= bornBeat + 8 + CrimsonChorusRules.MinimumRecoveryBeats, "at least two recovery beats");
-            AssertEqual(true, end - fire >= 2 * 28 && end - fire <= 5 * 29, "recovery is two to five beats");
+            AssertEqual(CrimsonMeter.BarTick(bornBar + 3), end, "one bar of recovery, ending on a bar head");
+            AssertEqual(true, end - fire is 112 or 113, "the recovery is one bar (at least two beats)");
             AssertEqual(true, fire - born is >= 160 and <= 720 && end - fire is >= 24 and <= 180, "inside the descriptor bounds CrimsonChorusPlan accepts");
-            AssertEqual(end, CrimsonChoreography.Create(end, 0, false).Start, "the next phrase opens exactly where the call ends");
+            var next = CrimsonChoreography.Create(end, 2, 1, true);
+            AssertEqual(end, next.Start, "the next phrase opens exactly where the call ends");
+            AssertEqual(end, next.Hits[0].Fire, "and its pickup crossflow releases there");
+            AssertEqual(true, next.Hits[0].Warning >= fire + CrimsonChorusRules.ImpactTicks + 40, "its seals bloom two beats after the verdict, past the impact window");
         }
         AssertThrows<ArgumentOutOfRangeException>(() => CrimsonChorusRules.Schedule(-1), "negative request");
     }

@@ -6,61 +6,91 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Scarlet basic pulse ignores serial and Final instead of adding irregular fills")]
+    [DomainTest("Scarlet ordinary cells vary between phrases instead of one repeated metronome pattern")]
     private static void ScarletGrooveVariety()
     {
-        // Every earliest tick, serial and Final flag produce the same phrase: the pattern is the grid.
         foreach (int earliest in new[] { 0, 600, 900, 901, 5000, 30000 })
+        for (int phase = 0; phase < 4; phase++)
         {
             var patterns = new HashSet<string>();
-            for (int serial = 0; serial < 12; serial++)
-            foreach (bool final in new[] { false, true })
+            for (int serial = 1; serial <= 12; serial++)
             {
-                var phrase = CrimsonChoreography.Create(earliest, serial, final);
-                AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "same basic pulse in every phase");
-                patterns.Add(string.Join(",", phrase.Hits));
-                for (int i = 0; i < CrimsonChoreography.BasicNotes; i++)
+                var phrase = CrimsonChoreography.Create(earliest, serial, phase, false);
+                AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "same kind in every phase");
+                var offsets = new List<int>();
+                foreach (var hit in phrase.Hits)
                 {
-                    int warning = phrase.Hits[i].Fire - phrase.Hits[i].Warning;
-                    AssertEqual(true, warning is 28 or 29, "one measured beat of warning (28.125 ticks rounded)");
+                    offsets.Add(hit.Fire - phrase.Start);
+                    if (!CrimsonChoreography.IsCrossflow(hit.Pulse)) AssertEqual(true, hit.Fire - hit.Warning is 28 or 29, "one measured beat of warning (28.125 ticks rounded)");
                 }
+                patterns.Add(string.Join(",", offsets));
+                // Not a pulse on the beat: the ordinary notes are unevenly spaced or strike off the beat.
+                var eighths = new List<int>();
+                foreach (var hit in phrase.Hits)
+                    if (!CrimsonChoreography.IsCrossflow(hit.Pulse)) eighths.Add((int)Math.Round((hit.Fire - phrase.Start) / 14.0625));
+                var gaps = new HashSet<int>();
+                for (int i = 1; i < eighths.Count; i++) gaps.Add(eighths[i] - eighths[i - 1]);
+                bool signature = CrimsonSignatureMoves.IsSignaturePhrase(phase, serial);
+                if (signature) AssertEqual("7,10,13,16", string.Join(",", eighths), "signature steps a dotted quarter apart from beat 3.5");
+                else AssertEqual(true, gaps.Count == 2 || eighths.Exists(e => e % 2 == 1), $"syncopated, not a beat pulse ({string.Join(",", eighths)})");
+                AssertEqual(true, eighths.TrueForAll(e => e % 8 != 0 || signature && e == 16), "no ordinary strike on a bar head");
             }
-            AssertEqual(1, patterns.Count, "one deliberately repeated metronome pattern");
+            // Acts: two ordinary cells and the signature layout; Final: three ordinary cells.
+            AssertEqual(3, patterns.Count, "three distinct phrase layouts per cycle of three");
         }
     }
-    [DomainTest("Scarlet warning and strike ticks agree with the chorus visual pulse within one frame")]
+    [DomainTest("Scarlet key moments land on bar-head pulse peaks and ordinary notes stay on the eighth-note grid")]
     private static void ScarletChorusPulseAlignment()
     {
-        int earliest = CrimsonChoreography.OpeningTicks;
-        for (int serial = 0; serial < 300; serial++)
+        for (int phase = 0; phase < 4; phase++)
         {
-            var phrase = CrimsonChoreography.Create(earliest, serial, true);
-            foreach (var hit in phrase.Hits)
-            foreach (int tick in new[] { hit.Warning, hit.Fire })
+            int earliest = CrimsonChoreography.OpeningTicks;
+            for (int serial = 1; serial <= 120; serial++)
             {
-                // Gameplay rounds to a tick, whereas the chorus draws at fractional age.
-                // The first half-frame after that tick must be on the same pulse peak.
-                double renderAge = tick + .50001d;
-                int beat = CrimsonMeter.BeatAtOrAfter(tick);
-                AssertEqual(tick, CrimsonMeter.BeatTick(beat), "every call and strike is a grid beat");
-                float peak = beat % CrimsonMeter.BeatsPerBar == 0 ? 1f : .72f;
-                AssertEqual(true, CrimsonMeter.Pulse(renderAge) >= peak * MathF.Exp(-1.0001f / 5f), "same pulse peak, including rounded half-tick beats");
+                var phrase = CrimsonChoreography.Create(earliest, serial, phase, serial % 5 == 1);
+                foreach (var hit in phrase.Hits)
+                {
+                    bool key = CrimsonChoreography.IsCrossflow(hit.Pulse)
+                        || CrimsonSignatureMoves.IsSignaturePhrase(phase, serial) && hit.Pulse == CrimsonChoreography.SignatureClimax;
+                    foreach (int tick in key ? new[] { hit.Fire } : new[] { hit.Warning, hit.Fire })
+                    {
+                        int eighth = (int)Math.Round(tick / 14.0625);
+                        AssertEqual(tick, CrimsonMeter.EighthTick(eighth), "every call and strike is on the eighth-note grid");
+                    }
+                    if (!key) continue;
+                    // Gameplay rounds to a tick, whereas the backdrop pulse draws at fractional age. The first
+                    // half-frame after a release is on the bar's full pulse peak.
+                    int beat = CrimsonMeter.BeatAtOrAfter(hit.Fire);
+                    AssertEqual(hit.Fire, CrimsonMeter.BeatTick(beat), "a key moment is a grid beat");
+                    AssertEqual(0, beat % CrimsonMeter.BeatsPerBar, "on a bar head");
+                    AssertEqual(true, CrimsonMeter.Pulse(hit.Fire + .50001d) >= MathF.Exp(-1.0001f / 5f), "the downbeat's full pulse peak");
+                }
+                earliest = phrase.End;
             }
-            earliest = phrase.End;
         }
+        for (int e = 0; e <= 2 * CrimsonMeter.MaximumBeat; e += 7)
+            AssertEqual(ScarletEighth(e), CrimsonMeter.EighthTick(e), "eighth ticks round half up");
+        for (int k = 0; k <= CrimsonMeter.MaximumBeat; k += 3)
+            AssertEqual(CrimsonMeter.BeatTick(k), CrimsonMeter.EighthTick(2 * k), "two eighths are one beat");
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonMeter.EighthTick(-1), "no negative eighth");
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonMeter.EighthTick(2 * CrimsonMeter.MaximumBeat + 1), "bounded eighth");
     }
-    [DomainTest("Scarlet early phrase reservation preserves rounded beat boundaries without dropping beats")]
+    [DomainTest("Scarlet early phrase reservation keeps the closer's release on the next phrase's downbeat")]
     private static void ScarletBarContinuity()
     {
-        int earliest = CrimsonChoreography.OpeningTicks;
-        for (int serial = 0; serial < 140; serial++)
+        for (int phase = 0; phase < 4; phase++)
         {
-            var first = CrimsonChoreography.Create(earliest, serial, true);
-            // The runtime reserves the next phrase LookAheadTicks early, so it asks from exactly End.
-            var next = CrimsonChoreography.Create(first.End, serial + 1, true);
-            AssertEqual(first.End, next.Start, "reservation lead does not insert a cooldown or skip a rounded beat");
-            AssertEqual(first.Hits[4].End, next.Start, "the crossflow collapse and the next downbeat share one tick");
-            earliest = next.End;
+            int earliest = CrimsonChoreography.OpeningTicks;
+            for (int serial = 1; serial <= 140; serial++)
+            {
+                var current = CrimsonChoreography.Create(earliest, serial, phase, serial == 1);
+                // The runtime books the next phrase on End and issues it before its first forecast.
+                var next = CrimsonChoreography.Create(current.End, serial + 1, phase, false);
+                AssertEqual(current.End, next.Start, "booking does not insert a cooldown or skip a rounded beat");
+                AssertEqual(next.Start, current.Hits[^1].Fire, "the closer (or the signature's final hit) and the next downbeat share one tick");
+                AssertEqual(true, next.FirstWarning >= current.Hits[^1].Fire + 20, "the next phrase's first forecast follows that release");
+                earliest = next.Start;
+            }
         }
     }
 }
