@@ -1,8 +1,11 @@
-// Reference-only, verbatim copy of Client/Encounters/CrimsonFoundry/Vfx/ScarletInkStroke.cs as it is on main (0.3.87, #117 and #118
-// merged; before the attack-expression branch added the signature moves' ink and residue yield), renamed ScarletInkStrokeReference.
+// Reference-only copy of Client/Encounters/CrimsonFoundry/Vfx/ScarletInkStroke.cs as it is on main (0.3.87, #117 and #118
+// merged; before the attack-expression branch added the signature moves' ink and residue yield), renamed ScarletInkStrokeReference,
+// with ONE edit: the quad's margin rule. Main's class reaches a flat 10 px beyond the radius; this class and the production class
+// reach MarginOf(radius) = max(10, ceil(.6 R + 9)) px (production: ScarletInkMargin.Of), so the glow is not cut into a box. The rule is
+// copied here on purpose, not shared, so a change to the production rule that this class does not follow fails G11.
 // It is the reference of rig gate G11: the production ScarletInkStroke must draw every field beam's live strike and residue (the Act
-// I basic phrases' tracking beams and crossflows) pixel for pixel like this class. Keep it a copy of main's class, never an edit; when
-// main's ink changes on purpose, replace it from main in the same change that accepts that change.
+// I basic phrases' tracking beams) pixel for pixel like this class. Keep it main's class plus that margin rule, nothing else; when
+// main's ink changes on purpose, replace it from main (re-applying the margin rule) in the same change that accepts that change.
 #nullable enable
 using System;
 using Convergence.Content.Encounters.CrimsonFoundry;
@@ -14,8 +17,8 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // Scarlet's strike material (ScarletInk.fx) on the authoritative CrimsonStroke capsules: a
 // river of black blood. Live: a black body whose rim burns and melts, red threads streaming
 // along it, a twisting core, and a blaze in the first ticks after impact. Residue: the ink
-// dries into a narrow scar. Nothing draws outside a capsule except a few pixels of
-// anti-aliased rim.
+// dries into a narrow scar. Nothing draws outside a capsule except the rim's anti-aliasing
+// and the glow fading out within the margin.
 //
 // It owns only the live and residue time of a field beam (TrackingBeam, SideBeams). The
 // forecast (CrimsonEnergy's PortalForecastPass + ForecastDustPass + mouth) and the two
@@ -23,10 +26,12 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // ForecastPass is never used here.
 internal sealed class ScarletInkStrokeReference
 {
-    internal const float Margin = 10;
     internal const int CloseTicks = 8, ResidueTicks = 24;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private readonly CrimsonStroke[] buffer = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+
+    // The margin rule (the only difference from main's class): the quad reaches this far beyond the radius.
+    private static float MarginOf(float radius) => MathF.Max(10, MathF.Ceiling(.6f * radius + 9));
 
     // Ember Crown burns, Sable Mantle is silk, Thorn Choir is bone; Final mixes them.
     internal static Vector4 Flavor(int source) => source switch
@@ -82,9 +87,9 @@ internal sealed class ScarletInkStrokeReference
             float length = delta.Length();
             if (s.Radius < .5f) continue;
             Vector2 along = length > .01f ? delta / length : Vector2.UnitX, normal = new(-along.Y, along.X);
-            float extent = s.Radius + Margin;
+            float margin = MarginOf(s.Radius), extent = s.Radius + margin;
             var seed = anchor ?? s.A;
-            shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
+            shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, margin));
             shader.Apply(pass);
             Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));
             device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);

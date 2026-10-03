@@ -9,13 +9,15 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // Scarlet's strike material (ScarletInk.fx) on the authoritative CrimsonStroke capsules: a
 // river of black blood. Live: a black body whose rim burns and melts, red threads streaming
 // along it, a twisting core, and a blaze in the first ticks after impact. Residue: the ink
-// dries into a narrow scar. Nothing draws outside a capsule except a few pixels of
-// anti-aliased rim, with one exception: the seal crossflow's stream (SideBeams) is drawn as the
+// dries into a narrow scar. The body never leaves its capsule except the few pixels of
+// anti-aliased rim; only the soft glow around it reaches out, as far as the quad does
+// (ScarletInkMargin.Of: 0.6 r + 9 px, so the glow has faded to under 5% where the quad ends, even at the opening overshoot, and is not cut into a box).
+// The seal crossflow's stream (SideBeams) is drawn as the
 // band between its two ends, cut square at both (and at its growing front) like the original
 // stream, because the capsule's round ends stuck out past the seals' narrow ellipses. The
-// band covers the capsule's whole span and its half-width is the capsule's radius, so it lies
-// inside the forecast band, and the capsule (the collision) is not touched; only the four
-// corners the round ends cut off are inked without hurting. The seals are drawn over a live
+// band covers the capsule's whole span and its half-width is the capsule's radius, so its body lies
+// inside the forecast band (only the glow reaches past it, across the band, never past a cut end), and the capsule (the collision)
+// is not touched; only the four corners the round ends cut off are inked without hurting. The seals are drawn over a live
 // stream (CrimsonGestureVisuals.DrawTrackingBeams), so each flat cut, which falls inside its seal's
 // ring, sinks into it; at a wall the held seal lies over the stream, which runs on under it to the wall.
 //
@@ -28,7 +30,6 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // wherever the move's next note leaves the ground safe.
 internal sealed class ScarletInkStroke
 {
-    internal const float Margin = 10;
     internal const int CloseTicks = 8, ResidueTicks = 24;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private readonly CrimsonStroke[] buffer = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
@@ -108,7 +109,8 @@ internal sealed class ScarletInkStroke
                 shader.Set("signal", new Vector4(signal.X, strength, signal.Z, signal.W));
             }
             Vector2 along = length > .01f ? delta / length : Vector2.UnitX, normal = new(-along.Y, along.X);
-            float extent = s.Radius + Margin;
+            // The quad reaches beyond the radius by the margin rule (ScarletInkMargin), so the glow fades out before its edge.
+            float margin = ScarletInkMargin.Of(s.Radius), extent = s.Radius + margin;
             var seed = anchor ?? s.A;
             if (band)
             {
@@ -119,14 +121,14 @@ internal sealed class ScarletInkStroke
                 float hi = MathF.Max(s.A.X, s.B.X) + s.Radius, lo = MathF.Min(s.A.X, s.B.X) - s.Radius, cut = hi - lo;
                 if (cut < .5f) continue;
                 along = -Vector2.UnitX; normal = new(0, -1);
-                shader.Set("shape", new Vector4(cut, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
+                shader.Set("shape", new Vector4(cut, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, margin));
                 shader.Apply(pass);
                 float span = cut + extent * 2;
                 Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);
                 device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
                 continue;
             }
-            shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
+            shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, margin));
             shader.Apply(pass);
             Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));
             device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);

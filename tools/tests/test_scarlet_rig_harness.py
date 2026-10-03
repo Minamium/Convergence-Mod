@@ -183,7 +183,7 @@ class HarnessContractTests(unittest.TestCase):
             self.assertIn(f'RigBaseline.Refuse(root, dir, {gate}, out manifest)', text)
             self.assertIn(f'RigBaseline.Write(root, dir, {gate},', text)
         # G11 and the Vespera half of G8v compare against references that live in the harness, so they hold under any phrase
-        # timing: main's ScarletInkStroke (verbatim, renamed) and the pre-S4 boss-path drawing (TodayVespera).
+        # timing: main's ScarletInkStroke (renamed, plus the quad-margin rule as its one edit) and the pre-S4 boss-path drawing (TodayVespera).
         reference = read(FIXTURES / 'ScarletInkReference.cs')
         self.assertIn('internal sealed class ScarletInkStrokeReference', reference)
         self.assertIn('new ScarletInkStrokeReference().Draw(view, r.Assets, p);', gates)
@@ -248,6 +248,10 @@ class HarnessContractTests(unittest.TestCase):
         for token in ('"wallL"', '"wallR"', 'outsideAlong', 'outsideAcross', 'columnAtRightCut', 'columnAtLeftCut', 'atRight >= .85f && atLeft >= .85f', 'sha256'):
             self.assertIn(token, crossflow)
         self.assertIn('Status(hashOk && frameOk && crossflowOk)', g11)
+        # The glow at the quad's edge is measured on the rendered crossflow, and the reference carries the margin rule.
+        for token in ('quadEdgeMax', 'edgeMax <= EdgeLimit', 'ScarletInkMargin.Of(stroke.Radius)'):
+            self.assertIn(token, crossflow)
+        self.assertIn('MarginOf(float radius) => MathF.Max(10, MathF.Ceiling(', read(FIXTURES / 'ScarletInkReference.cs'))
 
     def test_g6v_reports_the_rests_between_phrases_and_gates_only_blinks(self):
         gates = read(FIXTURES / 'ScarletConductorGates.cs')

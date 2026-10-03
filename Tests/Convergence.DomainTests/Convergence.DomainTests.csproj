@@ -49,6 +49,7 @@
     <Compile Include="../../Client/Encounters/CrimsonFoundry/CrimsonRigMotion.cs" Link="Presentation/CrimsonRigMotion.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/ScarletGesturePresentation.cs" Link="Presentation/ScarletGesturePresentation.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletResidueYield.cs" Link="Presentation/ScarletResidueYield.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletInkMargin.cs" Link="Presentation/ScarletInkMargin.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonMeter.cs" Link="Domain/CrimsonMeter.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/CrimsonMusicMixer.cs" Link="Presentation/CrimsonMusicMixer.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonTrackingBeam.cs" Link="Domain/CrimsonTrackingBeam.cs" />

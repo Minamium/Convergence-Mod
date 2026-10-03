@@ -1,6 +1,7 @@
 """Source wiring guards, not visual-quality or native gameplay approval."""
 from pathlib import Path
 import hashlib
+import math
 import re
 import unittest
 ROOT = Path(__file__).resolve().parents[2]
@@ -463,6 +464,85 @@ class ScarletContracts(unittest.TestCase):
         g11=gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
         for token in ('collisionPixelsWithoutInk','bare == 0','CrimsonTechniqueGeometry.Write(p, live ? tick : p.End - 1, strokes, false)'):
             self.assertIn(token,g11)
+
+    def test_ink_quad_margin_lets_the_halo_fade_before_the_quad_edge_everywhere(self):
+        # Presentation lead, 2026-10-04: the crossflow showed a faint hard-edged lighter box 10 px beyond its band, because ScarletInk.fx's halo
+        # (a function of the radius) is still ~75% at R + 10 for R = 140 while the quad stopped there. The quad's margin is now a function of the
+        # radius, derived from the shader's halo term; the shader is not touched (G11 pins its hashes).
+        shader = read_text(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx')
+        live = shader[shader.index('float4 Live(VO i)'):shader.index('float4 Residue(VO i)')]
+        found = re.search(r'float halo=exp2\(-pow\(max\(0,d-R\*([0-9.]+)\)/\(R\*([0-9.]+)\+([0-9.]+)\*aa\),2\)\)', live)
+        self.assertIsNotNone(found, 'the halo term the margin rule is derived from has changed; re-derive ScarletInkMargin')
+        offset, scale, per_pixel = (float(v) for v in found.groups())
+        self.assertEqual((.9, .24, 4.0), (offset, scale, per_pixel))
+        self.assertIn('float e=shape.y+shape.w;', shader)  # the quad's half-height is the radius + the margin passed in shape.w
+        # The shader's body radius overshoots the capsule's by at most 14% while it snaps open (R0 = r*open*over, R <= R0); the rule covers that peak.
+        self.assertIn('over=1+.14*exp2(-pow((t-3.2)/2.4,2))', live)
+        self.assertIn('float R0=max(.5,r*open*over);', live)
+        self.assertIn('float R=R0*(.9+.1*rimN);', live)
+        margin = read_text(CLIENT/'Vfx/ScarletInkMargin.cs')
+        # The C# model of the term is the shader's, constant for constant.
+        self.assertIn('MathF.Max(0, distance - .9f * shaderRadius) / (.24f * shaderRadius + 4 * aa)', margin)
+        rule = re.search(r'Of\(float radius\) => MathF\.Max\(Floor, MathF\.Ceiling\(([0-9.]+)f \* radius \+ ([0-9.]+)\)\);', margin)
+        self.assertIsNotNone(rule)
+        slope, intercept = float(rule.group(1)), float(rule.group(2))
+        floor = float(re.search(r'internal const float Floor = ([0-9.]+);', margin).group(1))
+        limit = float(re.search(r'HaloAtEdgeLimit = ([0-9.]+)f;', margin).group(1))
+        peak = float(re.search(r'PeakRadius = ([0-9.]+)f;', margin).group(1))
+        self.assertEqual(1.14, peak)
+        self.assertEqual(10, floor)
+        def halo(distance, radius, aa):
+            return 2 ** (-((max(0, distance - offset*radius))/(scale*radius + per_pixel*aa)) ** 2)
+        def margin_of(radius):
+            return max(floor, math.ceil(slope*radius + intercept))
+        worst = 0
+        for half_px in range(1, 501):
+            radius = half_px/2
+            edge = halo(radius + margin_of(radius), radius*peak, 1)  # at the opening overshoot's peak
+            worst = max(worst, edge)
+            self.assertLessEqual(edge, limit + 1e-6, f'the quad cuts {edge:.1%} of the halo at R={radius}')
+            self.assertLessEqual(halo(radius + margin_of(radius), radius*peak, .6), edge + 1e-9)  # zoom 2 fades further
+            self.assertLessEqual(halo(radius + margin_of(radius), radius, 1), .03)  # and afterwards, at R = r, far further
+        self.assertLess(worst, .05)
+        # The test has teeth: the original flat 10 px cut the crossflow's halo at ~75% and a tracking beam's at ~45%, and the first
+        # 0.4 r + 9 rule (set for R = r, not for the overshoot) still left an eighth of the halo at the opening of a 30 px stream.
+        self.assertGreater(halo(140 + 10, 140, 1), .7)
+        self.assertGreater(halo(36 + 10, 36, 1), .4)
+        self.assertGreater(halo(30.2 + math.ceil(.4*30.2 + 9), 30.2*peak, 1), .1)
+        self.assertEqual(93, margin_of(140))
+        # ScarletInkStroke applies the rule to every stroke, in the quad and in the shader's own margin uniform; the flat 10 px constant is gone.
+        stroke = read_text(CLIENT/'Vfx/ScarletInkStroke.cs')
+        self.assertNotIn('internal const float Margin', stroke)
+        self.assertIn('float margin = ScarletInkMargin.Of(s.Radius), extent = s.Radius + margin;', stroke)
+        self.assertEqual(2, stroke.count(', margin));'), 'both draws pass the same margin to the shader')
+        self.assertNotIn(' Margin)', stroke)
+        # The flat cut's horizontal extent stays exactly on the cut lines: the margin only grows the band's height (extent = radius + margin
+        # across; along the band the quad is the cut and u runs [extent, cut + extent] of cut + 2 extent, so x = 0 stays on the right end).
+        self.assertIn('float span = cut + extent * 2;', stroke)
+        self.assertIn('Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);', stroke)
+        # G11's reference carries the same rule on purpose (a copy, not a shared call), so production drifting from it fails the gate.
+        reference = read_text(ROOT/'tools/fixtures/ScarletInkReference.cs')
+        self.assertIn(f'MathF.Max(10, MathF.Ceiling({rule.group(1)}f * radius + {rule.group(2)}))', reference)
+        self.assertIn('float margin = MarginOf(s.Radius), extent = s.Radius + margin;', reference)
+        self.assertEqual(1, reference.count(', margin));'))
+        self.assertNotIn('const float Margin', reference)
+        self.assertNotIn('ScarletInkMargin.Of(', reference.replace('production: ScarletInkMargin.Of', ''))
+        # The tools that bounded lit pixels by the old constant use the rule, and G11 measures the glow at the quad's edge on rendered pixels.
+        gates = read_text(ROOT/'tools/fixtures/ScarletRigGates.cs')
+        g11 = gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
+        self.assertIn('extent = stroke.Radius + ScarletInkMargin.Of(stroke.Radius)', g11)
+        for token in ('quadEdgeMax', 'edgeMax <= EdgeLimit', 'bool softEdge'):
+            self.assertIn(token, g11)
+        self.assertIn('private const int EdgeLimit = 10;', gates)
+        self.assertIn('ScarletInkMargin.Of(residue[i].Radius) + 1', read_text(ROOT/'tools/fixtures/ScarletPreviewContract.cs'))
+        # The domain suite links the rule and pins it.
+        project = read_text(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj')
+        self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletInkMargin.cs', project)
+        domain = read_text(ROOT/'Tests/Convergence.DomainTests/ScarletInkMarginTests.cs')
+        self.assertIn('ScarletInkMarginFadesTheHalo', domain)
+        self.assertIn('ScarletInkMarginOfTheRealStrokes', domain)
+        # Nothing here touches the compiled shader.
+        self.assertIn('Vfx/*.cs', read_text(ROOT/'tools/preview-scarlet-rigs.ps1'))
 
     def test_peer_bodies_answer_a_note_only_once_its_aim_is_known(self):
         # A peer holds an aimed plan's issue-time Target until the lock sample (tick >= Born) arrives; a note built from it turns the

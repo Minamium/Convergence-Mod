@@ -881,8 +881,9 @@ internal sealed class RigGates
             hashes.Add(new { file, ok = actual == expected });
         }
         // The tracking beams of the Act I phrases, the production ink against the reference class (main's ScarletInkStroke before
-        // the signature moves): live at Fire+2 and +10, residue 5 ticks after End. The crossflow's stream is no longer main's
-        // capsule (it is cut square on its ends, owner 2026-10-04), so it has its own check below.
+        // the signature moves, carrying the same quad-margin rule ScarletInkMargin.Of: the rule is the one edit to main's class):
+        // live at Fire+2 and +10, residue 5 ticks after End. The crossflow's stream is no longer main's capsule (it is cut square
+        // on its ends, owner 2026-10-04), so it has its own check below.
         var frames = new List<object>(); bool frameOk = true; int checkedFrames = 0;
         foreach (string name in new[] { "act1-basic", "act1-basic2" })
         {
@@ -904,13 +905,20 @@ internal sealed class RigGates
             Status(hashOk && frameOk && crossflowOk),
             new { hashes, framesChecked = checkedFrames, frames, crossflow },
             "Pinned shader hashes, and every live-strike and residue frame of the Act I basic phrases' tracking beams (cells A and B) "
-            + "drawn by the production ScarletInkStroke and by ScarletInkStrokeReference (tools/fixtures/ScarletInkReference.cs, a verbatim copy of main's class before "
-            + "the signature moves) must be pixel for pixel identical, so the signature moves' changes to the class cannot reach a basic strike. "
+            + "drawn by the production ScarletInkStroke and by ScarletInkStrokeReference (tools/fixtures/ScarletInkReference.cs, a copy of main's class before "
+            + "the signature moves that carries the quad-margin rule, max(10, ceil(.4 R + 9)) px, as its one edit; the rule is copied there, not shared) must be pixel for pixel identical, so the signature moves' "
+            + "changes to the class cannot reach a basic strike. "
             + "The seal crossflow (the pickup's and the closing one, in the open and with a stream end on each wall) is drawn as a band cut square on its two "
             + "ends and on its growing front, not as main's capsule with round ends: no ink beyond the capsule's span along the stream or beyond its radius + the quad's margin across it, "
-            + "and a live column 2.5 px inside either cut as full as the middle of the stream (a round end would be a sliver); and every pixel more than 1 px inside the collision "
+            + "and a live column 2.5 px inside either cut as full as the middle of the stream (a round end would be a sliver); the last pixel rows inside the quad's edge across the band carry "
+            + "at most " + EdgeLimit + "/255 of glow (the glow fades out before the quad's edge instead of being cut into a lighter box; live, half-width >= 20 px, away from the cut ends); and every pixel more than 1 px inside the collision "
             + "capsule (CrimsonTechniqueGeometry.Write at that tick) carries ink, so the picture covers what hurts. sha256 is recorded per frame, not gated.");
     }
+
+    // The quad edge's glow: 0..255 of the brightest channel in the last pixel rows inside the quad, across the live crossflow. A flat 10 px
+    // margin leaves ~60 there (a lighter box), a margin fitted to the halo at R = r (.32 r + 7 or .4 r + 9) 19-22 at F+3, where the
+    // shader's body overshoots its capsule by 14%; the shipped .6 r + 9 leaves 7 at most (F+3) and 1 from F+7 on. The limit is set between.
+    private const int EdgeLimit = 10;
 
     // The seal crossflow's ink at real size (zoom 1, centred on the stream), 1:1 over transparent black.
     private List<object> Crossflow(out bool ok)
@@ -941,7 +949,11 @@ internal sealed class RigGates
                         if (count != 1) { ok = false; rows.Add(new { scene = name, where, rel, error = "strokes " + count }); continue; }
                         var stroke = strokes[0];
                         float hi = MathF.Max(stroke.A.X, stroke.B.X) + stroke.Radius, lo = MathF.Min(stroke.A.X, stroke.B.X) - stroke.Radius;
-                        float y = stroke.A.Y, reach = stroke.Radius + ScarletInkStroke.Margin + 2;
+                        float y = stroke.A.Y, extent = stroke.Radius + ScarletInkMargin.Of(stroke.Radius), reach = extent + 2;
+                        // The quad's edge across the band: the last pixel rows inside it, away from the cut ends, must carry (almost) no glow, or the
+                        // edge shows as a lighter box (the 10 px margin left up to a quarter of the glow's peak there). Live frames of a stream at least 20 px wide.
+                        bool edgeFrame = live && stroke.Radius >= 20;
+                        int edgeMax = 0, edgeCount = 0; long edgeSum = 0;
                         var pixels = InkOnly(s, view, p, r.Frame(width, height));
                         int lit = 0, outsideAlong = 0, outsideAcross = 0, hurts = 0, bare = 0;
                         float bareDepth = 0;
@@ -962,9 +974,15 @@ internal sealed class RigGates
                                         if (!Lit(pixels[py * width + px], 3)) { bare++; bareDepth = MathF.Max(bareDepth, stroke.Radius - dist); }
                                     }
                                 }
+                                float wx = view.ScreenPosition.X + px + .5f, wy = view.ScreenPosition.Y + py + .5f;
+                                if (edgeFrame && MathF.Abs(wy - y) <= extent && MathF.Abs(wy - y) > extent - 1.5f && wx > lo + 60 && wx < hi - 60)
+                                {
+                                    var e = pixels[py * width + px];
+                                    int level = Math.Max(Math.Max(e.R, e.G), Math.Max(e.B, e.A));
+                                    edgeMax = Math.Max(edgeMax, level); edgeSum += level; edgeCount++;
+                                }
                                 if (!Lit(pixels[py * width + px], 3)) continue;
                                 lit++;
-                                float wx = view.ScreenPosition.X + px + .5f, wy = view.ScreenPosition.Y + py + .5f;
                                 if (wx < lo - 1.5f || wx > hi + 1.5f) outsideAlong++;
                                 if (MathF.Abs(wy - y) > reach) outsideAcross++;
                                 int c = (int)MathF.Floor(wx); column[c] = column.TryGetValue(c, out var n) ? n + 1 : 1;
@@ -975,13 +993,15 @@ internal sealed class RigGates
                         float atRight = Column(hi - 2.5f) / middle, atLeft = hi - lo > 12 ? Column(lo + 2.5f) / middle : 1;
                         // (A sliver under 10 px of half-width, the first tick of the opening, has too few lit pixels per column for the ratio.)
                         bool square = !live || stroke.Radius < 10 || atRight >= .85f && atLeft >= .85f;
-                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square && bare == 0;
+                        bool softEdge = !edgeFrame || edgeMax <= EdgeLimit;
+                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square && bare == 0 && softEdge;
                         ok &= good;
                         using var sha = SHA256.Create();
                         var bytes = new byte[pixels.Length * 4];
                         for (int i = 0; i < pixels.Length; i++) { bytes[i * 4] = pixels[i].R; bytes[i * 4 + 1] = pixels[i].G; bytes[i * 4 + 2] = pixels[i].B; bytes[i * 4 + 3] = pixels[i].A; }
                         rows.Add(new { scene = name, where, pulse = p.Pulse, rel, live, span = new[] { lo, hi }, radius = stroke.Radius, lit, outsideAlong, outsideAcross, collisionPixels = hurts, collisionPixelsWithoutInk = bare, bareDepth,
-                            columnAtRightCut = atRight, columnAtLeftCut = atLeft, ok = good, sha256 = Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() });
+                            columnAtRightCut = atRight, columnAtLeftCut = atLeft,
+                            quadEdgeMax = edgeFrame ? edgeMax : (int?)null, quadEdgeMean = edgeFrame && edgeCount > 0 ? (double)edgeSum / edgeCount : (double?)null, ok = good, sha256 = Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() });
                     }
                 }
         }

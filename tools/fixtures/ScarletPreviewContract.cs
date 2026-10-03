@@ -125,7 +125,7 @@ internal static class PreviewContract
                     var p = new Vector2(field.Left + x + .5f, field.Top + y + .5f);
                     bool inside = false;
                     for (int i = 0; i < count && !inside; i++)
-                        inside = holds[i] && Distance(p, residue[i]) <= ScarletInkStroke.Margin + 1;
+                        inside = holds[i] && Distance(p, residue[i]) <= ScarletInkMargin.Of(residue[i].Radius) + 1;
                     if (!inside) wrong++;
                 }
             if (wrong > 0) Report(plan, -1, $"{wrong} lit pixels outside the held strokes at End+{ScarletResidueYield.YieldTicks}");
