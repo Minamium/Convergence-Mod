@@ -33,7 +33,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.7: -20.1 LUFS effective), true peak -6.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `c21e9e7e928f4bc414c01e8d1c0e6569a5d037e7263690cf8262dd94cf245851`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn1.ogg`
@@ -47,7 +47,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.75: -22.4 LUFS effective), true peak -13.8 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `70ec3ec29b13d561d02cc7872dd15040375162ea73b5ac2468dacf4b66b2e30e`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn2.ogg`
@@ -61,7 +61,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.75: -22.4 LUFS effective), true peak -14.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `ff54334500e38e7279aa1b0fbe2bfd4484f6d3bf05526913db591b35b3842090`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn3.ogg`
@@ -75,7 +75,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.75: -22.5 LUFS effective), true peak -14.4 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `cab504664f8e3fe1b5430496d2f8e8a6bdaf82b46d2dc44f0c69644037c32375`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn4.ogg`
@@ -89,7 +89,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.75: -22.5 LUFS effective), true peak -14.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `31453c049320afbaaea036fcf2fc4a4c713665270b4313c17bb7c0477b4c63bb`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn5.ogg`
@@ -103,7 +103,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.75: -22.5 LUFS effective), true peak -14.9 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `7a4c7ecbf7fa08466b6a0392b6664bedcf43d6bdd58354f3d58d6fb755cf5233`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyWarn6.ogg`
@@ -117,7 +117,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.75: -22.4 LUFS effective), true peak -15.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `fc6f7b89162ac8801070ba0f5fa18d4279c4cc331abc12acca7783303dde64cb`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessTestimonyFire.ogg`
@@ -131,7 +131,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -19.0 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `dde5928273ccd42e0cd12580f58d715dc6b9300a4fbe556d5f718bdd68f0f0eb`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessShardHit.ogg`
@@ -145,7 +145,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.7: -23.1 LUFS effective), true peak -6.8 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `5883eb495a40634a4ccf63084d5f559dd8909b86dd9f069524fd59e18545a1ec`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessSeal.ogg`
@@ -159,7 +159,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `c1cf60d873d40886b2d8dd4db9039dc3c029651c2fff726c06441674648ef3ce`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessThrowWarn.ogg`
@@ -173,7 +173,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -5.3 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `db62f91b3949225bb713c90cc692fef9ff2485b8788234e761359322784d0d35`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessThrowFire.ogg`
@@ -187,7 +187,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.7 LUFS (played at volume 0.95: -12.1 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `95b3d800dab2e1768f2e7d82f0b74c38164b23ba4e89865d307674be979de5fe`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomWarn.ogg`
@@ -201,7 +201,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.9 LUFS (played at volume 0.9: -12.8 LUFS effective), true peak -1.1 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `b177b30876e52bec856fc3b53cadc023f8696821a28e382cc77de775351326e6`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire1.ogg`
@@ -215,7 +215,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -19.0 LUFS effective), true peak -2.7 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `dd8d631572f3eaab47da2a884a0444a3fb4c463ba9677ab9c078df1d5637d5f1`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire2.ogg`
@@ -229,7 +229,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.0 LUFS (played at volume 0.8: -17.9 LUFS effective), true peak -3.3 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `199226ba35e19d19a0b80f29c3d6135baf0e88d5715de27cd2248f72fe000142`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire3.ogg`
@@ -243,7 +243,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -15.0 LUFS (played at volume 0.8: -16.9 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `8b7d16431a8b48f039565e79e54f44528affa6dab117f46b29b69c62387cbd51`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomFire4.ogg`
@@ -257,7 +257,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -3.2 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `01d6d29cd5644f4203f57fe920362985c3f3b40db5c6484b53b222452245b1c6`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomMiss.ogg`
@@ -271,7 +271,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.9 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `16d4813eda7ce9ec7530484db5ae92be92b7ab5961d5f84b0c60af4d8ca160a7`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessReturnWarn.ogg`
@@ -285,7 +285,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -7.6 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `df953bf8467cf9e5d5b59381d010f8ba1dec827436cc4ecc488af0abbcfe30d8`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessReturnFire.ogg`
@@ -299,7 +299,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `c2692ea0658096ff87e8ff2e0944e81005d7d17a33cd9d46af5e670669e81959`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessSpinLoop.wav`
@@ -313,7 +313,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -15.0 LUFS (played at volume 0.5: -21.0 LUFS effective), true peak -4.9 dBFS; built circularly, so the file repeats sample-exactly
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `66e682f2b5d0425d034c4d75e83eeb8061dc0404c1850d7d225384cb9ff477c0`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/WitnessAxiomLoop.wav`
@@ -327,7 +327,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -15.0 LUFS (played at volume 0.55: -20.2 LUFS effective), true peak -6.1 dBFS; built circularly, so the file repeats sample-exactly
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `1ae82f4d13fdb8e4036fee10550c18ec9d8983efe9c6b7c4f5a7a84bced3e2bb`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictStakeWarn.ogg`
@@ -341,7 +341,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -13.1 LUFS (played at volume 0.85: -14.5 LUFS effective), true peak -2.2 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `b8d5f2267ff6595d815b630d6dc6ea122c7bcf718697cfb63090096f1d67a58c`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictStakeFire.ogg`
@@ -355,7 +355,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.9 LUFS (played at volume 0.95: -12.3 LUFS effective), true peak -1.1 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `a5dc4ec6fe593b157cc11d681b26621be98196231d522b1bc99316fce365e28c`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteWarn.ogg`
@@ -369,7 +369,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -5.8 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `02e982ef2cf397dd198e6624708046d58eb538adcd1032a1b06d32bc3a5e17a1`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteFire.ogg`
@@ -383,7 +383,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.95: -11.9 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `d8b10955ba9fb62fe13e23a9f3b2961de41f49d1d6baef132a9ca281470b9ed8`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteMiss.ogg`
@@ -397,7 +397,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -8.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `3ccf52add00fee3593d09fcffb691470d2afcb3725a639370361440d838d46f9`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictWithdraw.ogg`
@@ -411,7 +411,7 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -20.1 LUFS (played at volume 0.7: -23.2 LUFS effective), true peak -17.0 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `738f5228ba0f05fa6b24f0eafb571a5d9b8e74c696d8000b038c37db5346151a`
 
 ### Pale Meridian weapon cues — 2026-10-03
