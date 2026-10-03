@@ -1,6 +1,6 @@
 {
-  "scope": "Scarlet loudness, plan A: Graceful Ordeal's streamed voice follows tModLoader's music-slider curve (31 v - 36.94 dB, normalised at v = 1), and the Raid's and the rewards' cues are lifted once per group or role against the score at the owner's sliders: 42 files re-rendered from their owner-picked takes with the lift baked in, runtime offsets for the windups (-1.53 dB) and the finales (-0.45 dB). Client presentation and assets only; gameplay, timings and protocol unchanged",
-  "target_build": "0.3.81 / protocol79 (feat/scarlet-loudness on main 0.3.80 after #113; #112 and a Doll PR hold 0.3.79)",
+  "scope": "Scarlet loudness: Graceful Ordeal's streamed voice follows tModLoader's music-slider curve (31 v - 36.94 dB, normalised at v = 1); the Raid's cue groups are lifted once each against the score at the owner's sliders (16 files re-rendered from their owner-picked takes with the lift baked in); the rewards' in-play roles (tolls, one-shots, windups, cascade parts) share one runtime offset of -3.5 dB, the finales and the Cadence -0.45 dB, and the reliquary show's +3.83 dB lift is baked into its file; every reward cue another player causes plays 8 dB under its owner's level. Plan A's first reward staging (in-play files lifted 9.4-10 dB) was withdrawn before shipping after a review's four-player dense mix (review_revision). Client presentation and assets only; gameplay, timings and protocol unchanged",
+  "target_build": "0.3.81 / protocol79 (feat/scarlet-loudness on main after #113 and #114; #112 holds 0.3.79)",
   "owner_direction": "2026-10-03, after playing main 0.3.78: 'あと全体的に効果音小さくない？気のせい？'. The lead (Claude, main session) chose plan A from the measurement below; this change implements it",
   "measurement": {
     "meter": "ITU-R BS.1770-4 K-weighting with the standard's 48 kHz coefficients, run along time, both channels summed; cue = maximum 400 ms momentary loudness padded 0.2 s before and 0.5 s after, 10 ms steps; score = 3 s short-term loudness, 100 ms steps",
@@ -102,6 +102,144 @@
         "Finale": -0.45,
         "Show": 0
       }
+    },
+    "status": "the score curve and the Raid lifts ship as planned; the reward staging below was the first draft and is superseded by review_revision"
+  },
+  "review_revision": {
+    "finding": "a review rendered a four-player fight at the owner's sliders and found plan A's reward staging (tolls and one-shots +9.37 dB, cascade parts +10.02, windups +6.97 against 0.3.78, with other players' windups, releases and finales at full level, including CenserSwing, CenserPour and CenserGrandPour) burying ScarletSpreadSummon and ScarletCrossflowCharge: the weapons together sat about 6 dB over the score where 0.3.80's sat about 10 dB under it; the local OrganShot stream matched SpreadSummon in its 2 kHz band and other players' scythe, quill and censer cues together matched CrossflowCharge in its 315 Hz band",
+    "verified": "reproduced with an independent renderer (tools/tests/test_scarlet_levels.py dense_mix) to within 0.01 dB of the review",
+    "change": {
+      "reward_role_decibels": {
+        "Build": -3.5,
+        "Shot": -3.5,
+        "Windup": -3.5,
+        "Release": -3.5,
+        "Finale": -0.45,
+        "Show": 0.0
+      },
+      "in_play_offset": "one offset for tolls, one-shots, windups and cascade parts (ScarletRewardCues.InPlayDecibels), 5 dB over 0.3.78; it keeps their auditioned balance",
+      "files_returned_to_auditioned_bytes": [
+        "Toll0",
+        "Toll1",
+        "Toll2",
+        "Toll3",
+        "Toll4",
+        "Toll5",
+        "Toll6",
+        "Toll7",
+        "ScytheSwingHigh",
+        "ScytheSwingLow",
+        "ScytheWhip",
+        "OrganShot1",
+        "OrganShot2",
+        "OrganShot3",
+        "OrganShot4",
+        "BatonStroke",
+        "CenserSummon",
+        "CenserSwing",
+        "QuillThrow",
+        "QuillStick",
+        "StaffCut",
+        "HandSlam",
+        "InkIgnite",
+        "CenserPour",
+        "InkBlaze"
+      ],
+      "files_still_lifted": "16 Raid files and ReliquaryOpen (+3.83 dB, no limiting)",
+      "remote_rule": "CrimsonRewardRules.RemoteCueDecibels (-8 dB, formerly RemoteShotDecibels) now applies to every reward cue another player causes, in ScarletRewardAudio.Emit; 0.3.78 applied it only to per-shot cues",
+      "why_minus_3_5": "the dense mix at -3.0 dB already met the floors (SpreadSummon 3.25 dB against 0.3.80's 3.16 in the censers4 scenario), -3.5 keeps about 0.4 dB of margin on that cue; -4.0 would give 0.9"
+    },
+    "dense_mix": {
+      "method": "Graceful Ordeal song bars 19-23 at the owner's sliders (0.39 x the music curve), the local player's Canticle Organ (owner 0) and three other players (owners 1-3, positional 0.9) at their real rates: organ shots every UseTicks(Ranged) = 14 ticks through OrganShot1-4, scythe strokes every StrokeTicks = 18 alternating High/Low, a quill every UseTicks(Rogue) = 18 sticking 6 ticks later, and n censers with an apex every ApexInterval / n ticks cued through the owner's budget (swing 14, pour 7, grand 20 ticks, brace before a heard grand); ScarletRewardAudio's role offsets, remote offset and voice pools (the owner's Voices replace-oldest; other players one voice of a per-shot file replace-oldest, one owner's Voices of any other file ignore-new). Each warning is laid at ten places; per place, the 400 ms where its K-weighted energy peaks, the best 1/3-octave band (40 Hz-16 kHz, 4th-order Butterworth, L+R) of the warning against the score and the weapons together; the median of the ten",
+      "scenarios": {
+        "mixed2": "owner 2 keeps 2 censers",
+        "mixed4": "owner 2 keeps 4 censers",
+        "censers2": "owners 1-3 each keep 2 censers",
+        "censers4": "owners 1-3 each keep 4 censers"
+      },
+      "floors": "every warning at least 3.0 dB and no less than 0.3.80 in every scenario",
+      "results_median_best_band_db": {
+        "0.3.80": {
+          "mixed2": {
+            "ScarletForetell": 0.13,
+            "ScarletStackSummon": 5.68,
+            "ScarletSpreadSummon": 3.33,
+            "ScarletCrossflowCharge": 0.29
+          },
+          "mixed4": {
+            "ScarletForetell": 0.03,
+            "ScarletStackSummon": 4.45,
+            "ScarletSpreadSummon": 3.31,
+            "ScarletCrossflowCharge": 0.14
+          },
+          "censers2": {
+            "ScarletForetell": -0.49,
+            "ScarletStackSummon": 4.18,
+            "ScarletSpreadSummon": 3.17,
+            "ScarletCrossflowCharge": -0.15
+          },
+          "censers4": {
+            "ScarletForetell": -0.51,
+            "ScarletStackSummon": 3.3,
+            "ScarletSpreadSummon": 3.15,
+            "ScarletCrossflowCharge": -0.3
+          }
+        },
+        "plan_a_first_staging": {
+          "mixed2": {
+            "ScarletForetell": 6.42,
+            "ScarletStackSummon": 3.89,
+            "ScarletSpreadSummon": -0.7,
+            "ScarletCrossflowCharge": -0.71
+          },
+          "mixed4": {
+            "ScarletForetell": 5.81,
+            "ScarletStackSummon": 2.64,
+            "ScarletSpreadSummon": -0.7,
+            "ScarletCrossflowCharge": -1.52
+          },
+          "censers2": {
+            "ScarletForetell": 3.28,
+            "ScarletStackSummon": 1.98,
+            "ScarletSpreadSummon": -1.1,
+            "ScarletCrossflowCharge": -2.12
+          },
+          "censers4": {
+            "ScarletForetell": 2.92,
+            "ScarletStackSummon": 1.43,
+            "ScarletSpreadSummon": -1.09,
+            "ScarletCrossflowCharge": -2.47
+          }
+        },
+        "shipped": {
+          "mixed2": {
+            "ScarletForetell": 11.86,
+            "ScarletStackSummon": 9.1,
+            "ScarletSpreadSummon": 3.85,
+            "ScarletCrossflowCharge": 4.1
+          },
+          "mixed4": {
+            "ScarletForetell": 11.76,
+            "ScarletStackSummon": 8.56,
+            "ScarletSpreadSummon": 3.8,
+            "ScarletCrossflowCharge": 3.78
+          },
+          "censers2": {
+            "ScarletForetell": 10.88,
+            "ScarletStackSummon": 8.15,
+            "ScarletSpreadSummon": 3.75,
+            "ScarletCrossflowCharge": 4.07
+          },
+          "censers4": {
+            "ScarletForetell": 10.75,
+            "ScarletStackSummon": 7.3,
+            "ScarletSpreadSummon": 3.6,
+            "ScarletCrossflowCharge": 3.56
+          }
+        }
+      },
+      "test": "tools/tests/test_scarlet_levels.py test_a_four_player_fight_leaves_every_warning_a_clear_band (local audio packages)",
+      "limits": "a model, not a capture: fixed positions (0.9), no Raid cue but the measured warning, one weapon per player plus censers"
     }
   },
   "lift_tool": {
@@ -119,7 +257,7 @@
       "max_gain_reduction_db": 3.0
     },
     "gain_choice": "the smallest gain bringing the decoded file within 0.1 dB of its auditioned BS.1770 level plus the lift with at most 3 dB of gain reduction; where limiting eats the gain first, the smallest gain reaching the highest loudness under the cap",
-    "determinism": "two runs byte-identical for all 42 files; the committed files equal the second run"
+    "determinism": "two runs byte-identical for all 42 files of the first staging; the 17 files that ship lifted (16 Raid, ReliquaryOpen) are the second run's output"
   },
   "files": {
     "ScarletForetell": {
@@ -573,561 +711,481 @@
     "Toll0": {
       "role": "Build",
       "file_before_lufs": -22.25,
-      "file_after_lufs": -21.39,
+      "file_after_lufs": -22.25,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -21.39,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.75,
       "vs_score_owner_sliders_before_db": -22.9,
-      "vs_score_owner_sliders_after_db": -7.07,
-      "true_peak_after_dbtp": -10.71,
+      "vs_score_owner_sliders_after_db": -11.43,
+      "true_peak_after_dbtp": -11.7,
       "legacy_recipe_meter_before_after": [
         -19.0,
-        -18.13
+        -19.0
       ],
       "lift": {
-        "take": "Toll0_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.863,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.007,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "e83b10b0bd10e151cfecc6d3cd9a92c15f2adbbcce66f456dd448535249322a2",
-        "sha256": "0a0c8e41e58823bc5a382e01dc2290726efa37877dedc627cdc6f9873bd1fcb0",
-        "ogg_serial": 3775391521
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "e83b10b0bd10e151cfecc6d3cd9a92c15f2adbbcce66f456dd448535249322a2",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "0a0c8e41e58823bc5a382e01dc2290726efa37877dedc627cdc6f9873bd1fcb0"
+        }
       }
     },
     "Toll1": {
       "role": "Build",
       "file_before_lufs": -22.16,
-      "file_after_lufs": -21.27,
+      "file_after_lufs": -22.16,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -21.27,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.66,
       "vs_score_owner_sliders_before_db": -22.81,
-      "vs_score_owner_sliders_after_db": -6.95,
-      "true_peak_after_dbtp": -11.08,
+      "vs_score_owner_sliders_after_db": -11.34,
+      "true_peak_after_dbtp": -11.88,
       "legacy_recipe_meter_before_after": [
         -19.03,
-        -18.14
+        -19.03
       ],
       "lift": {
-        "take": "Toll1_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.891,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "7cff1ae62d514cd5d83ddfd73ceda3e153cc77626f2206a45ebce858c6c0a1f4",
-        "sha256": "63d5e599558773c7ebac131e0fbf11548bcde134b013bf5ad886984551bb9be2",
-        "ogg_serial": 2003258080
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "7cff1ae62d514cd5d83ddfd73ceda3e153cc77626f2206a45ebce858c6c0a1f4",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "63d5e599558773c7ebac131e0fbf11548bcde134b013bf5ad886984551bb9be2"
+        }
       }
     },
     "Toll2": {
       "role": "Build",
       "file_before_lufs": -22.3,
-      "file_after_lufs": -21.44,
+      "file_after_lufs": -22.3,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -21.44,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.8,
       "vs_score_owner_sliders_before_db": -22.95,
-      "vs_score_owner_sliders_after_db": -7.12,
-      "true_peak_after_dbtp": -11.52,
+      "vs_score_owner_sliders_after_db": -11.48,
+      "true_peak_after_dbtp": -12.38,
       "legacy_recipe_meter_before_after": [
         -18.98,
-        -18.13
+        -18.98
       ],
       "lift": {
-        "take": "Toll2_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.853,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.017,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "269eb14fb46516128ba657039db8e059f3f63d908950c5acaf730f8254a4f1b0",
-        "sha256": "f1a1399eeed1fe0774b0ef552e07d1939d95d3e08607575da7b2c554397fd9aa",
-        "ogg_serial": 373765754
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "269eb14fb46516128ba657039db8e059f3f63d908950c5acaf730f8254a4f1b0",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "f1a1399eeed1fe0774b0ef552e07d1939d95d3e08607575da7b2c554397fd9aa"
+        }
       }
     },
     "Toll3": {
       "role": "Build",
       "file_before_lufs": -21.68,
-      "file_after_lufs": -20.81,
+      "file_after_lufs": -21.68,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -20.81,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.18,
       "vs_score_owner_sliders_before_db": -22.33,
-      "vs_score_owner_sliders_after_db": -6.49,
-      "true_peak_after_dbtp": -11.76,
+      "vs_score_owner_sliders_after_db": -10.86,
+      "true_peak_after_dbtp": -12.5,
       "legacy_recipe_meter_before_after": [
         -18.95,
-        -18.08
+        -18.95
       ],
       "lift": {
-        "take": "Toll3_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.874,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "16d38edb3c0ca5e674f5923b2aa3251aa54b5f7e318d37745ebd956c00c2786e",
-        "sha256": "9b24e1f90e0b3dc2bd2f3e52d3823e7690f8a514415942523d158f987eb60c0d",
-        "ogg_serial": 4235546140
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "16d38edb3c0ca5e674f5923b2aa3251aa54b5f7e318d37745ebd956c00c2786e",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "9b24e1f90e0b3dc2bd2f3e52d3823e7690f8a514415942523d158f987eb60c0d"
+        }
       }
     },
     "Toll4": {
       "role": "Build",
       "file_before_lufs": -21.05,
-      "file_after_lufs": -20.18,
+      "file_after_lufs": -21.05,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -20.18,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -24.55,
       "vs_score_owner_sliders_before_db": -21.7,
-      "vs_score_owner_sliders_after_db": -5.86,
-      "true_peak_after_dbtp": -10.76,
+      "vs_score_owner_sliders_after_db": -10.23,
+      "true_peak_after_dbtp": -11.48,
       "legacy_recipe_meter_before_after": [
         -18.96,
-        -18.08
+        -18.96
       ],
       "lift": {
-        "take": "Toll4_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.879,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "ff3cb6a1ce5b13cbe4dd7b14b7931c23cd4863becef9157df4ca022f13b3e737",
-        "sha256": "87171c13b38daadbb68447fe9aaa0a123f7d8c78a4284efc41ef3f603f50399e",
-        "ogg_serial": 2115248007
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "ff3cb6a1ce5b13cbe4dd7b14b7931c23cd4863becef9157df4ca022f13b3e737",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "87171c13b38daadbb68447fe9aaa0a123f7d8c78a4284efc41ef3f603f50399e"
+        }
       }
     },
     "Toll5": {
       "role": "Build",
       "file_before_lufs": -21.84,
-      "file_after_lufs": -20.96,
+      "file_after_lufs": -21.84,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -20.96,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.34,
       "vs_score_owner_sliders_before_db": -22.49,
-      "vs_score_owner_sliders_after_db": -6.64,
-      "true_peak_after_dbtp": -12.41,
+      "vs_score_owner_sliders_after_db": -11.02,
+      "true_peak_after_dbtp": -13.03,
       "legacy_recipe_meter_before_after": [
         -18.94,
-        -18.07
+        -18.94
       ],
       "lift": {
-        "take": "Toll5_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.873,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "45686bedf1120009f58aa72293b37a6aecafdaa948fe633bce2c09859ef6cf89",
-        "sha256": "da9664469e78e34beb711e10cb158365afb4ec2074af7346370d1ffd2a8618d9",
-        "ogg_serial": 955369977
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "45686bedf1120009f58aa72293b37a6aecafdaa948fe633bce2c09859ef6cf89",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "da9664469e78e34beb711e10cb158365afb4ec2074af7346370d1ffd2a8618d9"
+        }
       }
     },
     "Toll6": {
       "role": "Build",
       "file_before_lufs": -21.65,
-      "file_after_lufs": -20.79,
+      "file_after_lufs": -21.65,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -20.79,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.15,
       "vs_score_owner_sliders_before_db": -22.3,
-      "vs_score_owner_sliders_after_db": -6.47,
-      "true_peak_after_dbtp": -12.1,
+      "vs_score_owner_sliders_after_db": -10.83,
+      "true_peak_after_dbtp": -13.36,
       "legacy_recipe_meter_before_after": [
         -18.95,
-        -18.08
+        -18.95
       ],
       "lift": {
-        "take": "Toll6_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.868,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.002,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "8105abc4370d9b0d59724349c46b788fffef1b8cf377f649b63c5cd18fc4aef5",
-        "sha256": "9081e61a4979a7e9233693a502a6d6f8dab4aafe7e05ae974108b0ed37a13074",
-        "ogg_serial": 3549577214
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "8105abc4370d9b0d59724349c46b788fffef1b8cf377f649b63c5cd18fc4aef5",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "9081e61a4979a7e9233693a502a6d6f8dab4aafe7e05ae974108b0ed37a13074"
+        }
       }
     },
     "Toll7": {
       "role": "Build",
       "file_before_lufs": -21.6,
-      "file_after_lufs": -20.73,
+      "file_after_lufs": -21.6,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -20.73,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -25.1,
       "vs_score_owner_sliders_before_db": -22.25,
-      "vs_score_owner_sliders_after_db": -6.41,
-      "true_peak_after_dbtp": -11.67,
+      "vs_score_owner_sliders_after_db": -10.78,
+      "true_peak_after_dbtp": -12.62,
       "legacy_recipe_meter_before_after": [
         -18.94,
-        -18.08
+        -18.94
       ],
       "lift": {
-        "take": "Toll7_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.866,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.004,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "41725cb948a23ab6663d89039486d3a405ab17e923f5cd265fafb49833b38ad3",
-        "sha256": "eaedeefd4bab7a28ae856fe03d9386fde832d1bfe00fb27386186070cf7a81cd",
-        "ogg_serial": 2958261634
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "41725cb948a23ab6663d89039486d3a405ab17e923f5cd265fafb49833b38ad3",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "eaedeefd4bab7a28ae856fe03d9386fde832d1bfe00fb27386186070cf7a81cd"
+        }
       }
     },
     "ScytheSwingHigh": {
       "role": "Shot",
       "file_before_lufs": -20.27,
-      "file_after_lufs": -19.37,
+      "file_after_lufs": -20.27,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -19.37,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -23.77,
       "vs_score_owner_sliders_before_db": -20.92,
-      "vs_score_owner_sliders_after_db": -5.05,
-      "true_peak_after_dbtp": -5.27,
+      "vs_score_owner_sliders_after_db": -9.45,
+      "true_peak_after_dbtp": -6.25,
       "legacy_recipe_meter_before_after": [
         -17.0,
-        -16.1
+        -17.0
       ],
       "lift": {
-        "take": "ScytheSwingHigh_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.898,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "fc6e1f940fce33a87765a08c249a2df59a75c7f1bb374b30a790388b3e476b7d",
-        "sha256": "fe1fba414d207376bef6dc380d8fdbc26aea734dd5058fb3cd21f203b5329105",
-        "ogg_serial": 4079876052
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "fc6e1f940fce33a87765a08c249a2df59a75c7f1bb374b30a790388b3e476b7d",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "fe1fba414d207376bef6dc380d8fdbc26aea734dd5058fb3cd21f203b5329105"
+        }
       }
     },
     "ScytheSwingLow": {
       "role": "Shot",
       "file_before_lufs": -20.35,
-      "file_after_lufs": -19.5,
+      "file_after_lufs": -20.35,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -19.5,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -23.85,
       "vs_score_owner_sliders_before_db": -21.0,
-      "vs_score_owner_sliders_after_db": -5.18,
-      "true_peak_after_dbtp": -5.72,
+      "vs_score_owner_sliders_after_db": -9.53,
+      "true_peak_after_dbtp": -6.58,
       "legacy_recipe_meter_before_after": [
         -16.98,
-        -16.13
+        -16.98
       ],
       "lift": {
-        "take": "ScytheSwingLow_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.848,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.022,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "71265c94663156c2dfc42d27d54b4925b21efe57b790c505a2d8388f6940fe20",
-        "sha256": "cfcff92c8d2b6c62ba5fa8ad837102bde6eb4394874c43d0769fa7cfb1ee78e3",
-        "ogg_serial": 1994124565
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "71265c94663156c2dfc42d27d54b4925b21efe57b790c505a2d8388f6940fe20",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "cfcff92c8d2b6c62ba5fa8ad837102bde6eb4394874c43d0769fa7cfb1ee78e3"
+        }
       }
     },
     "ScytheWhip": {
       "role": "Shot",
       "file_before_lufs": -18.87,
-      "file_after_lufs": -17.99,
+      "file_after_lufs": -18.87,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -17.99,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -22.37,
       "vs_score_owner_sliders_before_db": -19.52,
-      "vs_score_owner_sliders_after_db": -3.67,
-      "true_peak_after_dbtp": -3.11,
+      "vs_score_owner_sliders_after_db": -8.05,
+      "true_peak_after_dbtp": -3.95,
       "legacy_recipe_meter_before_after": [
         -17.21,
-        -16.33
+        -17.21
       ],
       "lift": {
-        "take": "ScytheWhip_B",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.884,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "2b516b308cc70d5ec6dc4f626de3e5f105f35f17eed82d740853d08a6376553a",
-        "sha256": "17ee3a0bcfaa9d5de9a19fc7fa14ac11b9d6127cb331d06592426073bb088d8f",
-        "ogg_serial": 4211450904
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "2b516b308cc70d5ec6dc4f626de3e5f105f35f17eed82d740853d08a6376553a",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "17ee3a0bcfaa9d5de9a19fc7fa14ac11b9d6127cb331d06592426073bb088d8f"
+        }
       }
     },
     "OrganShot1": {
       "role": "Shot",
       "file_before_lufs": -17.25,
-      "file_after_lufs": -16.35,
+      "file_after_lufs": -17.25,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.35,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.75,
       "vs_score_owner_sliders_before_db": -17.9,
-      "vs_score_owner_sliders_after_db": -2.03,
-      "true_peak_after_dbtp": -1.69,
+      "vs_score_owner_sliders_after_db": -6.43,
+      "true_peak_after_dbtp": -2.09,
       "legacy_recipe_meter_before_after": [
         -17.13,
-        -16.23
+        -17.13
       ],
       "lift": {
-        "take": "OrganShot1_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.894,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "740ea327452078680eb7bc1740e49c2c71d98a30841b981c92eb68ef1e1fce4b",
-        "sha256": "5042b5b16ce4e16b282a1899aa24f651678463f27e2bdd7c493dce553f753906",
-        "ogg_serial": 4125514730
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "740ea327452078680eb7bc1740e49c2c71d98a30841b981c92eb68ef1e1fce4b",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "5042b5b16ce4e16b282a1899aa24f651678463f27e2bdd7c493dce553f753906"
+        }
       }
     },
     "OrganShot2": {
       "role": "Shot",
       "file_before_lufs": -17.51,
-      "file_after_lufs": -16.55,
+      "file_after_lufs": -17.51,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.55,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -21.01,
       "vs_score_owner_sliders_before_db": -18.16,
-      "vs_score_owner_sliders_after_db": -2.23,
-      "true_peak_after_dbtp": -1.27,
+      "vs_score_owner_sliders_after_db": -6.69,
+      "true_peak_after_dbtp": -2.15,
       "legacy_recipe_meter_before_after": [
         -17.11,
-        -16.16
+        -17.11
       ],
       "lift": {
-        "take": "OrganShot2_A",
-        "planned_db": 0.87,
-        "gain_db": 0.972,
-        "achieved_db": 0.964,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "0f3d2435aa77fe534dc505111c509faf43a2517d251345b6defee489008c60eb",
-        "sha256": "f333bf5ffdd1f8fe24ada9bd4ba8b255cb28d7d88b255f5963121fccd07ec485",
-        "ogg_serial": 2207032191
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "0f3d2435aa77fe534dc505111c509faf43a2517d251345b6defee489008c60eb",
+        "withdrawn_first_staging": {
+          "gain_db": 0.972,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "f333bf5ffdd1f8fe24ada9bd4ba8b255cb28d7d88b255f5963121fccd07ec485"
+        }
       }
     },
     "OrganShot3": {
       "role": "Shot",
       "file_before_lufs": -17.05,
-      "file_after_lufs": -16.16,
+      "file_after_lufs": -17.05,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.16,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.55,
       "vs_score_owner_sliders_before_db": -17.7,
-      "vs_score_owner_sliders_after_db": -1.84,
-      "true_peak_after_dbtp": -1.07,
+      "vs_score_owner_sliders_after_db": -6.23,
+      "true_peak_after_dbtp": -1.67,
       "legacy_recipe_meter_before_after": [
         -17.1,
-        -16.21
+        -17.1
       ],
       "lift": {
-        "take": "OrganShot3_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.893,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "b57a977eaa19bcab68e9a534b545bcbcf024670f11ff4a1262b157253f27a5f0",
-        "sha256": "2646f11a9c02be0b220d35eaf3cada0f39d0272d2352d68071fa27fbfa1961eb",
-        "ogg_serial": 2275681114
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "b57a977eaa19bcab68e9a534b545bcbcf024670f11ff4a1262b157253f27a5f0",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "2646f11a9c02be0b220d35eaf3cada0f39d0272d2352d68071fa27fbfa1961eb"
+        }
       }
     },
     "OrganShot4": {
       "role": "Shot",
       "file_before_lufs": -16.98,
-      "file_after_lufs": -16.17,
+      "file_after_lufs": -16.98,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.17,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.48,
       "vs_score_owner_sliders_before_db": -17.63,
-      "vs_score_owner_sliders_after_db": -1.85,
-      "true_peak_after_dbtp": -1.36,
+      "vs_score_owner_sliders_after_db": -6.16,
+      "true_peak_after_dbtp": -1.51,
       "legacy_recipe_meter_before_after": [
         -17.09,
-        -16.28
+        -17.09
       ],
       "lift": {
-        "take": "OrganShot4_A",
-        "planned_db": 0.87,
-        "gain_db": 2.62,
-        "achieved_db": 0.812,
-        "limiter_gain_reduction_db": 2.29,
-        "limiter_ceiling_dbtp": -1.3,
-        "shortfall_db": 0.058,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "83de85bbb0ada623accc0c1333634e8e2f8857025cd919044edd3859c85dbcf1",
-        "sha256": "af0151996b72198884d188f76cd062fcef1733e63f9b9f8b4ad787096a122c2d",
-        "ogg_serial": 3244672323
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "83de85bbb0ada623accc0c1333634e8e2f8857025cd919044edd3859c85dbcf1",
+        "withdrawn_first_staging": {
+          "gain_db": 2.62,
+          "limiter_gain_reduction_db": 2.29,
+          "sha256": "af0151996b72198884d188f76cd062fcef1733e63f9b9f8b4ad787096a122c2d"
+        }
       }
     },
     "BatonStroke": {
       "role": "Shot",
       "file_before_lufs": -20.35,
-      "file_after_lufs": -19.5,
+      "file_after_lufs": -20.35,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -19.5,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -23.85,
       "vs_score_owner_sliders_before_db": -21.0,
-      "vs_score_owner_sliders_after_db": -5.18,
-      "true_peak_after_dbtp": -6.99,
+      "vs_score_owner_sliders_after_db": -9.53,
+      "true_peak_after_dbtp": -7.7,
       "legacy_recipe_meter_before_after": [
         -17.01,
-        -16.16
+        -17.01
       ],
       "lift": {
-        "take": "BatonStroke_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.855,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.015,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "474532cb67d96129dea5e13f18ecc4c9d38e9fbd7f5b869fd87a6d4cb8517717",
-        "sha256": "ed4e7aade600612f3eb356a1d59040efb03bdf09a8643d874c1dc946e5deba1b",
-        "ogg_serial": 4204751012
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "474532cb67d96129dea5e13f18ecc4c9d38e9fbd7f5b869fd87a6d4cb8517717",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "ed4e7aade600612f3eb356a1d59040efb03bdf09a8643d874c1dc946e5deba1b"
+        }
       }
     },
     "CenserSummon": {
       "role": "Shot",
       "file_before_lufs": -19.36,
-      "file_after_lufs": -18.52,
+      "file_after_lufs": -19.36,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -18.52,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -22.86,
       "vs_score_owner_sliders_before_db": -20.01,
-      "vs_score_owner_sliders_after_db": -4.2,
-      "true_peak_after_dbtp": -7.75,
+      "vs_score_owner_sliders_after_db": -8.54,
+      "true_peak_after_dbtp": -9.02,
       "legacy_recipe_meter_before_after": [
         -17.08,
-        -16.24
+        -17.08
       ],
       "lift": {
-        "take": "CenserSummon_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.838,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.032,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "10453c7af7b467d05463e4a38a720eaa1aab924ca7b7ee9a5ce0698849c61e73",
-        "sha256": "9143d5f4bacdeaaba2be94350e474cc57f6d6e7bc4986f05ceb1d6bd36330c1f",
-        "ogg_serial": 799157482
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "10453c7af7b467d05463e4a38a720eaa1aab924ca7b7ee9a5ce0698849c61e73",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "9143d5f4bacdeaaba2be94350e474cc57f6d6e7bc4986f05ceb1d6bd36330c1f"
+        }
       }
     },
     "CenserSwing": {
       "role": "Shot",
       "file_before_lufs": -16.87,
-      "file_after_lufs": -16.02,
+      "file_after_lufs": -16.87,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.02,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.37,
       "vs_score_owner_sliders_before_db": -17.52,
-      "vs_score_owner_sliders_after_db": -1.7,
-      "true_peak_after_dbtp": -3.1,
+      "vs_score_owner_sliders_after_db": -6.05,
+      "true_peak_after_dbtp": -4.1,
       "legacy_recipe_meter_before_after": [
         -15.1,
-        -14.23
+        -15.1
       ],
       "lift": {
-        "take": "CenserSwing_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.852,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.018,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "0a5c5228beadc54cdc89c1f59bc1fb99c7f6bf976a77ef758f42bb76aac74cf4",
-        "sha256": "566cbcdcdc54e49d1b4e16222a86c4ee9e94b4f8692a372e747760bd97e5de36",
-        "ogg_serial": 1652979010
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "0a5c5228beadc54cdc89c1f59bc1fb99c7f6bf976a77ef758f42bb76aac74cf4",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "566cbcdcdc54e49d1b4e16222a86c4ee9e94b4f8692a372e747760bd97e5de36"
+        }
       }
     },
     "QuillThrow": {
       "role": "Shot",
       "file_before_lufs": -19.97,
-      "file_after_lufs": -19.07,
+      "file_after_lufs": -19.97,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -19.07,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -23.47,
       "vs_score_owner_sliders_before_db": -20.62,
-      "vs_score_owner_sliders_after_db": -4.75,
-      "true_peak_after_dbtp": -4.01,
+      "vs_score_owner_sliders_after_db": -9.15,
+      "true_peak_after_dbtp": -5.14,
       "legacy_recipe_meter_before_after": [
         -17.03,
-        -16.14
+        -17.03
       ],
       "lift": {
-        "take": "QuillThrow_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.892,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "a0315f1ce273f0424fb7d91fbdbb2fd58bdd698a3711877290ed0257e4ff9ce9",
-        "sha256": "6ec9771850cc869a044ce6c219f124bf582637acd4bfc73e0a423e05b6983220",
-        "ogg_serial": 1010934432
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "a0315f1ce273f0424fb7d91fbdbb2fd58bdd698a3711877290ed0257e4ff9ce9",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "6ec9771850cc869a044ce6c219f124bf582637acd4bfc73e0a423e05b6983220"
+        }
       }
     },
     "QuillStick": {
       "role": "Shot",
       "file_before_lufs": -17.44,
-      "file_after_lufs": -16.97,
+      "file_after_lufs": -17.44,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.97,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.94,
       "vs_score_owner_sliders_before_db": -18.09,
-      "vs_score_owner_sliders_after_db": -2.65,
-      "true_peak_after_dbtp": -1.21,
+      "vs_score_owner_sliders_after_db": -6.62,
+      "true_peak_after_dbtp": -1.29,
       "legacy_recipe_meter_before_after": [
         -17.32,
-        -16.84
+        -17.32
       ],
       "lift": {
-        "take": "QuillStick_A",
-        "planned_db": 0.87,
-        "gain_db": 0.87,
-        "achieved_db": 0.47,
-        "limiter_gain_reduction_db": 0.412,
-        "limiter_ceiling_dbtp": -1.3,
-        "shortfall_db": 0.4,
-        "capped_by_limiting": true,
-        "auditioned_sha256": "209798be05211c35d1ab10eaa7e0a2ca2c613a11ba38607493006ca68eef49f6",
-        "sha256": "d8365da014af0a864f2f9e35c6e5247e18bb1dda1d13bd5b3879317104af4d29",
-        "ogg_serial": 423090052
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "209798be05211c35d1ab10eaa7e0a2ca2c613a11ba38607493006ca68eef49f6",
+        "withdrawn_first_staging": {
+          "gain_db": 0.87,
+          "limiter_gain_reduction_db": 0.412,
+          "sha256": "d8365da014af0a864f2f9e35c6e5247e18bb1dda1d13bd5b3879317104af4d29"
+        }
       }
     },
     "ScytheWhipBrace": {
@@ -1135,10 +1193,10 @@
       "file_before_lufs": -18.02,
       "file_after_lufs": -18.02,
       "playback_db_before": -8.5,
-      "playback_db_after": -1.53,
-      "played_after_lufs": -19.55,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -21.52,
       "vs_score_owner_sliders_before_db": -18.67,
-      "vs_score_owner_sliders_after_db": -5.23,
+      "vs_score_owner_sliders_after_db": -7.2,
       "true_peak_after_dbtp": -4.89,
       "legacy_recipe_meter_before_after": [
         -15.08,
@@ -1151,10 +1209,10 @@
       "file_before_lufs": -17.57,
       "file_after_lufs": -17.57,
       "playback_db_before": -8.5,
-      "playback_db_after": -1.53,
-      "played_after_lufs": -19.1,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -21.07,
       "vs_score_owner_sliders_before_db": -18.22,
-      "vs_score_owner_sliders_after_db": -4.78,
+      "vs_score_owner_sliders_after_db": -6.75,
       "true_peak_after_dbtp": -3.8,
       "legacy_recipe_meter_before_after": [
         -15.04,
@@ -1167,10 +1225,10 @@
       "file_before_lufs": -16.81,
       "file_after_lufs": -16.81,
       "playback_db_before": -8.5,
-      "playback_db_after": -1.53,
-      "played_after_lufs": -18.34,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.31,
       "vs_score_owner_sliders_before_db": -17.46,
-      "vs_score_owner_sliders_after_db": -4.02,
+      "vs_score_owner_sliders_after_db": -5.99,
       "true_peak_after_dbtp": -6.25,
       "legacy_recipe_meter_before_after": [
         -15.21,
@@ -1183,10 +1241,10 @@
       "file_before_lufs": -18.49,
       "file_after_lufs": -18.49,
       "playback_db_before": -8.5,
-      "playback_db_after": -1.53,
-      "played_after_lufs": -20.02,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -21.99,
       "vs_score_owner_sliders_before_db": -19.14,
-      "vs_score_owner_sliders_after_db": -5.7,
+      "vs_score_owner_sliders_after_db": -7.67,
       "true_peak_after_dbtp": -4.97,
       "legacy_recipe_meter_before_after": [
         -15.1,
@@ -1199,10 +1257,10 @@
       "file_before_lufs": -15.35,
       "file_after_lufs": -15.35,
       "playback_db_before": -8.5,
-      "playback_db_after": -1.53,
-      "played_after_lufs": -16.88,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -18.85,
       "vs_score_owner_sliders_before_db": -16.0,
-      "vs_score_owner_sliders_after_db": -2.56,
+      "vs_score_owner_sliders_after_db": -4.53,
       "true_peak_after_dbtp": -1.88,
       "legacy_recipe_meter_before_after": [
         -15.2,
@@ -1215,10 +1273,10 @@
       "file_before_lufs": -18.55,
       "file_after_lufs": -18.55,
       "playback_db_before": -8.5,
-      "playback_db_after": -1.53,
-      "played_after_lufs": -20.08,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -22.05,
       "vs_score_owner_sliders_before_db": -19.2,
-      "vs_score_owner_sliders_after_db": -5.76,
+      "vs_score_owner_sliders_after_db": -7.73,
       "true_peak_after_dbtp": -1.31,
       "legacy_recipe_meter_before_after": [
         -18.46,
@@ -1229,141 +1287,121 @@
     "StaffCut": {
       "role": "Release",
       "file_before_lufs": -17.11,
-      "file_after_lufs": -15.66,
+      "file_after_lufs": -17.11,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -15.66,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -20.61,
       "vs_score_owner_sliders_before_db": -17.76,
-      "vs_score_owner_sliders_after_db": -1.34,
-      "true_peak_after_dbtp": -1.42,
+      "vs_score_owner_sliders_after_db": -6.29,
+      "true_peak_after_dbtp": -2.63,
       "legacy_recipe_meter_before_after": [
         -15.73,
-        -14.25
+        -15.73
       ],
       "lift": {
-        "take": "StaffCut_A",
-        "planned_db": 1.52,
-        "gain_db": 2.214,
-        "achieved_db": 1.451,
-        "limiter_gain_reduction_db": 1.315,
-        "limiter_ceiling_dbtp": -1.3,
-        "shortfall_db": 0.069,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "245b4b8934d7dbb6ca398dcd42e9df475c76c585208818aa75cc1c65c8e80673",
-        "sha256": "d917e64a204f9a5eab9a8c87d6d778598acd617f9866fec8737907014ad7b639",
-        "ogg_serial": 1520118943
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "245b4b8934d7dbb6ca398dcd42e9df475c76c585208818aa75cc1c65c8e80673",
+        "withdrawn_first_staging": {
+          "gain_db": 2.214,
+          "limiter_gain_reduction_db": 1.315,
+          "sha256": "d917e64a204f9a5eab9a8c87d6d778598acd617f9866fec8737907014ad7b639"
+        }
       }
     },
     "HandSlam": {
       "role": "Release",
       "file_before_lufs": -17.84,
-      "file_after_lufs": -16.91,
+      "file_after_lufs": -17.84,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -16.91,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -21.34,
       "vs_score_owner_sliders_before_db": -18.49,
-      "vs_score_owner_sliders_after_db": -2.59,
-      "true_peak_after_dbtp": -1.02,
+      "vs_score_owner_sliders_after_db": -7.02,
+      "true_peak_after_dbtp": -1.37,
       "legacy_recipe_meter_before_after": [
         -15.66,
-        -14.63
+        -15.66
       ],
       "lift": {
-        "take": "HandSlam_A",
-        "planned_db": 1.52,
-        "gain_db": 2.77,
-        "achieved_db": 0.926,
-        "limiter_gain_reduction_db": 2.47,
-        "limiter_ceiling_dbtp": -1.3,
-        "shortfall_db": 0.594,
-        "capped_by_limiting": true,
-        "auditioned_sha256": "45fda59ebb49104bb18d33c4d6d813b2eccc8c5039af518529e86a5607987119",
-        "sha256": "83404b293f46bb2b431b0e921c7a30e65bd1935d0eae86c343036bbc0a1e0a08",
-        "ogg_serial": 3863310014
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "45fda59ebb49104bb18d33c4d6d813b2eccc8c5039af518529e86a5607987119",
+        "withdrawn_first_staging": {
+          "gain_db": 2.77,
+          "limiter_gain_reduction_db": 2.47,
+          "sha256": "83404b293f46bb2b431b0e921c7a30e65bd1935d0eae86c343036bbc0a1e0a08"
+        }
       }
     },
     "InkIgnite": {
       "role": "Release",
       "file_before_lufs": -19.09,
-      "file_after_lufs": -17.55,
+      "file_after_lufs": -19.09,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -17.55,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -22.59,
       "vs_score_owner_sliders_before_db": -19.74,
-      "vs_score_owner_sliders_after_db": -3.23,
-      "true_peak_after_dbtp": -5.13,
+      "vs_score_owner_sliders_after_db": -8.27,
+      "true_peak_after_dbtp": -6.64,
       "legacy_recipe_meter_before_after": [
         -15.52,
-        -14.0
+        -15.52
       ],
       "lift": {
-        "take": "InkIgnite_A",
-        "planned_db": 1.52,
-        "gain_db": 1.52,
-        "achieved_db": 1.535,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "a9d0408a6a94b40d419b159dd420c9bfc9d711a6680c89673ca1a9851fb8d9b7",
-        "sha256": "7ef97c0d199592efff483847ab8291ffc37554b707ccb3c90ec6f520df661499",
-        "ogg_serial": 846676503
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "a9d0408a6a94b40d419b159dd420c9bfc9d711a6680c89673ca1a9851fb8d9b7",
+        "withdrawn_first_staging": {
+          "gain_db": 1.52,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "7ef97c0d199592efff483847ab8291ffc37554b707ccb3c90ec6f520df661499"
+        }
       }
     },
     "CenserPour": {
       "role": "Release",
       "file_before_lufs": -21.02,
-      "file_after_lufs": -19.48,
+      "file_after_lufs": -21.02,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -19.48,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -24.52,
       "vs_score_owner_sliders_before_db": -21.67,
-      "vs_score_owner_sliders_after_db": -5.16,
-      "true_peak_after_dbtp": -10.29,
+      "vs_score_owner_sliders_after_db": -10.2,
+      "true_peak_after_dbtp": -12.15,
       "legacy_recipe_meter_before_after": [
         -16.12,
-        -14.57
+        -16.12
       ],
       "lift": {
-        "take": "CenserPour_A",
-        "planned_db": 1.52,
-        "gain_db": 1.52,
-        "achieved_db": 1.541,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "067ec15261bcf9f315ba4e03df6bca7a3586d636681eafad14eadf63c7bba92e",
-        "sha256": "71dcbae765a6e2ae6c63fad8aac9fc862ce86832e9161a2d2c26be9711ff5079",
-        "ogg_serial": 3925544376
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "067ec15261bcf9f315ba4e03df6bca7a3586d636681eafad14eadf63c7bba92e",
+        "withdrawn_first_staging": {
+          "gain_db": 1.52,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "71dcbae765a6e2ae6c63fad8aac9fc862ce86832e9161a2d2c26be9711ff5079"
+        }
       }
     },
     "InkBlaze": {
       "role": "Release",
       "file_before_lufs": -15.78,
-      "file_after_lufs": -14.21,
+      "file_after_lufs": -15.78,
       "playback_db_before": -8.5,
-      "playback_db_after": 0.0,
-      "played_after_lufs": -14.21,
+      "playback_db_after": -3.5,
+      "played_after_lufs": -19.28,
       "vs_score_owner_sliders_before_db": -16.43,
-      "vs_score_owner_sliders_after_db": 0.11,
-      "true_peak_after_dbtp": -4.64,
+      "vs_score_owner_sliders_after_db": -4.96,
+      "true_peak_after_dbtp": -5.9,
       "legacy_recipe_meter_before_after": [
         -12.08,
-        -10.5
+        -12.08
       ],
       "lift": {
-        "take": "InkBlaze_A",
-        "planned_db": 1.52,
-        "gain_db": 1.52,
-        "achieved_db": 1.569,
-        "limiter_gain_reduction_db": 0.0,
-        "limiter_ceiling_dbtp": null,
-        "shortfall_db": 0.0,
-        "capped_by_limiting": false,
-        "auditioned_sha256": "80913ef8335d11c400f318e258c6aef9be40b74fd8e448c364b83364a69dacab",
-        "sha256": "797defab8cb2156e8483b5d15e9d9a5c90ec1bedcbfa79ba11b29447d8f7b9bc",
-        "ogg_serial": 970260187
+        "shipped": "none: the auditioned file byte for byte, placed by the in-play offset",
+        "sha256": "80913ef8335d11c400f318e258c6aef9be40b74fd8e448c364b83364a69dacab",
+        "withdrawn_first_staging": {
+          "gain_db": 1.52,
+          "limiter_gain_reduction_db": 0.0,
+          "sha256": "797defab8cb2156e8483b5d15e9d9a5c90ec1bedcbfa79ba11b29447d8f7b9bc"
+        }
       }
     },
     "StaffBarline": {
@@ -1493,11 +1531,7 @@
   },
   "limiter_reductions_db": {
     "ScarletImpact": 2.58,
-    "ScarletSacrifice": 1.878,
-    "OrganShot4": 2.29,
-    "QuillStick": 0.412,
-    "StaffCut": 1.315,
-    "HandSlam": 2.47
+    "ScarletSacrifice": 1.878
   },
   "relations_as_played": {
     "raid impact median vs score at owner sliders": -1.07,
@@ -1506,43 +1540,45 @@
     "raid chorus median vs score at owner sliders": -2.0,
     "raid status median vs score at owner sliders": -3.99,
     "raid charge median vs score at owner sliders": -5.87,
-    "Shot_median_minus_Impact": -2.09,
-    "Shot_max_minus_Impact": -0.63,
-    "Build_max_minus_Shot_min": -0.68,
-    "Windup_median_minus_Foretell": -0.01,
-    "Windup_max_minus_Foretell": 2.44,
-    "Release_median_minus_Impact": -1.52,
-    "Release_max_minus_Impact": 1.18,
+    "Shot_median_minus_Impact": -6.3,
+    "Shot_max_minus_Impact": -4.98,
+    "Build_max_minus_Shot_min": -0.7,
+    "Windup_median_minus_Foretell": -1.98,
+    "Windup_max_minus_Foretell": 0.47,
+    "Release_median_minus_Impact": -5.95,
+    "Release_max_minus_Impact": -3.89,
     "Finale_median_minus_CrossflowRelease": -1.01,
     "Finale_max_minus_CrossflowRelease": 0.06,
     "Show_minus_Victory": -1.98
   },
   "balance": {
-    "inside_groups": {
-      "QuillStick": "-0.39 dB against its role's common lift (limiting its attack bought no more loudness within the 3 dB cap)",
-      "HandSlam": "-0.61 dB against its role's common lift (limiting its attack bought no more loudness within the 3 dB cap)"
-    },
+    "inside_groups": {},
+    "inside_groups_note": "no file moves against its group's or role's common change (every reward file but ReliquaryOpen is the auditioned file; each Raid group took one lift)",
     "raid_groups_vs_audition": "each Raid group moved as one; against each other the impact rose 3.4 dB and the foretell 4.9 dB over the big, chorus and charge cues, status 0.6 dB",
-    "reward_roles_vs_audition_page_relative_to_one_shots_db": {
+    "reward_roles_vs_audition_page_relative_to_in_play_db": {
       "Build": 0.0,
-      "Windup": -2.4,
-      "Release": 0.65,
-      "Finale": -1.32,
-      "Show": 2.96
+      "Shot": 0.0,
+      "Windup": 0.0,
+      "Release": 0.0,
+      "Finale": 3.05,
+      "Show": 7.33
+    },
+    "reward_roles_0_3_78_relative_to_in_play_db": {
+      "Finale": 5.5,
+      "Show": 5.5
     },
     "notable": [
-      "ScytheWhipBrace 1.56 dB under ScytheWhip as played (0.85 dB over it auditioned)",
-      "InkBlaze 1.18 dB over ScarletImpact (loud end of the cascade role, whose median sits 1.5 dB under the impact)",
-      "CenserBrace 2.44 dB over ScarletForetell (loud end of the windups, whose median equals the foretell)",
-      "CenserSwing 0.63 dB under ScarletImpact (the loudest one-shot)",
+      "ScytheWhipBrace 0.85 dB over ScytheWhip as played, as auditioned",
+      "CenserSwing 1.05 dB under ScarletForetell (the loudest one-shot)",
+      "CenserBrace 0.47 dB and InkBlaze 0.04 dB over ScarletForetell (the loudest windup and cascade part)",
+      "the loudest toll 0.70 dB under the quietest one-shot",
       "StaffBarline 0.06 dB over ScarletCrossflowRelease",
       "ScarletReady sits 10.6 dB under the score at the owner's sliders but is a lobby vote, usually heard before the score starts"
     ]
   },
   "deviations_from_the_plan_simulation": [
-    "the plan simulated the bake on decoded copies of the shipped files; the shipped lift re-renders from each take's recipe master, so its limiter numbers differ: ScarletImpact needs 2.58 dB (simulated 1.75) to land within 0.1 dB, ScarletSacrifice 1.88 (1.71), OrganShot4 2.29 (2.70), StaffCut 1.31 (1.06); OrganShot1-3 need none (simulated 0.25-1.83)",
-    "QuillStick: the simulation took +2.97 dB of gain with 2.98 dB of limiting and still ended 0.9 dB short; more gain bought at most 0.08 dB here, so the plain +0.87 dB with 0.41 dB of limiting is kept, 0.40 dB short",
-    "HandSlam: +2.77 dB of gain with 2.47 dB of limiting, 0.59 dB short (simulated +3.01 / 2.94 dB, 0.9 dB short)"
+    "the plan simulated the bake on decoded copies of the shipped files; the shipped lift re-renders from each take's recipe master, so its limiter numbers differ: ScarletImpact needs 2.58 dB (simulated 1.75) to land within 0.1 dB, ScarletSacrifice 1.88 (1.71); the reward files it names were later withdrawn (review_revision)",
+    "the reward lifts of the first staging (QuillStick and HandSlam 0.40 and 0.59 dB short under the 3 dB limiter cap; OrganShot4 2.29 dB, StaffCut 1.31 dB of limiting) were withdrawn with it: those files ship as auditioned"
   ],
   "mix_check": {
     "phrase": "Act I, song bars 20-21 (with bar 19 before and 22 after for the windows): Foretell beats 0-3, Impact beats 1-4, CrossflowCharge beat 4, CrossflowRelease beat 6, as CrimsonChoreography schedules a basic phrase",
@@ -1571,16 +1607,16 @@
   },
   "checks": {
     "static": "passed: verify_repo --write-catalog --with-domain (catalog 87 documents, repository policy incl. the attribution manifest over 1586 files, YAML)",
-    "domain": "passed: 567 deterministic domain tests, including MusicSlider against tML ReMapVolumeToMatchXact (full slider 1, muted 0, negative 0, above full 1, five slider values within 0.001 dB, the owner's 0.685 at -9.76 dB)",
-    "python": "passed: py -3.12 -m unittest discover -s tools/tests: 164 tests, 3 skipped without soundfile (2 Doll renders and the level re-measurement); with the music venv (NumPy, SciPy, soundfile) test_scarlet_levels, test_scarlet_rewards and test_scarlet_audio pass in full (37), including the fresh BS.1770 re-measurement of all 54 files and of the score's reference from the arrangement parsed out of CrimsonMeter.cs and CrimsonMusicMixer.cs",
-    "tests_changed": "tools/tests/test_scarlet_levels.py replaces the two-meter level pins of test_scarlet_rewards.py with relations: Raid group medians against the score at the owner's sliders, reward role medians and limits against the Raid cue each answers, the auditioned balance inside every group (each file within -0.7/+0.15 dB of its group's common change), windup/finale files unchanged, offsets only lower, the score on tML's slider curve, and digests of the measured files and the score; the Attribution tests check the new hashes and pinned serials",
-    "determinism": "the lift tool reproduced the auditioned bytes of all 42 takes before lifting, and two runs gave byte-identical output",
+    "domain": "passed: 567 deterministic domain tests, including MusicSlider against tML ReMapVolumeToMatchXact (full slider 1, muted 0, negative 0, above full 1, five slider values within 0.001 dB, the owner's 0.685 at -9.76 dB), the shared in-play offset of the tolls, one-shots, windups and cascade parts, and RemoteCueDecibels at -8 dB",
+    "python": "passed: py -3.12 -m unittest discover -s tools/tests: 165 tests, 4 skipped without soundfile (2 Doll renders, the level re-measurement and the dense mix); with the music venv (NumPy, SciPy, soundfile) test_scarlet_levels, test_scarlet_rewards and test_scarlet_audio pass in full (38), including the fresh BS.1770 re-measurement of all 54 files and of the score's reference and the four-player dense mix in four scenarios",
+    "tests_changed": "tools/tests/test_scarlet_levels.py holds relations: Raid group medians against the score at the owner's sliders, reward role medians and limits against the Raid cue each answers, one offset for the four in-play roles, the auditioned balance inside every group (each Raid file within -0.7/+0.15 dB of its group's common change, every reward file but ReliquaryOpen the auditioned file), offsets only lower, the remote offset at most -6 dB, the score on tML's slider curve evaluated from MusicSlider's own source constants (no longer a copy of the formula), digests of the measured files and the score, the offsets the dense mix was rendered with, and the dense mix itself (every warning at least 3 dB and no less than 0.3.80); test_scarlet_rewards pins the remote offset applied once in ScarletRewardAudio.Emit; the Attribution tests check the hashes and pinned serials",
+    "determinism": "the lift tool reproduced the auditioned bytes of every take before lifting, and two runs gave byte-identical output; the 25 returned reward files equal origin/main byte for byte",
     "diff_check": "git diff --check clean",
     "native_package": "passed: tools/dev.py build --native against the installed tModLoader into an isolated local profile (0 errors, the existing 4 nullable warnings; version 0.3.81, solo admission enabled), tModLoader not running"
   },
   "not_run": [
     "the owner's in-game listening: every Raid cue and reward role against Graceful Ordeal at the owner's sliders, through all four stages and outside the Raid",
-    "a second player hearing remote shots, and two players stacking cues",
+    "a second player and a real four-player fight (the dense mix is a rendered model)",
     "other slider positions in game (computed only)",
     "Host & Play and the native load of the 0.3.81 package"
   ]

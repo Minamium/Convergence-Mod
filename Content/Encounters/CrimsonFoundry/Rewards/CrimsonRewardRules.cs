@@ -58,7 +58,7 @@ internal static class CrimsonRewardRules
 
     // ---- Multiplayer readability -------------------------------------------------------------------------------
     internal const float LocalOpacity = 1, RemoteDormantOpacity = .5f, RemoteLiveOpacity = .85f;
-    internal const float RemoteShotDecibels = -8; // per-swing/per-shot cues for other players, one voice
+    internal const float RemoteCueDecibels = -8; // every reward cue another player causes, under its owner's level
     internal static float Decibels(float db) => MathF.Pow(10, db / 20);
 
     // ---- Effect bounds (per frame, all owners together) --------------------------------------------------------

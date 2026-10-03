@@ -8,8 +8,9 @@ ran its K-weighting across the two channels) is a documented legacy number only 
 
 The tests hold relations, not levels: each Raid group's place against the score at the owner's sliders, each reward
 role's place against the Raid cue it answers, and the balance the owner auditioned inside every group. The tables pin
-the measured files by digest; a local-only test re-measures them and the score. Not hearing approval: the owner's
-in-game listening is not_run.
+the measured files by digest; a local-only test re-measures them and the score. Single files do not show a fight, so a
+second local-only test renders four players' weapons at their real rates over the score and holds a clear band for each
+Raid warning. Not hearing approval: the owner's in-game listening is not_run.
 """
 from pathlib import Path
 import hashlib
@@ -26,6 +27,10 @@ RAID = ROOT / 'Assets/Sounds/CrimsonFoundry'
 SOUNDS = ROOT / 'Assets/Sounds/Weapons/ScarletRewards'
 BGM = ROOT / 'Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg'
 CUES = CLIENT / 'Rewards/ScarletRewardCues.cs'
+RULES = ROOT / 'Content/Encounters/CrimsonFoundry/Rewards/CrimsonRewardRules.cs'
+# ITU-R BS.1770-4 K-weighting at 48 kHz (the pre-filter shelf, then the RLB high-pass).
+ITU_K = [((1.53512485958697, -2.69169618940638, 1.19839281085285), (1.0, -1.69065929318241, 0.73248077421585)),
+         ((1.0, -2.0, 1.0), (1.0, -1.99004745483398, 0.99007225036621))]
 
 # The owner's sliders when the levels were set (tModLoader config.json, 2026-10-02): the reference listening position.
 OWNER_MUSIC, OWNER_SOUND = 0.68503934, 0.16071428
@@ -43,16 +48,16 @@ RAID_LEVELS = {
 }
 RAID_LEVELS_SHA256 = '6e4c8c4591496530bda25a004f1e49a4bf6cecb662e8789716cd70a9bdeaf882'
 REWARD_LEVELS = {
-    'BatonLift': -18.49, 'BatonStroke': -19.50, 'Cadence': -14.36, 'CenserBrace': -15.35, 'CenserGrandPour': -14.17,
-    'CenserPour': -19.48, 'CenserSummon': -18.52, 'CenserSwing': -16.02, 'ChoirClasp': -12.24, 'HandSlam': -16.91,
-    'HymnInhale': -16.81, 'InkBlaze': -14.21, 'InkIgnite': -17.55, 'OrganShot1': -16.35, 'OrganShot2': -16.55,
-    'OrganShot3': -16.16, 'OrganShot4': -16.17, 'QuillStick': -16.97, 'QuillThrow': -19.07, 'ReliquaryOpen': -12.30,
-    'RiverRelease': -13.33, 'ScoreChord': -12.68, 'ScoreUnseal': -18.55, 'ScytheSwingHigh': -19.37,
-    'ScytheSwingLow': -19.50, 'ScytheWhip': -17.99, 'ScytheWhipBrace': -18.02, 'StaffBarline': -11.94,
-    'StaffCut': -15.66, 'StaffWindup': -17.57, 'Toll0': -21.39, 'Toll1': -21.27, 'Toll2': -21.44, 'Toll3': -20.81,
-    'Toll4': -20.18, 'Toll5': -20.96, 'Toll6': -20.79, 'Toll7': -20.73,
+    'BatonLift': -18.49, 'BatonStroke': -20.35, 'Cadence': -14.36, 'CenserBrace': -15.35, 'CenserGrandPour': -14.17,
+    'CenserPour': -21.02, 'CenserSummon': -19.36, 'CenserSwing': -16.87, 'ChoirClasp': -12.24, 'HandSlam': -17.84,
+    'HymnInhale': -16.81, 'InkBlaze': -15.78, 'InkIgnite': -19.09, 'OrganShot1': -17.25, 'OrganShot2': -17.51,
+    'OrganShot3': -17.05, 'OrganShot4': -16.98, 'QuillStick': -17.44, 'QuillThrow': -19.97, 'ReliquaryOpen': -12.30,
+    'RiverRelease': -13.33, 'ScoreChord': -12.68, 'ScoreUnseal': -18.55, 'ScytheSwingHigh': -20.27,
+    'ScytheSwingLow': -20.35, 'ScytheWhip': -18.87, 'ScytheWhipBrace': -18.02, 'StaffBarline': -11.94,
+    'StaffCut': -17.11, 'StaffWindup': -17.57, 'Toll0': -22.25, 'Toll1': -22.16, 'Toll2': -22.30, 'Toll3': -21.68,
+    'Toll4': -21.05, 'Toll5': -21.84, 'Toll6': -21.65, 'Toll7': -21.60,
 }
-REWARD_LEVELS_SHA256 = '763707660de9e78e275eb7790d4c5eec22aed1d1148ece08d955306277fc234e'
+REWARD_LEVELS_SHA256 = '8e1c00e478c7201332565add8dc8c220d1a8ff26ba9b3da74dc3fea4cd1cef49'
 # The same meter on the files the owner auditioned and picked (0.3.77 / 0.3.78), before the 2026-10-03 lift: the
 # balance inside each group is held against these.
 AUDITIONED = {
@@ -81,7 +86,8 @@ RAID_GROUPS = {
     'status': ({'ScarletDown', 'ScarletRevive', 'ScarletReady'}, (-5, -3)),
     'charge': ({'ScarletCrossflowCharge'}, None),  # rides with the release it swells into
 }
-# Reward roles (REWARDS.md#levels-against-the-raid).
+# Reward roles (REWARDS.md#levels-against-the-raid). The first four sound in play and share one offset.
+IN_PLAY = ('Build', 'Shot', 'Windup', 'Release')
 ROLES = {
     'Build': {f'Toll{k}' for k in range(8)},
     'Shot': {'ScytheSwingHigh', 'ScytheSwingLow', 'ScytheWhip', 'OrganShot', 'BatonStroke', 'CenserSummon', 'CenserSwing',
@@ -93,6 +99,24 @@ ROLES = {
 }
 # The most a file may fall short of its group's common lift (the limiter's 3 dB cap on a transient file), and overshoot it.
 BALANCE = (-0.7, 0.15)
+# The four-player dense mix (dense_mix below): each warning's median best-band margin, dB. DENSE is the shipped build,
+# rendered with DENSE_OFFSETS; DENSE_0380 is 0.3.80 rendered the same way (the Raid's 0.3.77 files, the rewards at
+# 0.3.78's offsets with only per-shot cues lower for other players, the score on a linear slider). Every warning keeps at
+# least DENSE_FLOOR in every scenario and loses nothing against 0.3.80.
+DENSE_OFFSETS = {'in_play': -3.5, 'Finale': -.45, 'Show': 0.0, 'remote': -8.0}
+DENSE = {
+    'mixed2': {'ScarletForetell': 11.86, 'ScarletStackSummon': 9.10, 'ScarletSpreadSummon': 3.86, 'ScarletCrossflowCharge': 4.10},
+    'mixed4': {'ScarletForetell': 11.76, 'ScarletStackSummon': 8.56, 'ScarletSpreadSummon': 3.80, 'ScarletCrossflowCharge': 3.78},
+    'censers2': {'ScarletForetell': 10.88, 'ScarletStackSummon': 8.15, 'ScarletSpreadSummon': 3.75, 'ScarletCrossflowCharge': 4.07},
+    'censers4': {'ScarletForetell': 10.75, 'ScarletStackSummon': 7.30, 'ScarletSpreadSummon': 3.60, 'ScarletCrossflowCharge': 3.56},
+}
+DENSE_0380 = {
+    'mixed2': {'ScarletForetell': 0.13, 'ScarletStackSummon': 5.68, 'ScarletSpreadSummon': 3.34, 'ScarletCrossflowCharge': 0.30},
+    'mixed4': {'ScarletForetell': 0.03, 'ScarletStackSummon': 4.45, 'ScarletSpreadSummon': 3.31, 'ScarletCrossflowCharge': 0.14},
+    'censers2': {'ScarletForetell': -0.49, 'ScarletStackSummon': 4.18, 'ScarletSpreadSummon': 3.17, 'ScarletCrossflowCharge': -0.16},
+    'censers4': {'ScarletForetell': -0.51, 'ScarletStackSummon': 3.30, 'ScarletSpreadSummon': 3.16, 'ScarletCrossflowCharge': -0.30},
+}
+DENSE_FLOOR = 3.0
 
 
 def read(path):
@@ -112,10 +136,19 @@ def music_gain():
     return float(re.search(r'MusicGain\(double scoreAge\) => ([\d.]+)f \* Ease', read(CONTENT / 'CrimsonInvocation.cs')).group(1))
 
 
+def music_slider(volume):
+    """CrimsonInvocation.MusicSlider evaluated from its own constants (volume <= 0 ? 0 : 10^(a (min(v, cap) - b) / c))."""
+    source = ' '.join(read(CONTENT / 'CrimsonInvocation.cs').split())
+    match = re.search(r'internal static float MusicSlider\(float volume\) => volume <= 0 \? 0 : '
+                      r'MathF\.Pow\(10, ([\d.]+) \* \(Math\.Min\(volume, ([\d.]+)\) - ([\d.]+)\) / ([\d.]+)\);', source)
+    slope, cap, top, scale = map(float, match.groups())
+    return 0.0 if volume <= 0 else 10 ** (slope * (min(volume, cap) - top) / scale)
+
+
 def bgm_in_cue_units(music, sound):
     """Where the score's reference sits on the cue files' scale, both as heard at these sliders: the score streams at
     MusicGain times the music curve, cues at the sound slider (linear, as tML's ActiveSound sets them)."""
-    return BGM_REFERENCE + db(music_gain()) + (tml_music_db(music) - tml_music_db(1)) - db(sound)
+    return BGM_REFERENCE + db(music_gain()) + db(music_slider(music)) - db(sound)
 
 
 def files_digest(folder, stems):
@@ -130,9 +163,14 @@ def raid_gain_db():
 
 
 def role_offsets():
-    """ScarletRewardCues.<Role>Decibels, in dB."""
+    """ScarletRewardCues.<Role>Decibels, in dB (a role may name InPlayDecibels)."""
     text = read(CUES)
-    return {role: float(re.search(rf'\b{role}Decibels = (-?[\d.]+)f', text).group(1)) for role in ROLES}
+    values = {'InPlayDecibels': float(re.search(r'\bInPlayDecibels = (-?[\d.]+)f;', text).group(1))}
+    out = {}
+    for role in ROLES:
+        value = re.search(rf'\b{role}Decibels = (-?[\d.]+f|InPlayDecibels)\b', text).group(1)
+        out[role] = values[value] if value in values else float(value.rstrip('f'))
+    return out
 
 
 def reward_files():
@@ -157,6 +195,163 @@ def played():
     return out
 
 
+# ---- The four-player dense mix ----------------------------------------------------------------------------------------
+# A single file's level cannot show what a fight sounds like: the weapons fire many times a second and other players'
+# weapons add up. This renders Graceful Ordeal's song bars 19-23 at the owner's sliders with the local player's organ
+# and three other players' weapons firing at their real rates, as ScarletRewardAudio plays them (role offsets, the
+# remote offset, the voice pools with replace-oldest or ignore-new, other players 250 px away: tML's positional
+# 1 - d/2500 = 0.9), and lays each Raid warning over it at ten places. The measure is the warning's best 1/3-octave
+# band against the score and the weapons together, in the 400 ms where the warning is loudest (the median of the ten).
+# A model, not a capture: organ shots every UseTicks(Ranged), scythe strokes every StrokeTicks, a quill thrown every
+# UseTicks(Rogue) that sticks 6 ticks later, and n censers whose apexes come every ApexInterval / n ticks, cued through
+# the owner's sound budget the way CenserVisuals does.
+WARNINGS = ('ScarletForetell', 'ScarletStackSummon', 'ScarletSpreadSummon', 'ScarletCrossflowCharge')
+# scenario: (censer owners, censers each). Every scenario has the local organ (owner 0), another player's scythe
+# (owner 1) and another's quill (owner 3).
+DENSE_SCENARIOS = {'mixed2': ((2,), 2), 'mixed4': ((2,), 4), 'censers2': ((1, 2, 3), 2), 'censers4': ((1, 2, 3), 4)}
+
+
+def cue_table():
+    """Cue name -> (audience, role, the owner's voices), from ScarletRewardCues.All."""
+    text = read(CUES)
+    body = text[text.index('internal static readonly ScarletCue[] All'):]
+    body = body[:body.index('};')]
+    out = {}
+    for quoted, named, audience, role, voices in re.findall(r"new\((?:\"(\w+)\"|(\w+)), '[AB]', (\w+), (\w+), (\d+),", body):
+        out[quoted or named] = (audience, 'Shot' if role == 'OneShot' else role, int(voices))
+    return out
+
+
+def remote_decibels():
+    return float(re.search(r'RemoteCueDecibels = (-?[\d.]+)f?;', read(RULES)).group(1))
+
+
+def dense_events(scenario, end, tick):
+    """(owner, cue, file, start sample) for one scenario; owner 0 is the local player."""
+    rules = read(RULES)
+    const = lambda name: int(re.search(rf'\b{name} = (\d+)', rules).group(1))  # noqa: E731
+    uses = rules[rules.index('internal static int UseTicks('):]
+    use = lambda kind: int(re.search(rf'CrimsonRewardKind\.{kind} => (\d+),', uses).group(1))  # noqa: E731
+    events = []
+
+    def every(owner, cue, period, first, file_of):
+        k, t = 0, first * tick
+        while t < end:
+            events.append((owner, cue, file_of(k), t))
+            t += period * tick
+            k += 1
+
+    every(0, 'OrganShot', use('Ranged'), 1, lambda k: f'OrganShot{k % 4 + 1}')
+    every(1, 'ScytheSwingHigh', const('StrokeTicks'), 4, lambda k: 'ScytheSwingHigh' if k % 2 == 0 else 'ScytheSwingLow')
+    every(3, 'QuillThrow', use('Rogue'), 10, lambda k: 'QuillThrow')
+    every(3, 'QuillStick', use('Rogue'), 16, lambda k: 'QuillStick')
+    owners, n = DENSE_SCENARIOS[scenario]
+    apex, grand_every, brace = const('ApexInterval'), const('GrandEvery'), const('GrandBrace')
+    lead, swing_gap, pour_gap, grand_gap = const('SwingCueLead'), const('SwingCueInterval'), const('PourCueInterval'), const('GrandCueInterval')
+    for owner in owners:
+        last = {'swing': -999, 'pour': -999, 'grand': -999, 'brace': -999}
+        k, t = 0, (7 if len(owners) == 1 else 5 + 3 * owner)
+        while t * tick < end:
+            cues = []
+            if (k // n) % grand_every == grand_every - 1:
+                if t - brace - last['brace'] >= swing_gap and t - last['grand'] >= grand_gap:
+                    cues.append(('CenserBrace', t - brace))
+                    last['brace'] = t - brace
+                if t - last['grand'] >= grand_gap:
+                    cues.append(('CenserGrandPour', t))
+                    last['grand'] = t
+            else:
+                if t - lead - last['swing'] >= swing_gap:
+                    cues.append(('CenserSwing', t - lead))
+                    last['swing'] = t - lead
+                if t - last['pour'] >= pour_gap:
+                    cues.append(('CenserPour', t))
+                    last['pour'] = t
+            events += [(owner, cue, cue, int(at * tick)) for cue, at in cues if 0 <= at * tick < end]
+            k += 1
+            t += apex / n
+    return sorted(events, key=lambda e: e[3])
+
+
+def dense_mix(scenario, raid=RAID, sounds=SOUNDS, role_db=None, remote_db=None, every_remote=True, slider=None):
+    """Each warning's median best-band margin (dB) over the score and the weapons in one scenario. The defaults are the
+    shipped files and code; the arguments let the evidence render 0.3.80 the same way."""
+    import numpy as np
+    import soundfile as sf
+    from scipy import signal
+
+    rate, bar, tick = 48000, 90000, 800
+    role_db = role_offsets() if role_db is None else role_db
+    remote_db = remote_decibels() if remote_db is None else remote_db
+    slider = music_slider(OWNER_MUSIC) if slider is None else slider
+    cache = {}
+
+    def clip(folder, stem):
+        if (folder, stem) not in cache:
+            x, sr = sf.read(str(folder / f'{stem}.ogg'), always_2d=True, dtype='float64')
+            assert sr == rate
+            cache[folder, stem] = x
+        return cache[folder, stem]
+
+    song, _ = sf.read(str(BGM), always_2d=True, dtype='float64')
+    music = song[19 * bar:24 * bar] * music_gain() * slider
+    n = len(music)
+    table = cue_table()
+    voices, active = [], {}
+    for owner, cue, stem, start in dense_events(scenario, n, tick):
+        audience, role, own = table[cue]
+        remote = owner != 0
+        db = role_db[role] + (remote_db if remote and (every_remote or audience == 'Shot') else 0)
+        gain = 10 ** (db / 20) * (.9 if remote else 1) * OWNER_SOUND
+        key = stem + (':peer' if remote else '')
+        limit = (1 if audience == 'Shot' else own) if remote else own
+        replace = audience == 'Shot' if remote else True
+        playing = [v for v in active.get(key, []) if voices[v][2] > start]
+        if len(playing) >= limit:
+            if not replace:
+                active[key] = playing
+                continue
+            oldest = min(playing, key=lambda v: voices[v][1])
+            voices[oldest][2] = start
+            playing.remove(oldest)
+        voices.append([stem, start, start + len(clip(sounds, stem)), gain])
+        active[key] = playing + [len(voices) - 1]
+    masker = music.copy()
+    for stem, s0, e0, gain in voices:
+        m = min(e0 - s0, n - s0)
+        if m > 0:
+            masker[s0:s0 + m] += clip(sounds, stem)[:m] * gain
+
+    def kpower(x):
+        for b, a in ITU_K:
+            x = signal.lfilter(b, a, x, axis=0)
+        return np.concatenate([[0.0], np.cumsum(np.sum(x ** 2, axis=1))])
+
+    centres = [c for c in 1000 * 2 ** (np.arange(-17, 14) / 3) if 40 <= c <= 16000]
+    bands = [signal.butter(4, [c * 2 ** (-1 / 6), min(c * 2 ** (1 / 6), 23000)], btype='band', fs=rate, output='sos') for c in centres]
+
+    def band_energy(x, a, b):
+        mono, pre = x[:, 0] + x[:, 1], min(4800, a)
+        return np.array([np.mean(signal.sosfilt(sos, mono[a - pre:b])[pre:] ** 2) + 1e-20 for sos in bands])
+
+    win, out = round(.4 * rate), {}
+    for warning in WARNINGS:
+        x = clip(raid, warning) * 10 ** (raid_gain_db() / 20) * OWNER_SOUND
+        best = []
+        for k in range(10):
+            a = bar + k * 30011
+            m = min(len(x), n - a)
+            sig = np.zeros_like(music)
+            sig[a:a + m] = x[:m]
+            energy = kpower(sig)
+            starts = np.arange(a, a + max(1, len(x) - win // 2), 480)
+            starts = starts[starts + win < len(energy) - 1]
+            w0 = int(starts[int(np.argmax(energy[starts + win] - energy[starts]))])
+            best.append(float((10 * np.log10(band_energy(sig, w0, w0 + win) / band_energy(masker, w0, w0 + win))).max()))
+        out[warning] = float(np.median(best))
+    return out
+
+
 def numeric_audio_stack():
     return all(importlib.util.find_spec(name) for name in ('numpy', 'scipy', 'soundfile'))
 
@@ -168,13 +363,14 @@ class ScarletLevels(unittest.TestCase):
         audio = read(CLIENT / 'CrimsonAudio.cs')
         self.assertEqual(2, audio.count('voice.Volume = gain * CrimsonInvocation.MusicSlider(Main.musicVolume);'))
         self.assertNotRegex(audio, r'\*\s*Main\.musicVolume\s*;', 'no linear slider path is left')
-        invocation = ' '.join(read(CONTENT / 'CrimsonInvocation.cs').split())
-        self.assertIn('internal static float MusicSlider(float volume) => volume <= 0 ? 0 : MathF.Pow(10, 31 * (Math.Min(volume, 1) - 1) / 20);',
-                      invocation)
+        # MusicSlider's own constants, read from its source, against tML's curve: a drifted slope, cap or scale fails
+        # here (the domain suite runs the compiled method against the same formula).
         for v in (0.05, 0.25, 0.5, OWNER_MUSIC, 0.9, 1.0):
-            ours = db(10 ** (31 * (min(v, 1) - 1) / 20))
-            self.assertAlmostEqual(tml_music_db(v) - tml_music_db(1), ours, places=9, msg=f'slider {v}')
-        self.assertAlmostEqual(-6.47, (tml_music_db(OWNER_MUSIC) - tml_music_db(1)) - db(OWNER_MUSIC), delta=.01,
+            self.assertAlmostEqual(tml_music_db(v) - tml_music_db(1), db(music_slider(v)), places=4, msg=f'slider {v}')
+        self.assertEqual(1.0, music_slider(1.5), 'never past a full slider')
+        self.assertEqual(0.0, music_slider(0.0), 'a muted slider silences the score')
+        self.assertEqual(0.0, music_slider(-0.1))
+        self.assertAlmostEqual(-6.47, db(music_slider(OWNER_MUSIC)) - db(OWNER_MUSIC), delta=.01,
                                msg="the owner's slider moves the score 6.5 dB against the linear path")
 
     def test_the_level_tables_measure_the_shipped_files(self):
@@ -185,6 +381,10 @@ class ScarletLevels(unittest.TestCase):
         self.assertEqual(RAID_LEVELS_SHA256, files_digest(RAID, RAID_LEVELS), message)
         self.assertEqual(REWARD_LEVELS_SHA256, files_digest(SOUNDS, REWARD_LEVELS), message)
         self.assertEqual(BGM_SHA256, hashlib.sha256(BGM.read_bytes()).hexdigest(), 'the score changed: re-measure BGM_REFERENCE')
+        # The dense mix was rendered with these offsets: change one and re-render DENSE (and the evidence).
+        offsets = role_offsets()
+        self.assertEqual(DENSE_OFFSETS, {'in_play': offsets['Shot'], 'Finale': offsets['Finale'], 'Show': offsets['Show'],
+                                         'remote': remote_decibels()}, 'the dense mix is stale: re-render it')
 
     def test_raid_groups_sit_at_their_place_against_the_score(self):
         level = played()
@@ -211,19 +411,22 @@ class ScarletLevels(unittest.TestCase):
         med = {role: statistics.median(v) for role, v in by_role.items()}
         impact, foretell = level['ScarletImpact'], level['ScarletForetell']
         release, victory = level['ScarletCrossflowRelease'], level['ScarletVictory']
-        self.assertTrue(-3 <= med['Shot'] - impact <= -1, 'one-shots about 2 dB under the Raid impact')
-        self.assertLess(max(by_role['Shot']), impact, 'no one-shot over the Raid impact')
+        offsets = role_offsets()
+        self.assertEqual({offsets['Shot']}, {offsets[role] for role in IN_PLAY}, 'the cues that sound in play share one offset')
+        self.assertTrue(-7 <= med['Shot'] - impact <= -5, 'one-shots about 6 dB under the Raid impact')
+        self.assertLess(max(by_role['Shot']), foretell, 'every one-shot under the Raid foretell')
         self.assertLess(max(by_role['Build']), min(by_role['Shot']), 'tolls under every one-shot')
-        self.assertTrue(-1 <= med['Windup'] - foretell <= 1, 'windups and braces about the Raid foretell')
-        self.assertTrue(-2 <= med['Release'] - impact <= 0, 'cascade parts about 1 dB under the Raid impact')
+        self.assertTrue(-3 <= med['Windup'] - foretell <= -1, 'windups and braces about 2 dB under the Raid foretell')
+        self.assertTrue(-7 <= med['Release'] - impact <= -5, 'cascade parts about 6 dB under the Raid impact')
+        self.assertLessEqual(max(level[s] for s, (_, r) in files.items() if r in IN_PLAY), foretell + 1,
+                             'no cue that sounds in play more than 1 dB over the Raid foretell')
         self.assertTrue(-2 <= med['Finale'] - release <= 0, 'finales about 1 dB under the crossflow release')
         self.assertLessEqual(max(by_role['Finale']), release + .5, 'no finale over the crossflow release')
         self.assertTrue(-3 <= level['ReliquaryOpen'] - victory <= -1, 'the reliquary show about 2 dB under the Raid Victory')
         # Offsets never boost a file past its level: a role that had to rise was re-rendered with the lift baked in.
-        for role, offset in role_offsets().items():
+        for role, offset in offsets.items():
             self.assertLessEqual(offset, 0, role)
-        rules = read(ROOT / 'Content/Encounters/CrimsonFoundry/Rewards/CrimsonRewardRules.cs')
-        self.assertLessEqual(float(re.search(r'RemoteShotDecibels = (-?\d+)', rules).group(1)), 0)
+        self.assertLessEqual(remote_decibels(), -6, "other players' cues stay well under the local player's")
         for name in ('ScoreThrowDecibels', 'PartialScoreDecibels'):
             self.assertLessEqual(float(re.search(rf'{name} = (-?[\d.]+)', read(CUES)).group(1)), 0, name)
 
@@ -242,11 +445,11 @@ class ScarletLevels(unittest.TestCase):
                     self.assertLessEqual(moved[m] - common, BALANCE[1])
         # The charge keeps its auditioned step under the release it swells into.
         self.assertAlmostEqual(moved['ScarletCrossflowCharge'], moved['ScarletCrossflowRelease'], delta=.1)
-        # Windups and finales keep their files; only their offsets moved.
+        # Every reward file but the reliquary's show is the auditioned file; only the offsets moved.
         for stem, (_, role) in files.items():
-            if role in ('Windup', 'Finale'):
+            if role != 'Show':
                 self.assertEqual(AUDITIONED[stem], REWARD_LEVELS[stem], stem)
-        self.assertEqual(offsets['Shot'], offsets['Build'], 'tolls keep their auditioned step under the one-shots')
+        self.assertEqual({offsets['Shot']}, {offsets[role] for role in IN_PLAY}, 'the in-play cues keep their auditioned balance')
 
     @unittest.skipUnless(numeric_audio_stack(), 'numpy, scipy and soundfile are local audio tools, not CI')
     def test_the_tables_match_a_fresh_measurement(self):
@@ -255,11 +458,9 @@ class ScarletLevels(unittest.TestCase):
         from scipy import signal
 
         rate = 48000
-        itu = [((1.53512485958697, -2.69169618940638, 1.19839281085285), (1.0, -1.69065929318241, 0.73248077421585)),
-               ((1.0, -2.0, 1.0), (1.0, -1.99004745483398, 0.99007225036621))]
 
         def power(x):
-            for b, a in itu:
+            for b, a in ITU_K:
                 x = signal.lfilter(b, a, x, axis=0)
             return np.concatenate([[0.0], np.cumsum(np.sum(x ** 2, axis=1))])
 
@@ -314,6 +515,18 @@ class ScarletLevels(unittest.TestCase):
                 prev = sb
             pooled.append(windows(power(out), 3.0, .1))
         self.assertAlmostEqual(BGM_REFERENCE, float(np.median(np.concatenate(pooled))), delta=.02)
+
+    @unittest.skipUnless(numeric_audio_stack(), 'numpy, scipy and soundfile are local audio tools, not CI')
+    def test_a_four_player_fight_leaves_every_warning_a_clear_band(self):
+        # The local organ and three other players' scythe, quill and censers at their real rates over the score: each
+        # Raid warning keeps a 1/3-octave band DENSE_FLOOR over everything else, and no less than in 0.3.80.
+        for scenario in DENSE_SCENARIOS:
+            margins = dense_mix(scenario)
+            for warning in WARNINGS:
+                with self.subTest(scenario=scenario, warning=warning):
+                    self.assertAlmostEqual(DENSE[scenario][warning], margins[warning], delta=.02)
+                    self.assertGreaterEqual(margins[warning], DENSE_FLOOR)
+                    self.assertGreaterEqual(margins[warning], DENSE_0380[scenario][warning])
 
 
 if __name__ == '__main__':
