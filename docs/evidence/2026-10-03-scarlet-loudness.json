@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet loudness: Graceful Ordeal's streamed voice follows tModLoader's music-slider curve (31 v - 36.94 dB, normalised at v = 1); the Raid's cue groups are lifted once each against the score at the owner's sliders (16 files re-rendered from their owner-picked takes with the lift baked in); the rewards' in-play roles (tolls, one-shots, windups, cascade parts) share one runtime offset of -3.5 dB, the finales and the Cadence -0.45 dB, and the reliquary show's +3.83 dB lift is baked into its file; every reward cue another player causes plays 8 dB under its owner's level. Plan A's first reward staging (in-play files lifted 9.4-10 dB) was withdrawn before shipping after a review's four-player dense mix (review_revision). Client presentation and assets only; gameplay, timings and protocol unchanged",
-  "target_build": "0.3.81 / protocol79 (feat/scarlet-loudness on main after #113 and #114; #112 holds 0.3.79)",
+  "target_build": "0.3.82 / protocol79 (feat/scarlet-loudness on main after #113 and #114; #112 holds 0.3.79 and #115 0.3.81)",
   "owner_direction": "2026-10-03, after playing main 0.3.78: 'あと全体的に効果音小さくない？気のせい？'. The lead (Claude, main session) chose plan A from the measurement below; this change implements it",
   "measurement": {
     "meter": "ITU-R BS.1770-4 K-weighting with the standard's 48 kHz coefficients, run along time, both channels summed; cue = maximum 400 ms momentary loudness padded 0.2 s before and 0.5 s after, 10 ms steps; score = 3 s short-term loudness, 100 ms steps",
@@ -1612,12 +1612,12 @@
     "tests_changed": "tools/tests/test_scarlet_levels.py holds relations: Raid group medians against the score at the owner's sliders, reward role medians and limits against the Raid cue each answers, one offset for the four in-play roles, the auditioned balance inside every group (each Raid file within -0.7/+0.15 dB of its group's common change, every reward file but ReliquaryOpen the auditioned file), offsets only lower, the remote offset at most -6 dB, the score on tML's slider curve evaluated from MusicSlider's own source constants (no longer a copy of the formula), digests of the measured files and the score, the offsets the dense mix was rendered with, and the dense mix itself (every warning at least 3 dB and no less than 0.3.80); test_scarlet_rewards pins the remote offset applied once in ScarletRewardAudio.Emit; the Attribution tests check the hashes and pinned serials",
     "determinism": "the lift tool reproduced the auditioned bytes of every take before lifting, and two runs gave byte-identical output; the 25 returned reward files equal origin/main byte for byte",
     "diff_check": "git diff --check clean",
-    "native_package": "passed: tools/dev.py build --native against the installed tModLoader into an isolated local profile (0 errors, the existing 4 nullable warnings; version 0.3.81, solo admission enabled), tModLoader not running"
+    "native_package": "passed: tools/dev.py build --native against the installed tModLoader into an isolated local profile (0 errors, the existing 4 nullable warnings; version 0.3.82, solo admission enabled), tModLoader not running"
   },
   "not_run": [
     "the owner's in-game listening: every Raid cue and reward role against Graceful Ordeal at the owner's sliders, through all four stages and outside the Raid",
     "a second player and a real four-player fight (the dense mix is a rendered model)",
     "other slider positions in game (computed only)",
-    "Host & Play and the native load of the 0.3.81 package"
+    "Host & Play and the native load of the 0.3.82 package"
   ]
 }
