@@ -107,6 +107,8 @@ class DollWeaponExports(unittest.TestCase):
         self.assertEqual(set(cues) - loops(), {p.stem for p in SOUNDS.glob("*.ogg")}, "one-shots are Ogg")
         self.assertEqual(loops(), {p.stem for p in SOUNDS.glob("*.wav")}, "loops, and only loops, are WAV")
         self.assertEqual([], sorted(p.name for p in SOUNDS.iterdir() if p.suffix not in (".ogg", ".wav")))
+        self.assertEqual(set(), {p.stem for p in SOUNDS.glob("*.ogg")} & {p.stem for p in SOUNDS.glob("*.wav")},
+                         "one-shots are Ogg only, loops WAV only")
 
     def test_loops_are_sample_exact_stereo_pcm16(self):
         cues = registry()
@@ -252,6 +254,20 @@ class DollWeaponPlaybackContract(unittest.TestCase):
         self.assertIn("IsLooped = true, MaxInstances = 1", sustain)
         self.assertIn("RitualAudioDiagnostics.Track(cue, voice, gain)", self.source)
 
+    def test_owner_priority_keeps_voices_and_instances_for_the_local_player(self):
+        self.assertIn("OwnerReserve = 8, PeerInstances = 1", self.source)
+        play_for = body(self.source, "internal static SlotId PlayFor(")
+        self.assertIn("if (owner == Main.myPlayer) return Play(cue, at, volume);", play_for, "the local player's cue plays as Play")
+        self.assertLess(play_for.index("Audible"), play_for.index("PeerStyle(cue)"))
+        self.assertIn("voices.Count >= VoiceCap - OwnerReserve", play_for, "a peer never takes the last voices")
+        self.assertIn("style.Volume = Math.Clamp(volume, 0f, 1f)", play_for)
+        peer = body(self.source, "private static SoundStyle PeerStyle(")
+        self.assertIn('style.Identifier = "Convergence:DollWeapon:Peer:" + cue;', peer, "peers draw on their own instance pool")
+        self.assertIn("style.MaxInstances = PeerInstances;", peer)
+        sustain = body(self.source, "internal static void Sustain(")
+        self.assertIn("owner != Main.myPlayer && voices.Count >= VoiceCap - OwnerReserve", sustain, "a peer's loop keeps the reserve too")
+        self.assertIn("peerStyles.Clear()", body(self.source, "internal static void Reset("))
+
     def test_sustain_gain_lives_on_the_lease_so_a_loop_can_fade_in_from_zero(self):
         sustain = body(self.source, "internal static void Sustain(")
         self.assertIn("IsLooped = true, MaxInstances = 1, Volume = 1f", sustain, "the loop style is built at full volume")
@@ -291,7 +307,8 @@ class DollWeaponPlaybackContract(unittest.TestCase):
     def test_every_routed_cue_is_exported(self):
         routed = set()
         for path in (ROOT / "Client").rglob("*.cs"):
-            routed |= set(re.findall(r'DollWeaponAudio\.(?:Play|Note|Sustain)\((?:ref \w+, )?"(\w+)"', path.read_text(encoding="utf-8")))
+            routed |= set(re.findall(r'DollWeaponAudio\.(?:Play|PlayFor|Note|Sustain)\((?:ref \w+, |[\w.]+, )?"(\w+)"',
+                                     path.read_text(encoding="utf-8")))
         self.assertTrue(routed)
         self.assertLessEqual(routed, set(exports()))
         # A loop is only ever sustained, and only a loop is.
@@ -299,6 +316,108 @@ class DollWeaponPlaybackContract(unittest.TestCase):
         for path in (ROOT / "Client").rglob("*.cs"):
             sustained |= set(re.findall(r'DollWeaponAudio\.Sustain\(ref \w+, "(\w+)"', path.read_text(encoding="utf-8")))
         self.assertEqual(sustained & set(exports()), loops() & routed)
+
+
+MERIDIAN_SCORE = ROOT / "Content/Encounters/FirstSeverance/Rewards/PaleMeridianScore.cs"
+MERIDIAN_LATTICE = ROOT / "Content/Encounters/FirstSeverance/Rewards/PaleMeridianLattice.cs"
+MERIDIAN_VISUALS = ROOT / "Client/Encounters/FirstSeverance/Weapons/MeridianVisuals.cs"
+
+
+def cs_array(source, name):
+    return [int(v) for v in re.findall(r"-?\d+", re.search(rf"{name} =\s*\{{([^}}]*)\}}", source).group(1))]
+
+
+def cs_const(source, name):
+    return int(re.search(rf"\b{name} = (-?\d+)", source).group(1))
+
+
+def py_tuple(source, name):
+    return [int(v) for v in re.findall(r"-?\d+", re.search(rf"^{name} = \(([^)]*)\)", source, re.MULTILINE).group(1))]
+
+
+def py_int(source, name):
+    return int(re.search(rf"^{name} = (\d+)", source, re.MULTILINE).group(1))
+
+
+class PaleMeridianCues(unittest.TestCase):
+    """The Pale Meridian cue set: every release a Warn/Fire pair plus a different Miss, one note file per ladder
+    step, a sample-exact loop on the weapon's clock, and the generator's timeline mirroring the C# score."""
+
+    def setUp(self):
+        self.generator = GENERATOR.read_text(encoding="utf-8")
+        self.score = MERIDIAN_SCORE.read_text(encoding="utf-8")
+        self.visuals = re.sub(r"//[^\n]*", "", MERIDIAN_VISUALS.read_text(encoding="utf-8"))
+
+    def test_pairs_notes_and_miss_are_exported(self):
+        names = set(exports())
+        for release in ("Part", "Ignite", "Strike", "Lattice"):
+            self.assertIn(f"Meridian{release}Warn", names)
+            self.assertIn(f"Meridian{release}Fire", names)
+        self.assertIn("MeridianStrikeMiss", names)
+        notes = re.findall(r'"(MeridianNote\d)"', self.visuals)
+        self.assertEqual([f"MeridianNote{i}" for i in range(9)], notes, "one note file per ladder step, in ladder order")
+        self.assertLessEqual(set(notes), names)
+        self.assertIn("MeridianLoop", loops())
+
+    def test_generator_timeline_mirrors_the_score(self):
+        self.assertEqual(cs_array(self.score, "Seats"), py_tuple(self.generator, "MERIDIAN_SEATS"))
+        self.assertEqual(cs_array(self.score, "Cadence"), py_tuple(self.generator, "MERIDIAN_CADENCE"))
+        self.assertEqual(cs_array(self.score, "BuildPhrase"), py_tuple(self.generator, "MERIDIAN_BUILD_PHRASE"))
+        self.assertEqual(cs_array(self.score, "OverchargePhrase"), py_tuple(self.generator, "MERIDIAN_OVERCHARGE_PHRASE"))
+        rise, ignite = (int(v) for v in re.search(r"^MERIDIAN_KEY_RISE, MERIDIAN_IGNITE = (\d+), (\d+)", self.generator, re.MULTILINE).groups())
+        self.assertEqual(cs_const(self.score, "KeyRise"), rise)
+        self.assertEqual(cs_const(self.score, "Ignite"), ignite)
+        self.assertEqual(cs_const(self.score, "Flight"), py_int(self.generator, "MERIDIAN_FLIGHT"))
+        lattice = MERIDIAN_LATTICE.read_text(encoding="utf-8")
+        self.assertEqual(cs_const(lattice, "MeridianFire"), py_int(self.generator, "MERIDIAN_MERIDIAN_FIRE"))
+        self.assertEqual(cs_const(lattice, "RippleStep"), py_int(self.generator, "MERIDIAN_RIPPLE"))
+        # The wind's ratchet ticks: floor(12 ((age - 300) / 48)^2.5), the first age of each step.
+        wind = [next(a for a in range(rise + 1, ignite + 1) if int(12 * ((a - rise) / (ignite - rise)) ** 2.5 + 1e-4) >= k)
+                for k in range(1, 13)]
+        self.assertEqual(wind, py_tuple(self.generator, "MERIDIAN_WIND"))
+
+    def test_call_site_volumes_match_the_audition(self):
+        cues = registry()
+        calls = re.findall(r'DollWeaponAudio\.(?:Play|PlayFor)\((?:p\.owner, )?"(Meridian\w+)", [^;]*?, (\d*\.?\d+)f\);', self.visuals)
+        self.assertTrue(calls)
+        for name, volume in calls:
+            with self.subTest(cue=name):
+                self.assertAlmostEqual(cues[name][2], float(volume), msg="the audition plays the call-site volume")
+        self.assertAlmostEqual(cues["MeridianLoop"][2], float(re.search(r"LoopVolume = (\d*\.?\d+)f", self.visuals).group(1)))
+
+    def test_peers_cues_never_starve_the_owner(self):
+        held = body(self.visuals, "private void Holdout(") + body(self.visuals, "private void Line(")
+        self.assertNotRegex(held, r"DollWeaponAudio\.Play\(", "every held and release cue is owner-aware")
+        self.assertGreaterEqual(held.count("DollWeaponAudio.PlayFor(p.owner, "), 12)
+        self.assertIn("(p.owner == Main.myPlayer || PeerNote(a, muzzle))", held, "peer notes thin out")
+        start = self.visuals.index("private static bool PeerNote(")
+        thin = self.visuals[start:self.visuals.index(";", start)]
+        self.assertIn("% PaleMeridianScore.HeavyPeriod == 0", thin, "in overcharge a peer's note only on each bar's downbeat")
+        self.assertIn("PeerNoteRange * PeerNoteRange", thin)
+        hits = body(self.visuals, "public override void OnHitNPC(")
+        self.assertNotIn("PlayFor", hits, "hit ticks are the owner's own (the owner computes its hits)")
+
+    def test_closing_strikes_are_restrained(self):
+        cues = registry()
+        for name in ("MeridianStrikeFire", "MeridianLatticeFire"):
+            with self.subTest(cue=name):
+                self.assertLessEqual(cues[name][0], -11.5, "the closing strikes sit at T3 or below, never T4")
+        for fn in ("def meridian_strike_fire(", "def meridian_lattice_fire("):
+            start = self.generator.index(fn)
+            recipe = self.generator[start:self.generator.index("\n@cue(", start)]
+            self.assertIn("soft_gong(", recipe, "a resonant low strike carries the tail")
+            organ = re.search(r"organ_pad\(.*?\n\s*place\(mix, \w+, [\d.]+, (-\d+)\)", recipe, re.S)
+            self.assertIsNotNone(organ)
+            self.assertLessEqual(int(organ.group(1)), -16, "the organ stays quiet under the strike")
+
+    def test_loop_is_pcm16_stereo_on_whole_ticks(self):
+        import wave
+        with wave.open(str(SOUNDS / "MeridianLoop.wav"), "rb") as clip:
+            self.assertEqual((2, 2, 44100), (clip.getnchannels(), clip.getsampwidth(), clip.getframerate()))
+            frames = clip.getnframes()
+        self.assertEqual(0, frames % 735, "a whole number of game ticks (735 samples each at 44.1 kHz)")
+        self.assertEqual(144, frames // 735, "four 36-tick heavy bars")
+        self.assertLessEqual(frames / 44100, registry()["MeridianLoop"][1])
 
 
 @unittest.skipUnless(numeric_stack(), "numpy, scipy and soundfile are local audio tools, not CI")
@@ -348,7 +467,11 @@ class DollWeaponRender(unittest.TestCase):
                 x, _ = sf.read(str(SOUNDS / f"{name}.wav"), always_2d=True, dtype="float64")
                 seam = self.gen.seam(x)
                 self.assertLessEqual(seam["wrap_step"], 0.5 * seam["max_inner_step"], "the wrap is no larger than an inner step")
-                self.assertLessEqual(abs(seam["head_tail_rms_db"]), 1.0, "head and tail sit at the same level")
+                # A "round" loop is a steady bed; a "period" loop (Pale Meridian's gear train) starts on its downbeat
+                # click, so its head is louder than its tail by design (its wrap: the step check above and
+                # test_meridian_cues_are_reproducible_and_the_loop_is_seamless).
+                if self.gen.CUES[name].loop_master == "round":
+                    self.assertLessEqual(abs(seam["head_tail_rms_db"]), 1.0, "head and tail sit at the same level")
 
     def test_generation_is_deterministic(self):
         store_root = self.gen.find_store()
@@ -374,6 +497,28 @@ class DollWeaponRender(unittest.TestCase):
                     suffix = ".wav" if self.gen.CUES[name].loop else ".ogg"
                     self.assertEqual((SOUNDS / f"{name}{suffix}").read_bytes(), (Path(folder) / f"{name}{suffix}").read_bytes(),
                                      "the committed cue is reproducible")
+
+    def test_meridian_cues_are_reproducible_and_the_loop_is_seamless(self):
+        import numpy as np
+        import soundfile as sf
+        store_root = self.gen.find_store()
+        if store_root is None:
+            self.skipTest("local recording store not found")
+        store = self.gen.Store(store_root, (ROOT / "Assets/ATTRIBUTION.md").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as out:
+            for name in ("MeridianNote3", "MeridianIgniteWarn", "MeridianLoop"):
+                self.gen.render_cue(name, store, Path(out))
+                path = self.gen.cue_path(name, Path(out))
+                self.assertEqual(path.read_bytes(), (SOUNDS / path.name).read_bytes(), f"{name} is reproducible")
+        x, rate = sf.read(str(SOUNDS / "MeridianLoop.wav"), always_2d=True, dtype="float64")
+        steps = np.abs(np.diff(x, axis=0)).max(axis=1)
+        self.assertLessEqual(np.abs(x[0] - x[-1]).max(), np.percentile(steps, 99.5), "the wrap is no bigger than an ordinary step")
+        self.assertLessEqual(self.gen.true_peak_db(np.concatenate((x[-64:], x[:64]))), -1.0)
+        for clip in sorted(SOUNDS.glob("Meridian*.ogg")):
+            y, _ = sf.read(str(clip), always_2d=True, dtype="float64")
+            with self.subTest(cue=clip.stem):
+                self.assertLessEqual(self.gen.true_peak_db(y), -1.0)
+                self.assertAlmostEqual(self.gen.CUES[clip.stem].target_lufs, self.gen.loudness(y), delta=0.6)
 
 
 if __name__ == "__main__":
