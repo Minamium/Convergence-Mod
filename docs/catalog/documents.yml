@@ -554,7 +554,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 6e1640add182be38af2d4570612db1ad515bd0c154e6c137119e0aa78245eee9
+  content_sha256: e794e16917256d11c1e7a862393a947277547a3014746d1afdba50265865aabc
   document_type: index
   status: accepted
   owners:
@@ -1352,23 +1352,31 @@ documents:
 - doc_id: project.brief
   path: docs/PROJECT_BRIEF.md
   title: Project Brief
-  content_sha256: 6c12b6e4c852530a6ba0f829b688df9322c9c8925ec7da127b84355395c295dc
+  content_sha256: a053386a196b312e1d2f5b73f2cf636bb8f5ac0a5cc4e75304e024a1b4cc8d7c
   document_type: overview
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-10-04'
   source_of_truth_for:
   - project.product_scope
   aliases:
   - project brief
   - product direction
+  - encounter roster
   related_code:
   - build.txt
   - Common/Compatibility/Calamity
+  - Content/Encounters
   related_docs:
   - project.status
+  - project.milestones
+  - project.art-direction
   - encounter.first-severance.overview
+  - encounter.ghost-samurai.spec
+  - encounter.crimson-foundry.spec
+  - encounter.azure-cathedral.spec
+  - encounter.ebon-manor.spec
 - doc_id: project.coding-standards
   path: docs/CODING_STANDARDS.md
   title: Coding Standards
@@ -1449,12 +1457,12 @@ documents:
 - doc_id: project.milestones
   path: docs/MILESTONES.md
   title: Milestones
-  content_sha256: 69a422e785c75366248dc15a7d9cb20f974938633afc30f3dbb10fc14c630fd9
+  content_sha256: 6a388389c11428ea218cc7de7c841c180f86d9a8ce3fc46d592f767c948d1fb4
   document_type: plan
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-10-04'
   source_of_truth_for:
   - project.roadmap
   aliases:
@@ -1465,8 +1473,9 @@ documents:
   - Content
   - Tests
   related_docs:
+  - project.brief
   - project.status
-  - encounter.first-severance.plan
+  - policy.release-process
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture

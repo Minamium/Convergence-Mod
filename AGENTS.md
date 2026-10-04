@@ -37,6 +37,7 @@ For visual work, apply the shared [Luminance presentation policy](docs/ART_DIREC
 
 - `docs/STATUS.md` is the canonical implementation-state record. Other documents may include a short context summary only when they link back to `docs/STATUS.md`; conflicting or detailed status belongs there.
 - Feature spec owns player-visible behavior; feature plan owns work order; backlog cannot expand current scope.
+- Direction owners: `docs/PROJECT_BRIEF.md` (product scope, encounter roster, project-wide direction rules), each feature spec's opening (that encounter's world, tone and must-nots) and `docs/MILESTONES.md` (gates and their order). Update them in the same change when an encounter is added, removed or renamed, when the owner sets or changes a direction or the next goal, and when a gate is passed or redefined; record owner direction given in conversation there, not only in agent memory.
 - Accepted ADRs own structural decisions and are superseded, not silently rewritten.
 - Indexed docs use the front-matter model in `docs/DOCUMENTATION_SYSTEM.md`.
 - Update only the document owning the changed fact; add links rather than repeating status, tuning, or procedures elsewhere. Small tuning/text changes do not require a new ADR or research report.

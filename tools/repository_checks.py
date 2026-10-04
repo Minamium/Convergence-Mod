@@ -66,6 +66,8 @@ REQUIRED_PATHS = (
     "docs/IP_PROVENANCE.md",
     "docs/RELEASE_PROCESS.md",
     "docs/VERSION_MATRIX.md",
+    "docs/PROJECT_BRIEF.md",
+    "docs/MILESTONES.md",
 )
 
 IGNORED_DIRECTORY_NAMES = {
@@ -745,6 +747,36 @@ def check_asset_attribution(files: list[Path], errors: list[str]) -> None:
         errors.append(f"ATTRIBUTION.md references a missing runtime asset: {asset_path}")
 
 
+ROSTER_HEADING = "## Encounter roster"
+
+
+def encounter_roster_errors(brief: str, encounters: list[str]) -> list[str]:
+    """Every docs/encounters/<feature>/ must be linked from the brief's roster section."""
+    start = brief.find(f"\n{ROSTER_HEADING}\n")
+    if start < 0:
+        return [f"docs/PROJECT_BRIEF.md has no '{ROSTER_HEADING}' section"]
+    end = brief.find("\n## ", start + len(ROSTER_HEADING) + 2)
+    roster = brief[start : end if end >= 0 else len(brief)]
+    return [
+        f"docs/PROJECT_BRIEF.md roster does not link docs/encounters/{name}/; "
+        "add the encounter (or remove its folder) in the same change"
+        for name in encounters
+        if f"(encounters/{name}/" not in roster
+    ]
+
+
+def check_encounter_roster(errors: list[str]) -> None:
+    encounters_root = ROOT / "docs" / "encounters"
+    brief_path = ROOT / "docs" / "PROJECT_BRIEF.md"
+    if not encounters_root.is_dir() or not brief_path.is_file():
+        return  # missing files are reported by check_required_paths
+    brief = read_utf8(brief_path, errors)
+    if brief is None:
+        return
+    names = sorted(path.name for path in encounters_root.iterdir() if path.is_dir())
+    errors.extend(encounter_roster_errors(brief.replace("\r\n", "\n"), names))
+
+
 def main() -> int:
     errors: list[str] = []
     files = iter_repository_files()
@@ -760,6 +792,7 @@ def main() -> int:
     check_repository_skills(errors)
     check_architecture_boundaries(files, errors)
     check_asset_attribution(files, errors)
+    check_encounter_roster(errors)
 
     if errors:
         print("Repository checks failed:")
