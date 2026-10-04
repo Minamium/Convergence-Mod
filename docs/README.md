@@ -34,7 +34,7 @@ For code/behavior work, start with [Current build](STATUS.md#current-build), [Ve
 | HP, timing, radius, damage tuning | Target constants/callers and the affected feature: [Doll Raid](encounters/first-severance/ENCOUNTER_SPEC.md) or [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
 | Combat, recovery, arena | Affected feature spec and code; [revive spec](encounters/first-severance/REVIVE_SPEC.md) or [arena rules](ARENA_INFRASTRUCTURE.md) for that subsystem; follow linked active ADRs only where a decision matters |
 | Authority, protocol, lifecycle, module boundaries | Relevant [architecture](ARCHITECTURE.md) / [network](NETWORK_ARCHITECTURE.md) sections and the ADRs governing the changed contract |
-| Work order or new feature scope | The named feature's active task/spec/plan; [Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) for that Raid. Backlog only when promoting an idea |
+| Work order or new feature scope | The named feature's active task/spec/plan; [Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) for that Raid. Backlog only when promoting an idea. A new encounter or an owner direction also updates the [Project Brief](PROJECT_BRIEF.md#encounter-roster); project-level order is in [Milestones](MILESTONES.md) |
 | Contribution, parallel development, repository rename | [Contributing](../CONTRIBUTING.md); current task/PR and local checkout/output identity |
 | API research, real build, new workstation | [Version matrix](VERSION_MATRIX.md), existing scoped research, and relevant [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure |
 | WotG-level presentation without losing multiplayer Raid mechanics | [WotG benchmark](research/WOTG_RAID_BENCHMARK.md): video metadata/access limits, pinned public source, independent design proposals |
@@ -50,9 +50,11 @@ Select checks from the shared [Verification Matrix](../.agents/skills/develop-co
 | Question | Authoritative document |
 |---|---|
 | What is implemented now? | [Status](STATUS.md) |
-| What is the current cooperative Raid and its public name? | [Doll Raid encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) |
+| What is the product direction, and which encounters exist? | [Project Brief](PROJECT_BRIEF.md): scope, the encounter roster with one-line identities, project-wide direction rules |
+| What comes next for the project as a whole? | [Milestones](MILESTONES.md) |
+| What governs the Doll Raid and its public name? | [Doll Raid encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) |
 | What governs the independent summoned Boss? | [Ghost Samurai specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
-| What governs the scarlet summoner / music-led Raid prototype? | [Crimson Invocation](encounters/crimson-foundry/ENCOUNTER_SPEC.md): shared pedestal/field, independent apparitions, small performer/companion, score and music rights |
+| What governs the scarlet summoner Raid? | [Scarlet Invocation](encounters/crimson-foundry/ENCOUNTER_SPEC.md): shared pedestal/field, three summoned apparitions, NPC-sized conjurer/companion, score and music rights |
 | What governs the ice-glass leviathan and small sword-bearing girl? | [Azure Cathedral](encounters/azure-cathedral/ENCOUNTER_SPEC.md): independent Raid, Ready, linked worm, native damage and EigHt music |
 | What governs the thread-mistress manor Raid? | [Ebon Manor](encounters/ebon-manor/ENCOUNTER_SPEC.md): Noirette, three acts on AutoMatador's beat grid, furniture/chandelier/loom/shears/waltz hazards and stitches |
 | What gets implemented in the Raid, and in what order? | [Doll Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
